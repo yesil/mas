@@ -180,6 +180,7 @@ function getSettings(config = {}) {
         Defaults.entitlement
     );
     const modal = toBoolean(getParameter('modal', commerce), Defaults.modal);
+    const upgrade = toBoolean(getParameter('upgrade', commerce), Defaults.upgrade);
     const forceTaxExclusive = toBoolean(
         getParameter('forceTaxExclusive', commerce),
         Defaults.forceTaxExclusive
@@ -204,6 +205,7 @@ function getSettings(config = {}) {
         getParameter('wcsBufferLimit', commerce),
         Defaults.wcsBufferLimit
     );
+    const domainSwitch = toBoolean(getParameter('domain.switch', commerce), false);
 
     return {
         ...getLocaleSettings({ locale }),
@@ -217,6 +219,7 @@ function getSettings(config = {}) {
         entitlement,
         extraOptions: Defaults.extraOptions,
         modal,
+        upgrade,
         env,
         forceTaxExclusive,
         priceLiteralsURL: commerce.priceLiteralsURL,
@@ -228,6 +231,7 @@ function getSettings(config = {}) {
         wcsBufferLimit,
         wcsEnv: env === Env.STAGE ? WcsEnv.STAGE : WcsEnv.PRODUCTION,
         landscape,
+        domainSwitch,
     };
 }
 

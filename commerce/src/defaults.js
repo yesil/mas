@@ -22,6 +22,7 @@ export const Defaults = Object.freeze({
     entitlement: false,
     extraOptions: {},
     modal: false,
+    upgrade: false,
     promotionCode: '',
     quantity: 1,
     wcsApiKey: 'wcms-commerce-ims-ro-user-milo',
