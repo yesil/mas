@@ -509,6 +509,10 @@ merch-card[variant="mini-compare-chart"] .footer-row-cell-description a {
         font-size: var(--consonant-merch-card-body-xs-font-size);
     }
 
+    html[lang="he"] merch-card[variant="mini-compare-chart"] [is="inline-price"] .price-recurrence::before {
+        content: "\\200B";
+    }
+
     merch-card[variant="mini-compare-chart"] [slot="price-commitment"] {
         padding: 0 var(--consonant-merch-spacing-xs);
     }
