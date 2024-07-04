@@ -25,6 +25,9 @@ jobs:
     - name: run npm clean install 
       run: npm ci
 
-    - name: run tests
-      run: npm run test
+    - name: Install XVFB
+      run: sudo apt-get install xvfb
+
+    - name: Run the tests
+      run: xvfb-run -a npm test
 
