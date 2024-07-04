@@ -25,6 +25,9 @@ jobs:
     - name: run npm clean install 
       run: npm ci
 
+    - name: Install puppeteer
+      run: npm install puppeteer
+
     - name: run tests
       run: npm run test
 
