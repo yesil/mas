@@ -25,9 +25,9 @@ jobs:
     - name: run npm clean install 
       run: npm ci
 
-    - name: Install puppeteer
-      run: npm install puppeteer
+    - name: Install XVFB
+      run: sudo apt-get install xvfb
 
-    - name: run tests
-      run: npm run test
+    - name: Run the tests
+      run: xvfb-run -a npm test
 
