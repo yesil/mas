@@ -5,7 +5,6 @@ import { mockLana } from './mocks/lana.js';
 import { mockFetch } from './mocks/fetch.js';
 import { mockConfig } from './mocks/config.js';
 
-import '../src/merch-card.js';
 import '../src/merch-offer.js';
 import '../src/merch-offer-select.js';
 import '../src/merch-quantity-select.js';

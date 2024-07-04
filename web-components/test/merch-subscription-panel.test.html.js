@@ -7,8 +7,6 @@ import { mockFetch } from './mocks/fetch.js';
 import { mockLana } from './mocks/lana.js';
 
 import './spectrum.js';
-import '../src/merch-icon.js';
-import '../src/merch-card.js';
 import '../src/merch-quantity-select.js';
 import '../src/merch-stock.js';
 import '../src/merch-secure-transaction.js';

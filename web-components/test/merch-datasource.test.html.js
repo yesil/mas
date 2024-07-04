@@ -1,10 +1,6 @@
 import { runTests } from '@web/test-runner-mocha';
 import { expect } from '@esm-bundle/chai';
 
-import '../src/merch-card.js';
-import '../src/merch-icon.js';
-import '../src/merch-datasource.js';
-
 import { mockFetch } from './mocks/fetch.js';
 import { withWcs } from './mocks/wcs.js';
 import { getTemplateContent } from './utils.js';

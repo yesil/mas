@@ -14,10 +14,8 @@ import {
     toggleLargeDesktop,
 } from './utils.js';
 
-import '../src/merch-card.js';
 import '../src/sidenav/merch-sidenav.js';
 import '../src/merch-card-collection.js';
-import '../src/merch-icon.js';
 
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from '../src/focus.js';
 import { withWcs } from './mocks/wcs.js';
@@ -86,7 +84,7 @@ runTests(async () => {
     await mockFetch(withWcs, withLiterals);
     await mas();
     if (shouldSkipTests !== 'true') {
-        describe.skip('merch-card-collection web component', () => {
+        describe('merch-card-collection web component', () => {
             let render;
             beforeEach(() => {
                 document.location.hash = '';
