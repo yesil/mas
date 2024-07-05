@@ -10,6 +10,7 @@ import { withAem } from './mocks/aem.js';
 import { withWcs } from './mocks/wcs.js';
 
 import mas from './mocks/mas.js';
+import { getTemplateContent } from '@adobe/mas-commons/test/utils.js';
 
 runTests(async () => {
     await mockFetch(withAem, withWcs);
@@ -17,7 +18,8 @@ runTests(async () => {
 
     describe('M@S Hub', () => {
         it('should render', () => {
-            const studio = document.querySelector('mas-studio');
+            const [studio] = getTemplateContent('studio');
+            document.querySelector('main').append(studio);
             expect(studio).exist;
         });
     });

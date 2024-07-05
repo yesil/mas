@@ -1,6 +1,7 @@
 import { sendMouse } from '@web/test-runner-commands';
-import { delay, getTemplateContent } from './utils.js';
+import { delay } from './utils.js';
 import { expect } from '@esm-bundle/chai';
+import { getTemplateContent } from '@adobe/mas-commons/test/utils.js';
 
 const content = document.getElementById('content');
 const sidenav = document.getElementById('sidenav');

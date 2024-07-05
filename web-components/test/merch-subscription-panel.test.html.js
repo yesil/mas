@@ -2,7 +2,6 @@ import { runTests } from '@web/test-runner-mocha';
 import { expect } from '@esm-bundle/chai';
 
 // Import mocks
-import { mockConfig } from './mocks/config.js';
 import { mockFetch } from './mocks/fetch.js';
 import { mockLana } from './mocks/lana.js';
 
@@ -14,12 +13,13 @@ import '../src/merch-offer.js';
 import '../src/merch-offer-select.js';
 import '../src/merch-subscription-panel.js';
 
-import { delay, getTemplateContent } from './utils.js';
+import { delay } from './utils.js';
 import { mockIms } from './mocks/ims.js';
 import { _$LE } from 'lit';
 import { withWcs } from './mocks/wcs.js';
 import { withLiterals } from './mocks/literals.js';
 import mas from './mocks/mas.js';
+import { getTemplateContent } from '@adobe/mas-commons/test/utils.js';
 
 const shouldSkipTests = sessionStorage.getItem('skipTests') === 'true';
 
