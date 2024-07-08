@@ -78,35 +78,33 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     render() {
         return html`
-            <sp-theme color="light" scale="medium">
-                <h1>Merch at Scale Hub</h1>
-                <div>
-                    <sp-search
-                        placeholder="Search"
-                        @input="${this.handleSearch}"
-                        @submit="${this.handleSearch}"
-                        value=${this.searchText}
-                        size="m"
-                    ></sp-search>
-                    <sp-picker
-                        label="Fragment model"
-                        size="m"
-                        value=${this.store.search.modelId}
+            <h1>Merch at Scale Hub</h1>
+            <div>
+                <sp-search
+                    placeholder="Search"
+                    @input="${this.handleSearch}"
+                    @submit="${this.handleSearch}"
+                    value=${this.searchText}
+                    size="m"
+                ></sp-search>
+                <sp-picker
+                    label="Fragment model"
+                    size="m"
+                    value=${this.store.search.modelId}
+                >
+                    <sp-menu-item value="all">All</sp-menu-item>
+                    <sp-menu-item
+                        value="L2NvbmYvc2FuZGJveC9zZXR0aW5ncy9kYW0vY2ZtL21vZGVscy9tZXJjaC1jYXJk"
+                        >Merch Card</sp-menu-item
                     >
-                        <sp-menu-item value="all">All</sp-menu-item>
-                        <sp-menu-item
-                            value="L2NvbmYvc2FuZGJveC9zZXR0aW5ncy9kYW0vY2ZtL21vZGVscy9tZXJjaC1jYXJk"
-                            >Merch Card</sp-menu-item
-                        >
-                    </sp-picker>
-                    <sp-button
-                        ?disabled="${!this.searchText}"
-                        @click=${this.doSearch}
-                        >Search</sp-button
-                    >
-                </div>
-                ${this.result}
-            </sp-theme>
+                </sp-picker>
+                <sp-button
+                    ?disabled="${!this.searchText}"
+                    @click=${this.doSearch}
+                    >Search</sp-button
+                >
+            </div>
+            ${this.result}
         `;
     }
 
