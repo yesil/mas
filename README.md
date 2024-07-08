@@ -26,7 +26,7 @@ aem up
 Refer to the corresponding README.md under any of the packages:
 * commerce - contains generic commerce-related logic, 'price' and 'checkout-link' web components
 * web-components - merch-card, merch-offer-selector and other web components
-* studio - M@S Hub for creating, updating and publishing merch fragments
+* studio - M@S Studio for creating, updating and publishing merch fragments
 
 
 #### Troubleshooting

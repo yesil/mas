@@ -78,7 +78,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     render() {
         return html`
-            <h1>Merch at Scale Hub</h1>
+            <h1>Merch at Scale Studio</h1>
             <div>
                 <sp-search
                     placeholder="Search"

@@ -16,7 +16,7 @@ runTests(async () => {
     await mockFetch(withAem, withWcs);
     await mas();
 
-    describe('M@S Hub', () => {
+    describe('M@S Studio', () => {
         it('should render', () => {
             const [studio] = getTemplateContent('studio');
             document.querySelector('main').append(studio);
