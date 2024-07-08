@@ -1,7 +1,13 @@
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
 const config = {
-    ...eslintPluginPrettierRecommended,
+    rules: {
+        'prefer-const': 'error',
+        'no-var': 'error',
+        'prefer-template': 'warn',
+        'prefer-rest-params': 'warn',
+        'prefer-spread': 'warn',
+    },
     ignores: [
         '/node_modules/',
         '**/node_modules/**',
@@ -10,6 +16,7 @@ const config = {
         '**/dist/**',
         'mas.js',
     ],
+    ...eslintPluginPrettierRecommended,
 };
 
 export default [config];
