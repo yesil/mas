@@ -92,11 +92,14 @@ Promise.all([
         plugins: [rewriteImports()],
         external: ['lit'],
     }),
+    buildLitComponent('merch-icon'),
     buildLitComponent('merch-quantity-select'),
     buildLitComponent('merch-secure-transaction'),
     buildLitComponent('merch-stock'),
     buildLitComponent('merch-subscription-panel'),
     buildLitComponent('merch-twp-d2p'),
+    buildLitComponent('merch-whats-included'),
+    buildLitComponent('merch-mnemonic-list'),
 ]).catch(() => process.exit(1));
 
 function rewriteImports(rew) {
