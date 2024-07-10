@@ -23,7 +23,7 @@
             "status": "PUBLISHED",
             "fields": [
                 {
-                    "name": "type",
+                    "name": "variant",
                     "type": "enumeration",
                     "multiple": false,
                     "values": [
@@ -141,7 +141,7 @@
             "status": "PUBLISHED",
             "fields": [
                 {
-                    "name": "type",
+                    "name": "variant",
                     "type": "enumeration",
                     "multiple": false,
                     "values": [

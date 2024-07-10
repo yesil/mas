@@ -544,14 +544,6 @@ var o4 = class {
   }
 };
 var r4 = (t5) => new o4("string" == typeof t5 ? t5 : t5 + "", void 0, s4);
-var i3 = (t5, ...e7) => {
-  const n7 = 1 === t5.length ? t5[0] : e7.reduce((e8, s8, n8) => e8 + ((t6) => {
-    if (true === t6._$cssResult$) return t6.cssText;
-    if ("number" == typeof t6) return t6;
-    throw Error("Value passed to 'css' function must be a 'css' function result: " + t6 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-  })(s8) + t5[n8 + 1], t5[0]);
-  return new o4(n7, t5, s4);
-};
 var S3 = (s8, n7) => {
   e4 ? s8.adoptedStyleSheets = n7.map((t5) => t5 instanceof CSSStyleSheet ? t5 : t5.styleSheet) : n7.forEach((e7) => {
     const n8 = document.createElement("style"), o7 = t3.litNonce;
@@ -1096,12 +1088,6 @@ function assertNotDecorated(prototype, annotation, key) {
     var requestedAnnotationType = annotation.annotationType_;
     die("Cannot apply '@" + requestedAnnotationType + "' to '" + fieldName + "':" + ("\nThe field is already decorated with '@" + currentAnnotationType + "'.") + "\nRe-decorating fields is not allowed.\nUse '@override' decorator for methods overridden by subclass.");
   }
-}
-function collectStoredAnnotations(target) {
-  if (!hasProp(target, storedAnnotationsSymbol)) {
-    addHiddenProp(target, storedAnnotationsSymbol, _extends({}, target[storedAnnotationsSymbol]));
-  }
-  return target[storedAnnotationsSymbol];
 }
 function is20223Decorator(context) {
   return typeof context == "object" && typeof context["kind"] == "string";
@@ -3227,20 +3213,6 @@ function notifyListeners(listenable, change) {
   }
   untrackedEnd(prevU);
 }
-function makeObservable(target, annotations, options) {
-  initObservable(function() {
-    var _annotations;
-    var adm = asObservableObject(target, options)[$mobx];
-    if (false) {
-      die("makeObservable second arg must be nullish when using decorators. Mixing @decorator syntax with annotations is not supported.");
-    }
-    (_annotations = annotations) != null ? _annotations : annotations = collectStoredAnnotations(target);
-    ownKeys(annotations).forEach(function(key) {
-      return adm.make_(key, annotations[key]);
-    });
-  });
-  return target;
-}
 var keysSymbol = /* @__PURE__ */ Symbol("mobx-keys");
 function makeAutoObservable(target, overrides, options) {
   if (false) {
@@ -5165,6 +5137,9 @@ var Fragment = class {
   constructor(props) {
     Object.assign(this, props);
   }
+  get hasChanges() {
+    return true;
+  }
 };
 
 // src/store/Search.js
@@ -5249,7 +5224,7 @@ var headers = {
   pragma: "no-cache",
   "cache-control": "no-cache"
 };
-async function fragmentSearch({ path, query }) {
+async function searchFragment({ path, query }) {
   const filter = {};
   if (path) {
     filter.path = path;
@@ -5267,17 +5242,20 @@ async function fragmentSearch({ path, query }) {
     headers
   }).then((res) => res.json()).then(({ items }) => items);
 }
-async function getCfByPath(path) {
+async function getFragmentByPath(path) {
   return fetch(`${this.cfFragmentsUrl}?path=${path}`, {
     headers
   }).then((res) => res.json()).then(({ items: [item] }) => item);
+}
+async function saveFragment(fragment) {
 }
 var AEM = class {
   sites = {
     cf: {
       fragments: {
-        search: fragmentSearch.bind(this),
-        getCfByPath: getCfByPath.bind(this)
+        search: searchFragment.bind(this),
+        getCfByPath: getFragmentByPath.bind(this),
+        save: saveFragment.bind(this)
       }
     }
   };
@@ -5301,12 +5279,17 @@ var Store = class {
    */
   aem;
   /**
+   * Selected fragment
+   * @type {Fragment}
+   */
+  fragment;
+  /**
    * @param {string} bucket
    */
   constructor(bucket) {
     if (!bucket) throw new Error("bucket is required");
-    makeObservable(this, {
-      search: observable
+    makeAutoObservable(this, {
+      aem: false
     });
     this.aem = new AEM(bucket);
     ({ cache: merchDataSourceCache } = document.createElement("merch-datasource"));
@@ -5318,6 +5301,12 @@ var Store = class {
       return items.map((item) => new Fragment(item));
     });
     this.search.setResult(fragments);
+  }
+  /**
+   * @param {FocusEvent} fragment
+   */
+  selectFragment(fragment) {
+    this.fragment = fragment;
   }
 };
 
@@ -5482,22 +5471,22 @@ var models = {
   }
 };
 var MasStudio = class extends MobxReactionUpdateCustom(s6, Reaction) {
-  static styles = i3`
-        :host {
-            display: block;
-        }
-
-        sp-theme {
-            display: contents;
-        }
-    `;
   static properties = {
-    store: { type: Object },
+    store: { type: Object, state: true },
     bucket: { type: String, attribute: "aem-bucket" },
-    searchText: { type: String }
+    searchText: { type: String, state: true },
+    confirmSelect: {
+      type: Boolean,
+      state: true
+    },
+    fragment: {
+      type: Object,
+      state: true
+    }
   };
   constructor() {
     super();
+    this.confirmSelect = false;
   }
   connectedCallback() {
     super.connectedCallback();
@@ -5509,21 +5498,45 @@ var MasStudio = class extends MobxReactionUpdateCustom(s6, Reaction) {
     this.deeplinkDisposer();
   }
   get search() {
-    return this.shadowRoot.querySelector("sp-search");
+    return this.querySelector("sp-search");
   }
   get picker() {
-    return this.shadowRoot.querySelector("sp-picker");
+    return this.querySelector("sp-picker");
+  }
+  createRenderRoot() {
+    return this;
+  }
+  get selectFragmentDialog() {
+    if (!this.confirmSelect) return A;
+    return x`
+            <sp-underlay open></sp-underlay>
+            <sp-dialog size="m">
+                <h1 slot="heading">You have unsaved changes!</h1>
+                <p>
+                    Do you want to save your changes before selecting another
+                    merch card?
+                </p>
+                <sp-button
+                    slot="button"
+                    @onclick="${() => this.editFragment(this.fragment, true)}"
+                >
+                    Close
+                </sp-button>
+            </sp-dialog>
+        `;
   }
   get result() {
     if (this.store.search.result.length === 0) return A;
-    return x`<ul>
+    return x`<ul id="result">
             ${c5(
       this.store.search.result,
       (item) => item.path,
       (item) => {
         switch (item.model.path) {
           case models.merchCard.path:
-            return x`<merch-card>
+            return x`<merch-card
+                                @dblclick="${() => this.editFragment(item)}"
+                            >
                                 <merch-datasource
                                     odin
                                     source="odin-author"
@@ -5565,7 +5578,7 @@ var MasStudio = class extends MobxReactionUpdateCustom(s6, Reaction) {
                     >Search</sp-button
                 >
             </div>
-            ${this.result}
+            ${this.selectFragmentDialog} ${this.result}
         `;
   }
   async startDeeplink() {
@@ -5577,6 +5590,16 @@ var MasStudio = class extends MobxReactionUpdateCustom(s6, Reaction) {
       await this.updateComplete;
       this.doSearch();
     }
+  }
+  /**
+   * @param {Fragment} fragment
+   */
+  editFragment(fragment, force = false) {
+    if (fragment === this.store.fragment) return;
+    if (this.store.fragment?.hasChanges && !force) {
+      this.confirmSelect = true;
+    }
+    this.store.selectFragment(fragment);
   }
   /**
    * @param {Event} e;

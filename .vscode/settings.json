@@ -1,6 +1,13 @@
 {
     "search.followSymlinks": false,
     "files.exclude": {
-        "mas.js": true
+        "mas.js": true,
+        "libs": true
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
 }

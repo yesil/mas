@@ -1,10 +1,11 @@
-import { html, css, LitElement, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { Store } from './store/Store.js';
 import { EVENT_SUBMIT } from './events.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Reaction } from 'mobx';
 import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
 import { deeplink, pushState } from '@adobe/mas-commons';
+import { Fragment } from './store/Fragment.js';
 
 const models = {
     merchCard: {
@@ -13,24 +14,23 @@ const models = {
     },
 };
 class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
-    static styles = css`
-        :host {
-            display: block;
-        }
-
-        sp-theme {
-            display: contents;
-        }
-    `;
-
     static properties = {
-        store: { type: Object },
+        store: { type: Object, state: true },
         bucket: { type: String, attribute: 'aem-bucket' },
-        searchText: { type: String },
+        searchText: { type: String, state: true },
+        confirmSelect: {
+            type: Boolean,
+            state: true,
+        } /* display dialog to save changes before selecting a new fragment */,
+        fragment: {
+            type: Object,
+            state: true,
+        } /* refence to fragment while the dialog is open */,
     };
 
     constructor() {
         super();
+        this.confirmSelect = false;
     }
 
     connectedCallback() {
@@ -45,23 +45,92 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get search() {
-        return this.shadowRoot.querySelector('sp-search');
+        return this.querySelector('sp-search');
     }
 
     get picker() {
-        return this.shadowRoot.querySelector('sp-picker');
+        return this.querySelector('sp-picker');
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    get selectFragmentDialog() {
+        if (!this.confirmSelect) return nothing;
+        return html`
+            <sp-underlay open></sp-underlay>
+            <sp-dialog size="m">
+                <h1 slot="heading">You have unsaved changes!</h1>
+                <p>
+                    Do you want to save your changes before selecting another
+                    merch card?
+                </p>
+                <sp-button
+                    slot="button"
+                    @click="${(e) =>
+                        this.editFragment(null, this.fragment, true)}"
+                >
+                    Save
+                </sp-button>
+                <sp-button
+                    slot="button"
+                    variant="primary"
+                    @click="${(e) =>
+                        this.editFragment(null, this.fragment, true)}"
+                >
+                    Discard
+                </sp-button>
+                <sp-button
+                    slot="button"
+                    variant="secondary"
+                    @click="${this.closeConfirmSelect}"
+                >
+                    Cancel
+                </sp-button>
+            </sp-dialog>
+        `;
+    }
+
+    get fragmentEditor() {
+        return html`<div id="editor">${this.merchCardFragmentEditor}</div>`;
+    }
+
+    get merchCardFragmentEditor() {
+        const { fragment } = this.store;
+        if (!fragment) return nothing;
+        return html`<sp-field-label for="card-variant">Variant</sp-field-label>
+            <sp-picker id="card-variant" value="${fragment.variant}">
+                <span slot="label">Choose a variant:</span>
+                <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
+                <sp-menu-item>CCH</sp-menu-item>
+                <sp-menu-item>Plans</sp-menu-item>
+                <sp-menu-item>Catalog</sp-menu-item>
+            </sp-picker>
+            <sp-field-label for="card-title">Title</sp-field-label>
+            <sp-textfield
+                placeholder="Enter card title"
+                id="card-title"
+                value="${fragment.title}"
+            ></sp-textfield>`;
+    }
+
+    get fragmentEditorEl() {
+        return this.querySelector('#editor');
     }
 
     get result() {
         if (this.store.search.result.length === 0) return nothing;
-        return html`<ul>
+        return html`<ul id="result">
             ${repeat(
                 this.store.search.result,
                 (item) => item.path,
                 (item) => {
                     switch (item.model.path) {
                         case models.merchCard.path:
-                            return html`<merch-card>
+                            return html`<merch-card
+                                @dblclick="${(e) => this.editFragment(e, item)}"
+                            >
                                 <merch-datasource
                                     odin
                                     source="odin-author"
@@ -104,7 +173,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     >Search</sp-button
                 >
             </div>
-            ${this.result}
+            ${this.selectFragmentDialog} ${this.result} ${this.fragmentEditor}
         `;
     }
 
@@ -117,6 +186,28 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             await this.updateComplete;
             this.doSearch();
         }
+    }
+
+    /**
+     * @param {Event} e
+     * @param {Fragment} fragment
+     * @param {boolean} force - discard unsaved changes
+     */
+    async editFragment(e, fragment, force = false) {
+        if (fragment && fragment === this.store.fragment) return;
+        if (this.store.fragment?.hasChanges && !force) {
+            this.fragment = fragment;
+            this.confirmSelect = true;
+        } else {
+            this.store.selectFragment(fragment);
+            this.confirmSelect = false;
+            await this.updateComplete;
+            this.fragmentEditorEl.style.top = `${e?.target.closest('merch-card').offsetTop}px`;
+        }
+    }
+
+    closeConfirmSelect() {
+        this.confirmSelect = false;
     }
 
     /**
