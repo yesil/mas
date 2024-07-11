@@ -81,3 +81,8 @@ sp-underlay + sp-dialog {
     top: var(--spectrum-spacing-100);
     right: var(--spectrum-spacing-100);
 }
+
+#ost {
+    position: absolute;
+    z-index: 2000;
+}

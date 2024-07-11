@@ -8,6 +8,7 @@ import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
 import { deeplink, pushState } from '@adobe/mas-commons';
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
+import { openAsDialog } from '../libs/ost.js';
 
 const models = {
     merchCard: {
@@ -140,6 +141,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     title="Offer Selector Tool"
                     label="Offer Selector Tool"
                     value="offer-selector"
+                    @click="${this.editorActionClickHandler}"
                 >
                     <sp-icon-star slot="icon"></sp-icon-star>
                 </sp-action-button>
@@ -339,6 +341,15 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         const search = { query, path, modelId };
         pushState(search);
         this.store.doSearch(search);
+    }
+
+    editorActionClickHandler(e) {
+        const ostRoot = document.getElementById('ost');
+        const accessToken = localStorage.getItem('masAccessToken');
+        const closeDialog = openAsDialog(ostRoot, console.log, {
+            zIndex: 20,
+            accessToken,
+        });
     }
 }
 
