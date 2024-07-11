@@ -1,7 +1,6 @@
 {
     "search.followSymlinks": false,
     "files.exclude": {
-        "mas.js": true,
         "libs": true
     },
     "[html]": {
