@@ -66,13 +66,17 @@ sp-underlay + sp-dialog {
 }
 
 #editor {
-    display: flex;
+    display: none;
     min-width: 640px;
     flex-direction: column;
     background-color: var(--spectrum-background-layer-1-color);
     position: absolute;
     padding: var(--spectrum-spacing-500);
     border-radius: calc(var(--swc-scale-factor)*4px);
+}
+
+#editor.open {
+    display: flex;
 }
 
 #actions {

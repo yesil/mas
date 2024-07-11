@@ -9,6 +9,7 @@ import { deeplink, pushState } from '@adobe/mas-commons';
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
 import { openAsDialog } from '../libs/ost.js';
+import { classMap } from 'lit/directives/class-map.js';
 
 const models = {
     merchCard: {
@@ -156,7 +157,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get fragmentEditor() {
-        return html`<div id="editor" classname="">
+        const classes = { open: this.store.fragment };
+        return html`<div id="editor" class=${classMap(classes)}>
             ${this.merchCardFragmentEditor} ${this.fragmentEditorToolbar}
         </div>`;
     }

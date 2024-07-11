@@ -55,8 +55,8 @@ const cardContent = {
 };
 
 async function parseMerchCard(item, merchCard) {
-    const { variant = 'catalog' } = item;
-    const cardMapping = cardContent[variant] || cardContent.catalog;
+    const { variant = 'ccd-action' } = item;
+    const cardMapping = cardContent[variant];
 
     merchCard.setAttribute('variant', variant);
     item.icon?.forEach((icon) => {

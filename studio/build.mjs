@@ -6,6 +6,7 @@ build({
     format: 'esm',
     bundle: true,
     outfile: 'libs/swc.js',
+    platform: 'browser',
     sourcemap: true,
     define: {
         'process.env.NODE_ENV': '"production"',
@@ -17,10 +18,12 @@ build({
     format: 'esm',
     bundle: true,
     outfile: 'libs/studio.js',
+    platform: 'browser',
     sourcemap: true,
     define: {
         'process.env.NODE_ENV': '"production"',
     },
+    external: ['../libs/ost.js'],
 }).catch(() => process.exit(1));
 
 build({
@@ -31,6 +34,8 @@ build({
     plugins: [lessLoader()],
     sourcemap: true,
     define: {
-        'process.env.NODE_ENV': '"production"',
+        'process.env': JSON.stringify({
+            APP_ENV: '',
+        }),
     },
 }).catch(() => process.exit(1));

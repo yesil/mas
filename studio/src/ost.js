@@ -1,1 +1,3 @@
-export { openAsDialog } from '@dexter/offer-selector-tool';
+import { openAsDialog } from '@dexter/offer-selector-tool';
+
+export { openAsDialog };
