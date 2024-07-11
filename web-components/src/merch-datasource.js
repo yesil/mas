@@ -172,8 +172,13 @@ export class MerchDataSource extends HTMLElement {
         this.fetchData();
     }
 
-    refresh() {
-        this.cache.remove(this.model.path);
+    refresh(flushCache = true) {
+        this.parentElement
+            .querySelectorAll(':scope > *:not(merch-datasource)')
+            .forEach((item) => item.remove());
+        if (flushCache) {
+            this.cache.remove(this.path);
+        }
         this.fetchData();
     }
 
@@ -184,23 +189,8 @@ export class MerchDataSource extends HTMLElement {
         }
         if (item) {
             parseMerchCard(item, this.parentElement);
-            this.render();
             return;
         }
-
-        this.render();
-    }
-
-    async render() {
-        if (!this.isConnected) return;
-        if (this.parentElement.tagName !== 'MERCH-CARD') return;
-        await Promise.all(
-            [
-                ...this.parentElement.querySelectorAll(
-                    '[is="inline-price"],[is="checkout-link"]',
-                ),
-            ].map((el) => el.onceSettled()),
-        );
     }
 }
 

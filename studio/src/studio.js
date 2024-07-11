@@ -1,4 +1,5 @@
 import { html, LitElement, nothing } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Store } from './store/Store.js';
 import { EVENT_SUBMIT } from './events.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -6,6 +7,7 @@ import { Reaction } from 'mobx';
 import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
 import { deeplink, pushState } from '@adobe/mas-commons';
 import { Fragment } from './store/Fragment.js';
+import './rte-editor.js';
 
 const models = {
     merchCard: {
@@ -13,6 +15,7 @@ const models = {
         name: 'Merch Card',
     },
 };
+
 class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     static properties = {
         store: { type: Object, state: true },
@@ -26,6 +29,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             type: Object,
             state: true,
         } /* refence to fragment while the dialog is open */,
+        fragmentOffsets: {
+            type: Object,
+            state: true,
+        } /* the offset top of last clicked fragment */,
     };
 
     constructor() {
@@ -92,8 +99,64 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         `;
     }
 
+    get fragmentEditorToolbar() {
+        if (!this.store.fragment) return nothing;
+        return html`<div id="actions">
+            <sp-action-group
+                aria-label="Fragment actions"
+                role="group"
+                compact
+                emphasized
+            >
+                <sp-action-button
+                    label="Save"
+                    title="Save changes"
+                    value="save"
+                >
+                    <sp-icon-save-floppy slot="icon"></sp-icon-save-floppy>
+                </sp-action-button>
+                <sp-action-button
+                    label="Discard"
+                    title="Discard changes"
+                    value="discard"
+                >
+                    <sp-icon-undo slot="icon"></sp-icon-undo>
+                </sp-action-button>
+                <sp-action-button label="Clone" value="clone">
+                    <sp-icon-duplicate slot="icon"></sp-icon-duplicate>
+                </sp-action-button>
+                <sp-action-button label="Publish" value="publish">
+                    <sp-icon-publish-check slot="icon"></sp-icon-publish-check>
+                </sp-action-button>
+                <sp-action-button label="Unpublish" value="unpublish">
+                    <sp-icon-publish-remove
+                        slot="icon"
+                    ></sp-icon-publish-remove>
+                </sp-action-button>
+            </sp-action-group>
+            <sp-divider vertical></sp-divider>
+            <sp-action-group>
+                <sp-action-button
+                    title="Offer Selector Tool"
+                    label="Offer Selector Tool"
+                    value="offer-selector"
+                >
+                    <sp-icon-star slot="icon"></sp-icon-star>
+                </sp-action-button>
+            </sp-action-group>
+            <sp-divider vertical></sp-divider>
+            <sp-action-group>
+                <sp-action-button title="Close" label="Close" value="close">
+                    <sp-icon-close-circle slot="icon"></sp-icon-close-circle>
+                </sp-action-button>
+            </sp-action-group>
+        </div>`;
+    }
+
     get fragmentEditor() {
-        return html`<div id="editor">${this.merchCardFragmentEditor}</div>`;
+        return html`<div id="editor" classname="">
+            ${this.merchCardFragmentEditor} ${this.fragmentEditorToolbar}
+        </div>`;
     }
 
     get merchCardFragmentEditor() {
@@ -111,8 +174,31 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             <sp-textfield
                 placeholder="Enter card title"
                 id="card-title"
+                data-field="title"
                 value="${fragment.title}"
-            ></sp-textfield>`;
+                @change="${this.updateFragment}"
+            ></sp-textfield>
+            <sp-field-label for="card-icon">Icons</sp-field-label>
+            <sp-textfield
+                placeholder="Enter icon URLs"
+                id="card-icon"
+                multiline
+                data-field="icon"
+                value="${fragment.icon}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
+            <sp-field-label for="horizontal"> Prices </sp-field-label>
+            <sp-field-group horizontal id="horizontal">
+                <rte-editor>${unsafeHTML(fragment.prices)}</rte-editor>
+            </sp-field-group>
+            <sp-field-label for="horizontal"> Description </sp-field-label>
+            <sp-field-group horizontal id="horizontal">
+                <rte-editor>${unsafeHTML(fragment.description)}</rte-editor>
+            </sp-field-group>
+            <sp-field-label for="horizontal"> Footer </sp-field-label>
+            <sp-field-group horizontal id="horizontal">
+                <rte-editor>${unsafeHTML(fragment.ctas)}</rte-editor>
+            </sp-field-group> `;
     }
 
     get fragmentEditorEl() {
@@ -173,7 +259,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     >Search</sp-button
                 >
             </div>
-            ${this.selectFragmentDialog} ${this.result} ${this.fragmentEditor}
+            ${this.result} ${this.fragmentEditor} ${this.selectFragmentDialog}
         `;
     }
 
@@ -185,25 +271,50 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         if (this.searchText) {
             await this.updateComplete;
             this.doSearch();
+        } else {
+            this.store.search.setResult([]);
         }
     }
 
     /**
-     * @param {Event} e
+     * @param {Event} e click event, maybe null
      * @param {Fragment} fragment
      * @param {boolean} force - discard unsaved changes
      */
     async editFragment(e, fragment, force = false) {
+        if (e) {
+            const merchCard = e.target.closest('merch-card');
+            const { offsetTop, offsetLeft, offsetWidth } = merchCard;
+            this.fragmentOffsets = [
+                `${offsetTop}px`,
+                `${offsetLeft + offsetWidth + 32}px`,
+            ];
+        }
         if (fragment && fragment === this.store.fragment) return;
         if (this.store.fragment?.hasChanges && !force) {
             this.fragment = fragment;
             this.confirmSelect = true;
         } else {
             this.store.selectFragment(fragment);
+            this.fragment = undefined;
             this.confirmSelect = false;
             await this.updateComplete;
-            this.fragmentEditorEl.style.top = `${e?.target.closest('merch-card').offsetTop}px`;
+            this.fragmentEditorEl.style.top = this.fragmentOffsets[0];
+            this.fragmentEditorEl.style.left = this.fragmentOffsets[1];
         }
+    }
+
+    updateFragment(e) {
+        const fieldName = e.target.dataset.field;
+        let { value } = e.target;
+        if (e.target.multiline) {
+            value = value.split('\n');
+        }
+        this.store.fragment[fieldName] = value;
+        const merchDataSource = this.querySelector(
+            `merch-datasource[path="${this.store.fragment.path}"]`,
+        );
+        merchDataSource.refresh(false);
     }
 
     closeConfirmSelect() {
