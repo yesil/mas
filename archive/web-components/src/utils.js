@@ -147,7 +147,11 @@ export function getTextNodes(element) {
  */
 export function createTag(tag, attributes = {}, innerHTML) {
     const element = document.createElement(tag);
-    element.innerHTML = innerHTML;
+    if (innerHTML instanceof HTMLElement) {
+        element.appendChild(innerHTML);
+    } else {
+        element.innerHTML = innerHTML;
+    }
 
     // Set attributes
     for (const [key, value] of Object.entries(attributes)) {

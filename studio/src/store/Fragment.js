@@ -17,4 +17,8 @@ export class Fragment {
     constructor(props) {
         Object.assign(this, props);
     }
+
+    get hasChanges() {
+        return true;
+    }
 }

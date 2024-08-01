@@ -55,17 +55,11 @@ const cardContent = {
 };
 
 async function parseMerchCard(item, merchCard) {
-    const cardJson = item.fields.reduce((acc, { name, multiple, values }) => {
-        acc[name] = multiple ? values : values[0];
-        return acc;
-    }, {});
-    const { type = 'catalog' } = cardJson;
-    const cardType = cardContent[type] || cardContent.catalog;
+    const { variant = 'ccd-action' } = item;
+    const cardMapping = cardContent[variant];
 
-    merchCard.variant = type;
-
-    merchCard.setAttribute('variant', type);
-    cardJson.icon?.forEach((icon) => {
+    merchCard.setAttribute('variant', variant);
+    item.icon?.forEach((icon) => {
         const merchIcon = createTag('merch-icon', {
             slot: 'icons',
             src: icon,
@@ -76,42 +70,46 @@ async function parseMerchCard(item, merchCard) {
         merchCard.append(merchIcon);
     });
 
-    if (cardJson.title) {
+    if (item.title) {
         merchCard.append(
             createTag(
-                cardType.title.tag,
-                { slot: cardType.title.slot },
-                cardJson.title,
+                cardMapping.title.tag,
+                { slot: cardMapping.title.slot },
+                item.title,
             ),
         );
     }
 
-    if (cardJson.prices) {
-        const prices = cardJson.prices;
+    if (item.prices) {
+        const prices = item.prices;
         const headingM = createTag(
-            cardType.prices.tag,
-            { slot: cardType.prices.slot },
+            cardMapping.prices.tag,
+            { slot: cardMapping.prices.slot },
             prices,
         );
         merchCard.append(headingM);
     }
 
-    merchCard.append(
-        createTag('p', { slot: 'body-xxs', id: 'individuals1' }, 'Desktop'),
-    );
-
-    if (cardJson.description) {
+    if (item.description) {
         const body = createTag(
-            cardType.description.tag,
-            { slot: cardType.description.slot },
-            cardJson.description,
+            cardMapping.description.tag,
+            { slot: cardMapping.description.slot },
+            item.description,
         );
         merchCard.append(body);
     }
 
-    if (cardJson.ctas) {
-        let ctas = cardJson.ctas;
+    if (item.ctas) {
+        let ctas = item.ctas;
         const footer = createTag('div', { slot: 'footer' }, ctas);
+        [...footer.querySelectorAll('[is="checkout-link"]')].forEach((cta) => {
+            const spectrumCta = createTag('sp-button', {}, cta);
+            spectrumCta.addEventListener('click', (e) => {
+                e.stopPropagation();
+                cta.click();
+            });
+            footer.appendChild(spectrumCta);
+        });
         merchCard.append(footer);
     }
 }
@@ -174,8 +172,13 @@ export class MerchDataSource extends HTMLElement {
         this.fetchData();
     }
 
-    refresh() {
-        this.cache.remove(this.path);
+    refresh(flushCache = true) {
+        this.parentElement
+            .querySelectorAll(':scope > *:not(merch-datasource)')
+            .forEach((item) => item.remove());
+        if (flushCache) {
+            this.cache.remove(this.path);
+        }
         this.fetchData();
     }
 
@@ -186,23 +189,8 @@ export class MerchDataSource extends HTMLElement {
         }
         if (item) {
             parseMerchCard(item, this.parentElement);
-            this.render();
             return;
         }
-
-        this.render();
-    }
-
-    async render() {
-        if (!this.isConnected) return;
-        if (this.parentElement.tagName !== 'MERCH-CARD') return;
-        await Promise.all(
-            [
-                ...this.parentElement.querySelectorAll(
-                    '[is="inline-price"],[is="checkout-link"]',
-                ),
-            ].map((el) => el.onceSettled()),
-        );
     }
 }
 

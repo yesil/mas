@@ -1,9 +1,12 @@
-import { makeObservable, observable } from 'mobx';
+import { makeAutoObservable, makeObservable, observable } from 'mobx';
 import { Search } from './Search.js';
 
 import { AEM } from '@adobe/mas-commons';
 import { Fragment } from './Fragment.js';
 
+/**
+ * Reference to single
+ */
 let merchDataSourceCache;
 
 export class Store {
@@ -17,12 +20,18 @@ export class Store {
     aem;
 
     /**
+     * Selected fragment
+     * @type {Fragment}
+     */
+    fragment;
+
+    /**
      * @param {string} bucket
      */
     constructor(bucket) {
         if (!bucket) throw new Error('bucket is required'); // TODO provide better error message.
-        makeObservable(this, {
-            search: observable,
+        makeAutoObservable(this, {
+            aem: false,
         });
         this.aem = new AEM(bucket);
         ({ cache: merchDataSourceCache } =
@@ -34,9 +43,16 @@ export class Store {
         const fragments = await this.aem.sites.cf.fragments
             .search(this.search)
             .then((items) => {
-                merchDataSourceCache?.add(...items);
                 return items.map((item) => new Fragment(item));
             });
+        merchDataSourceCache?.add(...fragments);
         this.search.setResult(fragments);
+    }
+
+    /**
+     * @param {FocusEvent} fragment
+     */
+    selectFragment(fragment) {
+        this.fragment = fragment;
     }
 }

@@ -1,3 +1,5 @@
+import { Fragment } from '../../studio/src/store/Fragment.js';
+
 const accessToken = localStorage.getItem('masAccessToken');
 
 const headers = {
@@ -13,7 +15,7 @@ const headers = {
  * @param {string} [params.query] - The search query
  * @returns {Promise<Array>} - A promise that resolves to an array of search results
  */
-async function fragmentSearch({ path, query }) {
+export async function searchFragment({ path, query }) {
     const filter = {};
     if (path) {
         filter.path = path;
@@ -31,10 +33,27 @@ async function fragmentSearch({ path, query }) {
         headers,
     })
         .then((res) => res.json())
-        .then(({ items }) => items);
+        .then(({ items }) => {
+            return items.map((item) => {
+                const data = item.fields.reduce(
+                    (acc, { name, multiple, values }) => {
+                        acc[name] = multiple ? values : values[0];
+                        return acc;
+                    },
+                    {},
+                );
+                data.path = item.path;
+                data.model = item.model;
+                return data;
+            });
+        });
 }
 
-async function getCfByPath(path) {
+/**
+ * @param {string} path fragment path
+ * @returns the raw fragment item
+ */
+export async function getFragmentByPath(path) {
     return fetch(`${this.cfFragmentsUrl}?path=${path}`, {
         headers,
     })
@@ -42,12 +61,19 @@ async function getCfByPath(path) {
         .then(({ items: [item] }) => item);
 }
 
+/**
+ * Save given fragment
+ * @param {Fragment} fragment
+ */
+export async function saveFragment(fragment) {}
+
 class AEM {
     sites = {
         cf: {
             fragments: {
-                search: fragmentSearch.bind(this),
-                getCfByPath: getCfByPath.bind(this),
+                search: searchFragment.bind(this),
+                getCfByPath: getFragmentByPath.bind(this),
+                save: saveFragment.bind(this),
             },
         },
     };

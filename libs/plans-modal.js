@@ -6066,7 +6066,8 @@ merch-card .footer-row-cell:nth-child(8) {
     min-height: var(--consonant-merch-card-footer-row-8-min-height);
 }
 
-span[is="inline-price"][data-template='strikethrough'] {
+span[is="inline-price"][data-template='strikethrough'],
+span.price.price-strikethrough {
     text-decoration: line-through;
 }
 
@@ -6090,6 +6091,11 @@ body.merch-modal {
     overflow: hidden;
     scrollbar-gutter: stable;
     height: 100vh;
+}
+
+sp-button a[is="checkout-link"] {
+    color: inherit;
+    text-decoration: inherit;
 }
 `;
 document.head.appendChild(styles);

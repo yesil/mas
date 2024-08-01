@@ -1,60 +1,92 @@
+body {
+    margin: 0;
+}
+
+sp-theme {
+    background-color: var(--spectrum-background-layer-1-color);
+}
+
 mas-studio {
     display: flex;
     gap: 8px;
     align-items: center;
     flex-direction: column;
-  }
-  
-  merch-card {
-    position: relative;
-  }
-  
-  mas-studio > ul > li {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}
+
+mas-studio > ul > li {
     list-style: none;
     position: relative;
     border-top: 1px dodgerblue solid;
     margin-top: 16px;
     display: flex;
     justify-content: center;
-  }
-    
-  mas-studio .block {
-    margin-top: 64px;
-  }
-  
-  mas-studio p.path {
-    position: absolute;
-    top: 16px;
-    left: 0;
-    white-space: nowrap;
-    margin: 0;
-  }
-  
-  mas-studio sp-action-group {
-    position: absolute;
-    top: 16px;
-    right: 0;
-  }
-  
-  mas-studio > ul {
-    width: 80%;
-  }
-  
-  div[data-cf-path] {
-    margin: 60px 0 10px;
-  }
-  
-  sp-action-button#confirm {
-    margin-left: 16px;
-  }
-  
-  sp-textfield {
-    width: 360px;
-  }
-  
-  footer {
+}
+
+#result {
+    margin-top: 32px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 200px;
-  }
+    gap: 16px;
+    padding-inline-start: 0;
+    background-color: var(--spectrum-background-layer-2-color);
+}
+
+action-bar {
+    align-self: flex-end;
+}
+
+sp-textfield {
+    width: 360px;
+}
+
+sp-underlay:not([open]) + sp-dialog {
+    display: none;
+}
+
+sp-underlay {
+    z-index: 10;
+}
+
+sp-underlay + sp-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 11;
+    transform: translate(-50%, -50%);
+    background: var(--spectrum-gray-100);
+}
+
+.tox-tinymce {
+    width: 100%;
+}
+
+#editor {
+    display: none;
+    min-width: 640px;
+    flex-direction: column;
+    background-color: var(--spectrum-background-layer-1-color);
+    position: absolute;
+    padding: var(--spectrum-spacing-500);
+    border-radius: calc(var(--swc-scale-factor)*4px);
+}
+
+#editor.open {
+    display: flex;
+}
+
+#actions {
+    display: flex;
+    position: absolute;
+    top: var(--spectrum-spacing-100);
+    right: var(--spectrum-spacing-100);
+}
+
+#ost {
+    position: absolute;
+    z-index: 2000;
+}

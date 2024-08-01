@@ -10,10 +10,12 @@ export async function withWcs(originalFetch) {
                 .get('offer_selector_ids')
                 .split(',')
                 .map((osi) =>
-                    offers[`${osi}-${language}`]?.map((offer) => ({
-                        ...offer,
-                        offerSelectorIds: [osi],
-                    })),
+                    (offers[`${osi}-${language}`] ?? offers[osi])?.map(
+                        (offer) => ({
+                            ...offer,
+                            offerSelectorIds: [osi],
+                        }),
+                    ),
                 );
 
             // 404 if any of requested osis does not exist
