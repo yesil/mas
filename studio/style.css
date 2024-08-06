@@ -87,6 +87,6 @@ sp-underlay + sp-dialog {
 }
 
 #ost {
-    position: absolute;
-    z-index: 2000;
+    height: 80vh;
+    width: 80vw;
 }

@@ -5,10 +5,12 @@ import { EVENT_SUBMIT } from './events.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Reaction } from 'mobx';
 import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
-import { deeplink, pushState } from '@adobe/mas-commons';
+import {
+    deeplink,
+    pushState,
+} from '@adobecom/milo/libs/features/mas/web-components/src/deeplink.js';
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
-import { openAsDialog } from '../libs/ost.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 const models = {
@@ -36,6 +38,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             state: true,
         } /* the offset top of last clicked fragment */,
     };
+
+    #ostRoot;
 
     constructor() {
         super();
@@ -77,7 +81,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 </p>
                 <sp-button
                     slot="button"
-                    @click="${(e) =>
+                    @click="${() =>
                         this.editFragment(null, this.fragment, true)}"
                 >
                     Save
@@ -85,7 +89,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 <sp-button
                     slot="button"
                     variant="primary"
-                    @click="${(e) =>
+                    @click="${() =>
                         this.editFragment(null, this.fragment, true)}"
                 >
                     Discard
@@ -138,14 +142,27 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
-                <sp-action-button
-                    title="Offer Selector Tool"
-                    label="Offer Selector Tool"
-                    value="offer-selector"
-                    @click="${this.editorActionClickHandler}"
-                >
-                    <sp-icon-star slot="icon"></sp-icon-star>
-                </sp-action-button>
+                <overlay-trigger type="modal" receive-focus="true">
+                    <sp-dialog-base underlay slot="click-content">
+                        <sp-dialog
+                            size="l"
+                            no-divider
+                            dismissable
+                            mode="fullscreen"
+                        >
+                            <div id="ost"></div>
+                        </sp-dialog>
+                    </sp-dialog-base>
+                    <sp-action-button
+                        slot="trigger"
+                        title="Offer Selector Tool"
+                        label="Offer Selector Tool"
+                        value="offer-selector"
+                        @click="${this.editorActionClickHandler}"
+                    >
+                        <sp-icon-star slot="icon"></sp-icon-star>
+                    </sp-action-button>
+                </overlay-trigger>
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
@@ -193,15 +210,23 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor>${unsafeHTML(fragment.prices)}</rte-editor>
+                <rte-editor data-field="prices" @blur="${this.updateFragment}"
+                    >${unsafeHTML(fragment.prices)}</rte-editor
+                >
             </sp-field-group>
             <sp-field-label for="horizontal"> Description </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor>${unsafeHTML(fragment.description)}</rte-editor>
+                <rte-editor
+                    data-field="description"
+                    @blur="${this.updateFragment}"
+                    >${unsafeHTML(fragment.description)}</rte-editor
+                >
             </sp-field-group>
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor>${unsafeHTML(fragment.ctas)}</rte-editor>
+                <rte-editor data-field="ctas" @blur="${this.updateFragment}"
+                    >${unsafeHTML(fragment.ctas)}</rte-editor
+                >
             </sp-field-group> `;
     }
 
@@ -345,12 +370,19 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.store.doSearch(search);
     }
 
-    editorActionClickHandler(e) {
-        const ostRoot = document.getElementById('ost');
+    async editorActionClickHandler(e) {
+        if (this.#ostRoot) return;
+        this.#ostRoot = document.getElementById('ost');
         const accessToken = localStorage.getItem('masAccessToken');
-        const closeDialog = openAsDialog(ostRoot, console.log, {
+        const searchParameters = new URLSearchParams();
+        window.ost.openOfferSelectorTool({
+            rootElement: this.#ostRoot,
             zIndex: 20,
-            accessToken,
+            aosAccessToken: accessToken,
+            searchParameters,
+            onSelect: (offer) => {
+                console.log('Offer selected:', offer);
+            },
         });
     }
 }

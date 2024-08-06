@@ -1,7 +1,7 @@
 import { makeAutoObservable, makeObservable, observable } from 'mobx';
 import { Search } from './Search.js';
 
-import { AEM } from '@adobe/mas-commons';
+import { AEM } from '@adobecom/milo/libs/features/mas/web-components/src/aem.js';
 import { Fragment } from './Fragment.js';
 
 /**
@@ -34,8 +34,7 @@ export class Store {
             aem: false,
         });
         this.aem = new AEM(bucket);
-        ({ cache: merchDataSourceCache } =
-            document.createElement('merch-datasource'));
+        merchDataSourceCache = document.createElement('merch-datasource').cache;
     }
 
     async doSearch(props) {

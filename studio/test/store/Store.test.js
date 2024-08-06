@@ -1,8 +1,7 @@
 import { expect } from '@esm-bundle/chai';
-import '../../../libs/merch-card-all.js';
 import { Store } from '../../src/store/Store.js';
-import { withAem } from '../mocks/aem.js';
-import { mockFetch } from '../mocks/fetch.js';
+import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
+import { withAem } from '@adobecom/milo/libs/features/mas/mocks/aem.js';
 
 describe('Store', async () => {
     await mockFetch(withAem);

@@ -9,9 +9,15 @@
             window.process = { env: {} };
         </script>
         <script src="/__wds-outside-root__/1/node_modules/tinymce/tinymce.js"></script>
+        
         <script src="studio.test.html.js" type="module"></script>
+        
+        <!-- OST -->
+        <script src="../ost/index.js"></script>
+        <link rel="stylesheet" href="../ost/index.css" />
+        
+        <!-- MAS Studo styles -->
         <link rel="stylesheet" href="../style.css" />
-        <link rel="stylesheet" href="../libs/ost.css" />
     </head>
 
     <body>
@@ -21,6 +27,7 @@
             <sp-theme color="light" scale="medium">
                 <mas-studio aem-bucket="author-p22655-e59341"></mas-studio>
             </sp-theme>
+            <div id="ost"></div>
         </template>
     </body>
 </html>
