@@ -1,4 +1,4 @@
-import { init } from '../libs/commerce.js';
+//import { init } from '../libs/commerce.js';
 import '../libs/merch-card-all.js';
 
 const locale =
@@ -14,5 +14,5 @@ const config = () => ({
 
 /** in tests, eagerly initialisation breaks mocks */
 export default async () => {
-    await init(config);
+  //  await init(config);
 };

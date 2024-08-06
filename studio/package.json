@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Merch at Scale Studio",
   "scripts": {
-    "build": "node build.mjs",
+    "build": "node build.mjs && cd ./ost && node ost.mjs",
     "build:milo": "echo",
     "test": "wtr --config ./web-test-runner.config.mjs --coverage --watch --debug",
     "test:ci": "wtr --config ./web-test-runner.config.mjs"

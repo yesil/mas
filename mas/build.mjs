@@ -1,18 +1,29 @@
 import { build } from 'esbuild';
 import fs from 'node:fs';
 
-const { metafile } = await build({
-    alias: {
-        react: '../mocks/react.js',
-    },
+const defaults = {
     bundle: true,
-    entryPoints: ['./src/mas.js'],
     format: 'esm',
     metafile: true,
     minify: true,
-    sourcemap: true,
-    outfile: '../libs/mas.js',
     platform: 'browser',
+    sourcemap: true,
     target: ['es2020'],
+};
+
+let { metafile } = await build({
+    ...defaults,
+    alias: {
+        react: '../mocks/react.js',
+    },
+    entryPoints: ['./src/mas.js'],
+    outfile: '../libs/mas.js',
 });
-fs.writeFileSync('stats.json', JSON.stringify(metafile));
+fs.writeFileSync('mas.json', JSON.stringify(metafile));
+
+({ metafile } = await build({
+    ...defaults,
+    entryPoints: ['./src/merch-card-all.js'],
+    outfile: '../libs/merch-card-all.js',
+}));
+fs.writeFileSync('merch-card-all.json', JSON.stringify(metafile));

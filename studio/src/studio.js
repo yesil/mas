@@ -8,8 +8,8 @@ import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
 import { deeplink, pushState } from '@adobe/mas-commons';
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
-import { openAsDialog } from '../libs/ost.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { Overlay } from '@spectrum-web-components/overlay';
 
 const models = {
     merchCard: {
@@ -345,13 +345,27 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.store.doSearch(search);
     }
 
-    editorActionClickHandler(e) {
-        const ostRoot = document.getElementById('ost');
+    async editorActionClickHandler(e) {
+        const rootElement = document.getElementById('ost');
         const accessToken = localStorage.getItem('masAccessToken');
-        const closeDialog = openAsDialog(ostRoot, console.log, {
+        const searchParameters = new URLSearchParams();
+        window.ost.openOfferSelectorTool({
+            rootElement,
             zIndex: 20,
-            accessToken,
+            aosAccessToken: accessToken,
+            searchParameters,
+            onSelect: (offer) => {
+                console.log('Offer selected:', offer);
+            },
         });
+        const content = document.querySelector('#ost');
+        const options = {
+            trigger: e.target,
+            receivesFocus: true,
+            type: 'modal',
+        };
+        const overlay = await Overlay.open(content, options);
+        document.body.append(overlay);
     }
 }
 
