@@ -6,7 +6,6 @@
     "private": true,
     "workspaces": [
         "commons",
-        "mas",
         "studio"
     ],
     "scripts": {

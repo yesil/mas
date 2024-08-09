@@ -30,8 +30,11 @@ export default {
             inject: {
                 importMap: {
                     imports: {
-                        react: '/test/mocks/react.js',
-                        '@pandora/fetch': '/test/mocks/pandora-fetch.js',
+                        react: '/__wds-outside-root__/2/milo/libs/features/mas/mocks/react.js',
+                        '@pandora/fetch':
+                            '/__wds-outside-root__/2/milo/libs/features/mas/mocks/pandora-fetch.js',
+                        '/libs/deps/lit-all.min.js':
+                            '/__wds-outside-root__/2/milo/libs/deps/lit-all.min.js',
                     },
                 },
             },

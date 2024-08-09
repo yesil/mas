@@ -5,19 +5,18 @@ import { expect } from '@esm-bundle/chai';
 import '../src/swc.js';
 import '../src/studio.js';
 
-import { mockFetch } from './mocks/fetch.js';
-import { withAem } from './mocks/aem.js';
-import { withWcs } from './mocks/wcs.js';
+import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
+import { withAem } from '@adobecom/milo/libs/features/mas/mocks/aem.js';
+import { withWcs } from '@adobecom/milo/libs/features/mas/mocks/wcs.js';
+import { withLiterals } from '@adobecom/milo/libs/features/mas/mocks/literals.js';
 
-import mas from './mocks/mas.js?features=merch-card';
-import { getTemplateContent } from '@adobe/mas-commons/test/utils.js';
-import { delay } from './utils.js';
+import mas from '@adobecom/milo/libs/deps/mas/mas.js?features=merch-card';
+import { getTemplateContent, delay } from '@adobe/mas-commons/test/utils.js';
 
 import '@tinymce/tinymce-webcomponent';
 
 runTests(async () => {
-    await mockFetch(withAem, withWcs);
-    await mas();
+    await mockFetch(withAem, withLiterals, withWcs);
 
     describe('M@S Studio', () => {
         beforeEach(() => {

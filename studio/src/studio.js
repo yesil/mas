@@ -5,11 +5,13 @@ import { EVENT_SUBMIT } from './events.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Reaction } from 'mobx';
 import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
-import { deeplink, pushState } from '@adobe/mas-commons';
+import {
+    deeplink,
+    pushState,
+} from '@adobecom/milo/libs/features/mas/web-components/src/deeplink.js';
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { Overlay } from '@spectrum-web-components/overlay';
 
 const models = {
     merchCard: {
@@ -36,6 +38,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             state: true,
         } /* the offset top of last clicked fragment */,
     };
+
+    #ostRoot;
 
     constructor() {
         super();
@@ -138,14 +142,27 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
-                <sp-action-button
-                    title="Offer Selector Tool"
-                    label="Offer Selector Tool"
-                    value="offer-selector"
-                    @click="${this.editorActionClickHandler}"
-                >
-                    <sp-icon-star slot="icon"></sp-icon-star>
-                </sp-action-button>
+                <overlay-trigger type="modal" receive-focus="true">
+                    <sp-dialog-base underlay slot="click-content">
+                        <sp-dialog
+                            size="l"
+                            no-divider
+                            dismissable
+                            mode="fullscreen"
+                        >
+                            <div id="ost"></div>
+                        </sp-dialog>
+                    </sp-dialog-base>
+                    <sp-action-button
+                        slot="trigger"
+                        title="Offer Selector Tool"
+                        label="Offer Selector Tool"
+                        value="offer-selector"
+                        @click="${this.editorActionClickHandler}"
+                    >
+                        <sp-icon-star slot="icon"></sp-icon-star>
+                    </sp-action-button>
+                </overlay-trigger>
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
@@ -346,11 +363,12 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     async editorActionClickHandler(e) {
-        const rootElement = document.getElementById('ost');
+        if (this.#ostRoot) return;
+        this.#ostRoot = document.getElementById('ost');
         const accessToken = localStorage.getItem('masAccessToken');
         const searchParameters = new URLSearchParams();
         window.ost.openOfferSelectorTool({
-            rootElement,
+            rootElement: this.#ostRoot,
             zIndex: 20,
             aosAccessToken: accessToken,
             searchParameters,
@@ -358,14 +376,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 console.log('Offer selected:', offer);
             },
         });
-        const content = document.querySelector('#ost');
-        const options = {
-            trigger: e.target,
-            receivesFocus: true,
-            type: 'modal',
-        };
-        const overlay = await Overlay.open(content, options);
-        document.body.append(overlay);
     }
 }
 
