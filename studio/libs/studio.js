@@ -5548,50 +5548,8 @@ var Search = class {
   }
 };
 
-// ../commons/src/deeplink.js
-var EVENT_HASHCHANGE = "hashchange";
-function parseState(hash = window.location.hash) {
-  const result = [];
-  const keyValuePairs = hash.replace(/^#/, "").split("&");
-  for (const pair of keyValuePairs) {
-    const [key, value = ""] = pair.split("=");
-    if (key) {
-      result.push([key, decodeURIComponent(value.replace(/\+/g, " "))]);
-    }
-  }
-  return Object.fromEntries(result);
-}
-function pushState(state) {
-  const hash = new URLSearchParams(window.location.hash.slice(1));
-  Object.entries(state).forEach(([key, value2]) => {
-    if (value2) {
-      hash.set(key, value2);
-    } else {
-      hash.delete(key);
-    }
-  });
-  hash.sort();
-  const value = hash.toString();
-  if (value === window.location.hash) return;
-  let lastScrollTop = window.scrollY || document.documentElement.scrollTop;
-  window.location.hash = value;
-  window.scrollTo(0, lastScrollTop);
-}
-function deeplink(callback) {
-  const handler = () => {
-    if (!window.location.hash.includes("=")) return;
-    const state = parseState(window.location.hash);
-    callback(state);
-  };
-  handler();
-  window.addEventListener(EVENT_HASHCHANGE, handler);
-  return () => {
-    window.removeEventListener(EVENT_HASHCHANGE, handler);
-  };
-}
-
-// ../commons/src/aem.js
-var accessToken = localStorage.getItem("masAccessToken");
+// ../../milo/libs/features/mas/web-components/src/aem.js
+var accessToken = window.adobeid.authorize();
 var headers = {
   Authorization: `Bearer ${accessToken}`,
   pragma: "no-cache",
@@ -5678,7 +5636,7 @@ var Store = class {
       aem: false
     });
     this.aem = new AEM(bucket);
-    ({ cache: merchDataSourceCache } = document.createElement("merch-datasource"));
+    merchDataSourceCache = document.createElement("merch-datasource").cache;
   }
   async doSearch(props) {
     this.search.update(props);
@@ -5829,8 +5787,57 @@ function MobxReactionUpdateCustom(constructor, ReactionConstructor) {
   }, _a = cachedRequestUpdate, _b;
 }
 
+// ../../milo/libs/features/mas/web-components/src/deeplink.js
+var EVENT_HASHCHANGE = "hashchange";
+function parseState(hash = window.location.hash) {
+  const result = [];
+  const keyValuePairs = hash.replace(/^#/, "").split("&");
+  for (const pair of keyValuePairs) {
+    const [key, value = ""] = pair.split("=");
+    if (key) {
+      result.push([key, decodeURIComponent(value.replace(/\+/g, " "))]);
+    }
+  }
+  return Object.fromEntries(result);
+}
+function pushState(state) {
+  const hash = new URLSearchParams(window.location.hash.slice(1));
+  Object.entries(state).forEach(([key, value2]) => {
+    if (value2) {
+      hash.set(key, value2);
+    } else {
+      hash.delete(key);
+    }
+  });
+  hash.sort();
+  const value = hash.toString();
+  if (value === window.location.hash) return;
+  let lastScrollTop = window.scrollY || document.documentElement.scrollTop;
+  window.location.hash = value;
+  window.scrollTo(0, lastScrollTop);
+}
+function deeplink(callback) {
+  const handler = () => {
+    if (!window.location.hash.includes("=")) return;
+    const state = parseState(window.location.hash);
+    callback(state);
+  };
+  handler();
+  window.addEventListener(EVENT_HASHCHANGE, handler);
+  return () => {
+    window.removeEventListener(EVENT_HASHCHANGE, handler);
+  };
+}
+
 // src/rte-editor.js
 var RteEditor = class extends HTMLElement {
+  constructor() {
+    super();
+    this.editor = null;
+  }
+  get value() {
+    return this.editor.getContent();
+  }
   connectedCallback() {
     window.tinymce.init({
       target: this,
@@ -5839,8 +5846,21 @@ var RteEditor = class extends HTMLElement {
       license_key: "gpl",
       extended_valid_elements: "a[is|href|class],span[is|class]",
       noneditable_class: "placeholder-resolved",
-      content_style: ".price-strikethrough { text-decoration: line-through;}"
+      content_style: ".price-strikethrough { text-decoration: line-through;}",
+      setup: (editor) => {
+        this.editor = editor;
+        editor.on("blur", () => this.handleBlur());
+      }
     });
+  }
+  handleBlur() {
+    const content = this.editor.getContent();
+    const changeEvent = new CustomEvent("blur", {
+      bubbles: true,
+      composed: true,
+      detail: { content }
+    });
+    this.dispatchEvent(changeEvent);
   }
 };
 customElements.define("rte-editor", RteEditor);
@@ -5898,6 +5918,7 @@ var MasStudio = class extends MobxReactionUpdateCustom(s7, Reaction) {
       state: true
     }
   };
+  #ostRoot;
   constructor() {
     super();
     this.confirmSelect = false;
@@ -5932,14 +5953,14 @@ var MasStudio = class extends MobxReactionUpdateCustom(s7, Reaction) {
                 </p>
                 <sp-button
                     slot="button"
-                    @click="${(e9) => this.editFragment(null, this.fragment, true)}"
+                    @click="${() => this.editFragment(null, this.fragment, true)}"
                 >
                     Save
                 </sp-button>
                 <sp-button
                     slot="button"
                     variant="primary"
-                    @click="${(e9) => this.editFragment(null, this.fragment, true)}"
+                    @click="${() => this.editFragment(null, this.fragment, true)}"
                 >
                     Discard
                 </sp-button>
@@ -5990,14 +6011,27 @@ var MasStudio = class extends MobxReactionUpdateCustom(s7, Reaction) {
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
-                <sp-action-button
-                    title="Offer Selector Tool"
-                    label="Offer Selector Tool"
-                    value="offer-selector"
-                    @click="${this.editorActionClickHandler}"
-                >
-                    <sp-icon-star slot="icon"></sp-icon-star>
-                </sp-action-button>
+                <overlay-trigger type="modal" receive-focus="true">
+                    <sp-dialog-base underlay slot="click-content">
+                        <sp-dialog
+                            size="l"
+                            no-divider
+                            dismissable
+                            mode="fullscreen"
+                        >
+                            <div id="ost"></div>
+                        </sp-dialog>
+                    </sp-dialog-base>
+                    <sp-action-button
+                        slot="trigger"
+                        title="Offer Selector Tool"
+                        label="Offer Selector Tool"
+                        value="offer-selector"
+                        @click="${this.editorActionClickHandler}"
+                    >
+                        <sp-icon-star slot="icon"></sp-icon-star>
+                    </sp-action-button>
+                </overlay-trigger>
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
@@ -6043,15 +6077,23 @@ var MasStudio = class extends MobxReactionUpdateCustom(s7, Reaction) {
             ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor>${o8(fragment.prices)}</rte-editor>
+                <rte-editor data-field="prices" @blur="${this.updateFragment}"
+                    >${o8(fragment.prices)}</rte-editor
+                >
             </sp-field-group>
             <sp-field-label for="horizontal"> Description </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor>${o8(fragment.description)}</rte-editor>
+                <rte-editor
+                    data-field="description"
+                    @blur="${this.updateFragment}"
+                    >${o8(fragment.description)}</rte-editor
+                >
             </sp-field-group>
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor>${o8(fragment.ctas)}</rte-editor>
+                <rte-editor data-field="ctas" @blur="${this.updateFragment}"
+                    >${o8(fragment.ctas)}</rte-editor
+                >
             </sp-field-group> `;
   }
   get fragmentEditorEl() {
@@ -6185,12 +6227,13 @@ var MasStudio = class extends MobxReactionUpdateCustom(s7, Reaction) {
     pushState(search);
     this.store.doSearch(search);
   }
-  editorActionClickHandler(e9) {
-    const rootElement = document.getElementById("ost");
-    const accessToken2 = localStorage.getItem("masAccessToken");
+  async editorActionClickHandler(e9) {
+    if (this.#ostRoot) return;
+    this.#ostRoot = document.getElementById("ost");
+    const accessToken2 = window.adobeid.authorize();
     const searchParameters = new URLSearchParams();
     window.ost.openOfferSelectorTool({
-      rootElement,
+      rootElement: this.#ostRoot,
       zIndex: 20,
       aosAccessToken: accessToken2,
       searchParameters,
