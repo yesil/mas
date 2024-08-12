@@ -5,7 +5,6 @@ import { withAem } from '@adobecom/milo/libs/features/mas/mocks/aem.js';
 
 describe('Store', async () => {
     await mockFetch(withAem);
-    await mockIms();
     describe('Search', () => {
         it('perform a search with [query, path] params', async () => {
             const store = new Store('test');

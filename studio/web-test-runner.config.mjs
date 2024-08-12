@@ -25,16 +25,20 @@ export default {
         exclude: ['test/mocks/**', 'test/**', '**/node_modules/**'],
     },
     files: ['test/**/*.test.(js|html)'],
+    middleware: [
+        async (ctx, next) => {
+            await next();
+            ctx.set('Access-Control-Allow-Credentials', true);
+            ctx.set('Access-Control-Allow-Origin', '*');
+        },
+    ],
     plugins: [
         importMapsPlugin({
             inject: {
                 importMap: {
                     imports: {
-                        react: '/__wds-outside-root__/2/milo/libs/features/mas/mocks/react.js',
-                        '@pandora/fetch':
-                            '/__wds-outside-root__/2/milo/libs/features/mas/mocks/pandora-fetch.js',
-                        '/libs/deps/lit-all.min.js':
-                            '/__wds-outside-root__/2/milo/libs/deps/lit-all.min.js',
+                        react: '/test/mocks/react.js',
+                        '@pandora/fetch': '/test/mocks/pandora-fetch.js',
                     },
                 },
             },

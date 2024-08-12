@@ -5,24 +5,24 @@
         <meta property="og:title" content="Merch at Scale Studio" />
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script type="module">
+        <script>
             window.process = { env: {} };
+            window.adobeid = {
+                authorize: () => localStorage.getItem('masAccessToken'),
+            };
         </script>
         <script src="/__wds-outside-root__/1/node_modules/tinymce/tinymce.js"></script>
-        
         <script src="studio.test.html.js" type="module"></script>
-        
         <!-- OST -->
         <script src="../ost/index.js"></script>
         <link rel="stylesheet" href="../ost/index.css" />
-        
+
         <!-- MAS Studo styles -->
         <link rel="stylesheet" href="../style.css" />
     </head>
 
     <body>
         <main></main>
-        <div id="ost"></div>
         <template id="studio">
             <sp-theme color="light" scale="medium">
                 <mas-studio aem-bucket="author-p22655-e59341"></mas-studio>

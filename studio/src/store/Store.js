@@ -15,7 +15,7 @@ export class Store {
      */
     search = new Search();
     /**
-     * @type {import('@adobe/mas-commons').AEM}
+     * @type {import('@adobecom/milo/libs/features/mas/web-components/src').AEM}
      */
     aem;
 
@@ -51,7 +51,17 @@ export class Store {
     /**
      * @param {FocusEvent} fragment
      */
-    selectFragment(fragment) {
-        this.fragment = fragment;
+    async selectFragment(fragment) {
+        this.aem.sites.cf.fragments.getCfById(fragment.id).then((fragment) => {
+            merchDataSourceCache?.add(fragment);
+            this.fragment = new Fragment(fragment);
+        });
+    }
+
+    saveFragment() {
+        this.aem.sites.cf.fragments.save(this.fragment).then((fragment) => {
+            merchDataSourceCache?.add(fragment);
+            this.fragment = new Fragment(fragment);
+        });
     }
 }

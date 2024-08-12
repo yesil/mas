@@ -1,26 +1,29 @@
 import { build } from 'esbuild';
+import fs from 'node:fs';
 
-build({
+const defaults = {
+    alias: { react: '../mocks/react.js' },
+    bundle: true,
+    define: { 'process.env.NODE_ENV': '"production"' },
+    external: [],
+    format: 'esm',
+    metafile: true,
+    minify: true,
+    platform: 'browser',
+    sourcemap: true,
+    target: ['es2020'],
+};
+
+let { metafile } = await build({
+    ...defaults,
     entryPoints: ['src/swc.js'],
-    format: 'esm',
-    bundle: true,
     outfile: 'libs/swc.js',
-    platform: 'browser',
-    sourcemap: true,
-    define: {
-        'process.env.NODE_ENV': '"production"',
-    },
-}).catch(() => process.exit(1));
+});
+fs.writeFileSync('swc.json', JSON.stringify(metafile));
 
-build({
+({ metafile } = await build({
+    ...defaults,
     entryPoints: ['src/studio.js'],
-    format: 'esm',
-    bundle: true,
     outfile: 'libs/studio.js',
-    platform: 'browser',
-    sourcemap: true,
-    define: {
-        'process.env.NODE_ENV': '"production"',
-    },
-    external: ['../libs/ost.js'],
-}).catch(() => process.exit(1));
+}));
+fs.writeFileSync('studio.json', JSON.stringify(metafile));

@@ -26,9 +26,7 @@
                     "name": "variant",
                     "type": "enumeration",
                     "multiple": false,
-                    "values": [
-                        "ccd-action"
-                    ]
+                    "values": ["ccd-action"]
                 },
                 {
                     "name": "icon",
@@ -43,17 +41,13 @@
                     "name": "name",
                     "type": "text",
                     "multiple": false,
-                    "values": [
-                        "creative-cloud"
-                    ]
+                    "values": ["creative-cloud"]
                 },
                 {
                     "name": "title",
                     "type": "text",
                     "multiple": false,
-                    "values": [
-                        "Creative Cloud All Apps"
-                    ]
+                    "values": ["Creative Cloud All Apps"]
                 },
                 {
                     "name": "link",
@@ -83,17 +77,13 @@
                     "name": "secure",
                     "type": "boolean",
                     "multiple": false,
-                    "values": [
-                        true
-                    ]
+                    "values": [true]
                 },
                 {
                     "name": "stock",
                     "type": "boolean",
                     "multiple": false,
-                    "values": [
-                        true
-                    ]
+                    "values": [true]
                 },
                 {
                     "name": "ctas",
@@ -101,7 +91,7 @@
                     "multiple": false,
                     "mimeType": "text/html",
                     "values": [
-                        "<a is='checkout-link' data-checkout-workflow='UCv3' data-checkout-workflow-step='segmentation' data-promotion-code='CCI2AAUSQ22440CH' data-quantity='1' data-wcs-osi='r_JXAnlFI7xD6FxWKl2ODvZriLYBoSL701Kd1hRyhe8' data-extra-options='{}' href='#'><span>Buy now</span></a><a is='checkout-link' data-checkout-workflow='UCv3' data-checkout-workflow-step='email' data-quantity='1'data-wcs-osi='MV-_1XzZ6JAft_2wXu3a-z28noWUucHMdMtyIYcodak' data-extra-options='{}' href='#'><span>Free trial</span></a>"
+                        "<a is='checkout-link' data-checkout-workflow='UCv3' data-checkout-workflow-step='segmentation' data-promotion-code='CCI2AAUSQ22440CH' data-quantity='1' data-wcs-osi='r_JXAnlFI7xD6FxWKl2ODvZriLYBoSL701Kd1hRyhe8' data-extra-options='{}' href='#'><span>Buy now</span></a>&nbsp;<a is='checkout-link' data-checkout-workflow='UCv3' data-checkout-workflow-step='email' data-quantity='1'data-wcs-osi='MV-_1XzZ6JAft_2wXu3a-z28noWUucHMdMtyIYcodak' data-extra-options='{}' href='#'><span>Free trial</span></a>"
                     ]
                 }
             ],
@@ -117,7 +107,7 @@
             },
             "validationStatus": [],
             "fieldTags": [],
-            "etag": "\"2028f561fa1f216104ee23d9ee4a141e\""
+            "etag": "\"0e44acfdea271202f169511e77086345\""
         },
         {
             "path": "/content/dam/sandbox/mas/photoshop",
@@ -145,33 +135,25 @@
                     "name": "variant",
                     "type": "enumeration",
                     "multiple": false,
-                    "values": [
-                        "ccd-action"
-                    ]
+                    "values": ["ccd-action"]
                 },
                 {
                     "name": "icon",
                     "type": "text",
                     "multiple": true,
-                    "values": [
-                        "/test/mocks/img/photoshop.svg"
-                    ]
+                    "values": ["/test/mocks/img/photoshop.svg"]
                 },
                 {
                     "name": "name",
                     "type": "text",
                     "multiple": false,
-                    "values": [
-                        "photoshop"
-                    ]
+                    "values": ["photoshop"]
                 },
                 {
                     "name": "title",
                     "type": "text",
                     "multiple": false,
-                    "values": [
-                        "Photoshop"
-                    ]
+                    "values": ["Photoshop"]
                 },
                 {
                     "name": "link",
@@ -201,17 +183,13 @@
                     "name": "secure",
                     "type": "boolean",
                     "multiple": false,
-                    "values": [
-                        true
-                    ]
+                    "values": [true]
                 },
                 {
                     "name": "stock",
                     "type": "boolean",
                     "multiple": false,
-                    "values": [
-                        true
-                    ]
+                    "values": [true]
                 },
                 {
                     "name": "ctas",
@@ -235,7 +213,7 @@
             },
             "validationStatus": [],
             "fieldTags": [],
-            "etag": "\"343f00d61244effce6e55c31cc90d4f9\""
+            "etag": "\"7e784d915185cd8d3febc31587f7e5bf\""
         }
     ]
 }

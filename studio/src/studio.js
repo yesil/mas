@@ -13,6 +13,8 @@ import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
 import { classMap } from 'lit/directives/class-map.js';
 
+import { defaults as ostDefaults } from './ost.js';
+
 const models = {
     merchCard: {
         path: '/conf/sandbox/settings/dam/cfm/models/merch-card',
@@ -118,6 +120,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     label="Save"
                     title="Save changes"
                     value="save"
+                    @click="${this.saveFragment}"
                 >
                     <sp-icon-save-floppy slot="icon"></sp-icon-save-floppy>
                 </sp-action-button>
@@ -166,7 +169,12 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
-                <sp-action-button title="Close" label="Close" value="close">
+                <sp-action-button
+                    title="Close"
+                    label="Close"
+                    value="close"
+                    @click="${this.closeFragmentEditor}"
+                >
                     <sp-icon-close-circle slot="icon"></sp-icon-close-circle>
                 </sp-action-button>
             </sp-action-group>
@@ -183,8 +191,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     get merchCardFragmentEditor() {
         const { fragment } = this.store;
         if (!fragment) return nothing;
+        const form = Object.fromEntries(
+            fragment.fields.map((f) => [f.name, f]),
+        );
         return html`<sp-field-label for="card-variant">Variant</sp-field-label>
-            <sp-picker id="card-variant" value="${fragment.variant}">
+            <sp-picker
+                id="card-variant"
+                data-field="variant"
+                value="${form.variant.values[0]}"
+                @change="${this.updateFragment}"
+            >
                 <span slot="label">Choose a variant:</span>
                 <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
                 <sp-menu-item>CCH</sp-menu-item>
@@ -196,22 +212,22 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 placeholder="Enter card title"
                 id="card-title"
                 data-field="title"
-                value="${fragment.title}"
+                value="${form.title.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
             <sp-field-label for="card-icon">Icons</sp-field-label>
             <sp-textfield
                 placeholder="Enter icon URLs"
                 id="card-icon"
-                multiline
                 data-field="icon"
-                value="${fragment.icon}"
+                multiline
+                value="${form.icon.values.join(',')}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-editor data-field="prices" @blur="${this.updateFragment}"
-                    >${unsafeHTML(fragment.prices)}</rte-editor
+                    >${unsafeHTML(form.prices.values[0])}</rte-editor
                 >
             </sp-field-group>
             <sp-field-label for="horizontal"> Description </sp-field-label>
@@ -219,13 +235,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 <rte-editor
                     data-field="description"
                     @blur="${this.updateFragment}"
-                    >${unsafeHTML(fragment.description)}</rte-editor
+                    >${unsafeHTML(form.description.values[0])}</rte-editor
                 >
             </sp-field-group>
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-editor data-field="ctas" @blur="${this.updateFragment}"
-                    >${unsafeHTML(fragment.ctas)}</rte-editor
+                    >${unsafeHTML(form.ctas.values[0])}</rte-editor
                 >
             </sp-field-group> `;
     }
@@ -247,10 +263,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                                 @dblclick="${(e) => this.editFragment(e, item)}"
                             >
                                 <merch-datasource
-                                    odin
-                                    source="odin-author"
                                     path="${item.path}"
                                 ></merch-datasource>
+                                ${item.hasChanges
+                                    ? html` <sp-status-light
+                                          size="l"
+                                          variant="yellow"
+                                      ></sp-status-light>`
+                                    : ''}
                             </merch-card>`;
                         default:
                             return nothing;
@@ -261,6 +281,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     render() {
+        if (!this.store) return nothing;
         return html`
             <h1>Merch at Scale Studio</h1>
             <div>
@@ -289,7 +310,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 >
             </div>
             ${this.result} ${this.fragmentEditor} ${this.selectFragmentDialog}
+            ${this.toast}
         `;
+    }
+
+    get toast() {
+        return html`<sp-toast timeout="6000"></sp-toast>`;
+    }
+
+    get toastEl() {
+        return this.querySelector('sp-toast');
     }
 
     async startDeeplink() {
@@ -305,6 +335,12 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
+    showToast(message, variant = "info") {
+        this.toastEl.innerHTML = message;
+        this.toastEl.variant = variant;
+        this.toastEl.open = true;
+    }
+
     /**
      * @param {Event} e click event, maybe null
      * @param {Fragment} fragment
@@ -313,37 +349,42 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     async editFragment(e, fragment, force = false) {
         if (e) {
             const merchCard = e.target.closest('merch-card');
-            const { offsetTop, offsetLeft, offsetWidth } = merchCard;
-            this.fragmentOffsets = [
-                `${offsetTop}px`,
-                `${offsetLeft + offsetWidth + 32}px`,
-            ];
+            const { offsetTop, offsetHeight } = merchCard;
+            this.fragmentOffsets = [`${offsetTop + offsetHeight + 20}px`];
         }
         if (fragment && fragment === this.store.fragment) return;
         if (this.store.fragment?.hasChanges && !force) {
             this.fragment = fragment;
-            this.confirmSelect = true;
+            this.confirmSelect = true; // TODO make me smart
         } else {
-            this.store.selectFragment(fragment);
+            await this.store.selectFragment(fragment);
             this.fragment = undefined;
             this.confirmSelect = false;
+            // re-position the form
             await this.updateComplete;
             this.fragmentEditorEl.style.top = this.fragmentOffsets[0];
-            this.fragmentEditorEl.style.left = this.fragmentOffsets[1];
         }
     }
 
     updateFragment(e) {
         const fieldName = e.target.dataset.field;
-        let { value } = e.target;
-        if (e.target.multiline) {
-            value = value.split('\n');
-        }
-        this.store.fragment[fieldName] = value;
+        let value = e.target.value || e.detail.value;
+        value = e.target.multiline ? value.split(',') : [value];
+        this.store.fragment.updateField(fieldName, value);
         const merchDataSource = this.querySelector(
             `merch-datasource[path="${this.store.fragment.path}"]`,
         );
         merchDataSource.refresh(false);
+    }
+
+    async saveFragment() {
+        this.showToast('Saving fragment...');
+        await this.store.saveFragment();
+        this.showToast('Fragment saved', 'positive');
+    }
+
+    closeFragmentEditor(e) {
+        this.store.selectFragment();
     }
 
     closeConfirmSelect() {
@@ -361,6 +402,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
+    closeOstDialog() {
+        this.querySelector('sp-dialog-base').open = false;
+    }
+
     async doSearch() {
         const query = this.searchText;
         const modelId = this.picker.value.replace('all', '');
@@ -376,12 +421,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         const accessToken = window.adobeid.authorize();
         const searchParameters = new URLSearchParams();
         window.ost.openOfferSelectorTool({
+            ...ostDefaults,
             rootElement: this.#ostRoot,
             zIndex: 20,
             aosAccessToken: accessToken,
             searchParameters,
             onSelect: (offer) => {
                 console.log('Offer selected:', offer);
+                this.closeOstDialog();
             },
         });
     }

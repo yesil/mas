@@ -1,3 +1,5 @@
+import { action, makeObservable, observable } from 'mobx';
+
 export class Fragment {
     path = '';
     type = '';
@@ -5,6 +7,9 @@ export class Fragment {
         id: '',
         path: '',
     };
+    hasChanges = false;
+
+    fields = [];
 
     /**
      * @param {Object} props - common properties of a fragment as a search result
@@ -13,12 +18,23 @@ export class Fragment {
      * @param {Object} props.model - cf model
      * @param {string} props.model.id - cf model id
      * @param {string} props.model.path - cf model path
+     * @param {Object[]} props.fields - cf fields
      */
     constructor(props) {
+        makeObservable(this, {
+            hasChanges: observable,
+            updateField: action,
+        });
         Object.assign(this, props);
     }
 
-    get hasChanges() {
-        return true;
+    updateField(fieldName, value) {
+        this.fields
+            .filter((field) => field.name === fieldName)
+            .forEach((field) => {
+                if (field.values === value) return;
+                field.values = value;
+                this.hasChanges = true;
+            });
     }
 }
