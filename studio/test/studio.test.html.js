@@ -16,20 +16,21 @@ import { getTemplateContent, delay } from '@adobe/mas-commons/test/utils.js';
 import '@tinymce/tinymce-webcomponent';
 
 runTests(async () => {
-    await mockFetch(withLiterals, withWcs, withAem);
     describe('M@S Studio', () => {
         beforeEach(() => {
             document.location.hash = '#';
             document.querySelector('main').innerHTML = '';
         });
 
-        it('should render', () => {
+        it('should render', async () => {
             const [studio] = getTemplateContent('studio');
             document.querySelector('main').append(studio);
             expect(studio).exist;
         });
 
         it('should search via deeplink', async () => {
+            // const disposer = await mockFetch(withLiterals, withWcs, withAem);
+            const disposer = await mockFetch(withLiterals, withWcs);
             document.location.hash =
                 '#path=%2Fcontent%2Fdam%2Fsandbox%2Fmas&query=ccd';
             const [studio] = getTemplateContent('studio');
