@@ -24,7 +24,6 @@ const models = {
 };
 
 const onSelect = (offerSelectorId, type, offer, options, promoOverride) => {
-    log.debug(offerSelectorId, type, offer, options, promoOverride);
     const link = createMarkup(
         ostDefaults,
         offerSelectorId,

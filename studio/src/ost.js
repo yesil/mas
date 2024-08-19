@@ -52,6 +52,12 @@ export const defaults = {
     },
 };
 
+const updateParams = (params, key, value) => {
+    if (value !== defaults[key]) {
+        params.set(key, value);
+    }
+};
+
 export const createMarkup = (
     defaults,
     offerSelectorId,
