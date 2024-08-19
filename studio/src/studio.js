@@ -12,6 +12,7 @@ import {
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { createMarkup } from './ost.js';
 
 import { defaults as ostDefaults } from './ost.js';
 
@@ -20,6 +21,30 @@ const models = {
         path: '/conf/sandbox/settings/dam/cfm/models/merch-card',
         name: 'Merch Card',
     },
+};
+
+const onSelect = (offerSelectorId, type, offer, options, promoOverride) => {
+    log.debug(offerSelectorId, type, offer, options, promoOverride);
+    const link = createMarkup(
+        ostDefaults,
+        offerSelectorId,
+        type,
+        offer,
+        options,
+        promoOverride,
+    );
+
+    log.debug(`Use Link: ${link.outerHTML}`);
+    const linkBlob = new Blob([link.outerHTML], { type: 'text/html' });
+    const textBlob = new Blob([link.href], { type: 'text/plain' });
+    const data = [
+        new ClipboardItem({
+            [linkBlob.type]: linkBlob,
+            [textBlob.type]: textBlob,
+        }),
+    ];
+    navigator.clipboard.write(data, log.debug, log.error);
+    this.closeOstDialog();
 };
 
 class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
@@ -431,7 +456,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             aosAccessToken: accessToken,
             searchParameters,
             onSelect: (offer) => {
-                console.log('Offer selected:', offer);
+                onSelect();
                 this.closeOstDialog();
             },
         });
