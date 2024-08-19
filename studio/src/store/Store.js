@@ -52,16 +52,14 @@ export class Store {
      * @param {FocusEvent} fragment
      */
     async selectFragment(fragment) {
-        this.aem.sites.cf.fragments.getCfById(fragment.id).then((fragment) => {
-            merchDataSourceCache?.add(fragment);
-            this.fragment = new Fragment(fragment);
-        });
+        this.aem.sites.cf.fragments.getCfById(fragment.id);
+        merchDataSourceCache?.add(fragment);
+        this.fragment = new Fragment(fragment);
     }
 
-    saveFragment() {
-        this.aem.sites.cf.fragments.save(this.fragment).then((fragment) => {
-            merchDataSourceCache?.add(fragment);
-            this.fragment = new Fragment(fragment);
-        });
+    async saveFragment() {
+        const fragment = await this.aem.sites.cf.fragments.save(this.fragment);
+        merchDataSourceCache?.add(fragment);
+        this.fragment = new Fragment(fragment);
     }
 }

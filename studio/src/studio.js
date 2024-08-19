@@ -335,7 +335,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
-    showToast(message, variant = "info") {
+    showToast(message, variant = 'info') {
         this.toastEl.innerHTML = message;
         this.toastEl.variant = variant;
         this.toastEl.open = true;
@@ -379,8 +379,12 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     async saveFragment() {
         this.showToast('Saving fragment...');
-        await this.store.saveFragment();
-        this.showToast('Fragment saved', 'positive');
+        try {
+            await this.store.saveFragment();
+            this.showToast('Fragment saved', 'positive');
+        } catch (e) {
+            this.showToast('Fragment could not be  saved', 'negative');
+        }
     }
 
     closeFragmentEditor(e) {
