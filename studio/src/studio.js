@@ -51,6 +51,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     constructor() {
         super();
         this.confirmSelect = false;
+        document.addEventListener(
+            'editor-action-click',
+            this.editorActionClickHandler.bind(this),
+        );
     }
 
     connectedCallback() {
@@ -62,6 +66,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     disconnectedCallback() {
         super.disconnectedCallback();
         this.deeplinkDisposer();
+        this.removeEventListener(
+            'editor-action-click',
+            this.editorActionClickHandler,
+        );
     }
 
     get search() {
@@ -476,13 +484,27 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     async editorActionClickHandler(e) {
-        if (this.#ostRoot) return;
-        this.#ostRoot = document.getElementById('ost');
+        const ostRoot = document.getElementById('ost');
         const accessToken = window.adobeid.authorize();
         const searchParameters = new URLSearchParams();
+        const clickedOffer = e.detail?.clickedElement;
+        if (clickedOffer) {
+            ['wcs-osi', 'template', 'promotion-code'].forEach((attr) => {
+                const value = clickedOffer.getAttribute(`data-${attr}`);
+                if (value) {
+                    searchParameters.set(
+                        attr
+                            .replace('wcs-', '')
+                            .replace('template', 'type')
+                            .replace('promotion-code', 'promo'),
+                        value,
+                    );
+                }
+            });
+        }
         window.ost.openOfferSelectorTool({
             ...ostDefaults,
-            rootElement: this.#ostRoot,
+            rootElement: ostRoot,
             zIndex: 20,
             aosAccessToken: accessToken,
             searchParameters,
