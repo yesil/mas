@@ -24,6 +24,7 @@ import '@spectrum-web-components/menu/sp-menu.js';
 import '@spectrum-web-components/overlay/overlay-trigger.js';
 import '@spectrum-web-components/overlay/sp-overlay.js';
 import '@spectrum-web-components/picker/sp-picker.js';
+import '@spectrum-web-components/progress-circle/sp-progress-circle.js';
 import '@spectrum-web-components/search/sp-search.js';
 import '@spectrum-web-components/status-light/sp-status-light.js';
 import '@spectrum-web-components/textfield/sp-textfield.js';

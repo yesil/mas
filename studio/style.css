@@ -89,7 +89,7 @@ sp-underlay + sp-dialog {
 }
 
 sp-toast {
-    position: absolute;
+    position: fixed;
     top: 4px;
     right: 4px;
 }
@@ -105,4 +105,15 @@ rte-editor + .tox.tox-tinymce {
     width: 100%;
     border: 1px solid var(--spectrum-global-color-gray-500);
     border-radius: var(--spectrum-corner-radius-100);
+}
+
+merch-card {
+    cursor: pointer;
+    user-select: none;
+}
+
+sp-progress-circle {
+    position: absolute;
+    top: 50%;
+    margin: 0 auto;
 }

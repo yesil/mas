@@ -37,6 +37,17 @@ export class Search {
         this.result = result;
     }
 
+    /**
+     * Add a new fragment to the result.
+     * Happens when a fragment is copied.
+     * @param {Fragment} fragment
+     * @param {Fragment} after
+     */
+    addToResult(fragment, after) {
+        const index = this.result.indexOf(after);
+        this.result.splice(index + 1, 0, fragment);
+    }
+
     update(props) {
         Object.assign(this, props);
     }

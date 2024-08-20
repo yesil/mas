@@ -25,6 +25,8 @@ export class Store {
      */
     fragment;
 
+    loading = false;
+
     /**
      * @param {string} bucket
      */
@@ -52,6 +54,8 @@ export class Store {
      * @param {FocusEvent} fragment
      */
     async selectFragment({ id } = {}) {
+        this.fragment = undefined;
+        this.loading = true;
         let fragment;
         if (id) {
             fragment = await this.aem.sites.cf.fragments.getCfById(id);
@@ -63,11 +67,22 @@ export class Store {
         } else {
             this.fragment = undefined;
         }
+        this.loading = false;
     }
 
     async saveFragment() {
         const fragment = await this.aem.sites.cf.fragments.save(this.fragment);
         merchDataSourceCache?.add(fragment);
         this.fragment = new Fragment(fragment);
+    }
+
+    async copyFragment() {
+        const fragment = await this.aem.sites.cf.fragments.copyFragment(
+            this.fragment,
+        );
+        merchDataSourceCache?.add(fragment);
+        const newFragment = new Fragment(fragment);
+        this.search.addToResult(newFragment, this.fragment);
+        this.fragment = newFragment;
     }
 }

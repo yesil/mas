@@ -136,7 +136,11 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 >
                     <sp-icon-undo slot="icon"></sp-icon-undo>
                 </sp-action-button>
-                <sp-action-button label="Clone" value="clone">
+                <sp-action-button
+                    label="Clone"
+                    value="clone"
+                    @click="${this.copyFragment}"
+                >
                     <sp-icon-duplicate slot="icon"></sp-icon-duplicate>
                 </sp-action-button>
                 <sp-action-button label="Publish" value="publish">
@@ -323,12 +327,20 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 >
             </div>
             ${this.result} ${this.fragmentEditor} ${this.selectFragmentDialog}
-            ${this.toast}
+            ${this.toast} ${this.loadingIndicator}
         `;
     }
 
     get toast() {
         return html`<sp-toast timeout="6000"></sp-toast>`;
+    }
+
+    get loadingIndicator() {
+        if (!this.store.loading) return nothing;
+        return html`<sp-progress-circle
+            indeterminate
+            size="l"
+        ></sp-progress-circle>`;
     }
 
     get toastEl() {
@@ -401,6 +413,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             this.showToast('Fragment saved', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be  saved', 'negative');
+        }
+    }
+
+    async copyFragment() {
+        this.showToast('Cloning fragment...');
+        try {
+            await this.store.copyFragment();
+            this.showToast('Fragment cloned', 'positive');
+        } catch (e) {
+            this.showToast('Fragment could not be cloned', 'negative');
         }
     }
 
