@@ -12,9 +12,8 @@ import {
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { createMarkup } from './ost.js';
 
-import { defaults as ostDefaults } from './ost.js';
+import { defaults as ostDefaults, createMarkup } from './ost.js';
 
 const models = {
     merchCard: {
@@ -33,17 +32,18 @@ const onSelect = (offerSelectorId, type, offer, options, promoOverride) => {
         promoOverride,
     );
 
-    log.debug(`Use Link: ${link.outerHTML}`);
-    const linkBlob = new Blob([link.outerHTML], { type: 'text/html' });
-    const textBlob = new Blob([link.href], { type: 'text/plain' });
-    const data = [
-        new ClipboardItem({
-            [linkBlob.type]: linkBlob,
-            [textBlob.type]: textBlob,
-        }),
-    ];
-    navigator.clipboard.write(data, log.debug, log.error);
-    this.closeOstDialog();
+    console.log(`Use Link: ${link.outerHTML}`);
+    const rteEditor = document.querySelector('rte-editor[data-field="prices"]');
+
+    if (rteEditor) {
+        rteEditor.appendContent(link.outerHTML);
+    }
+
+    const masStudio = document.getElementById('mas-studio');
+
+    if (masStudio && typeof masStudio.closeOstDialog === 'function') {
+        masStudio.closeOstDialog();
+    }
 };
 
 class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
@@ -227,6 +227,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             >
                 <span slot="label">Choose a variant:</span>
                 <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
+                <sp-menu-item>Special Offers</sp-menu-item>
                 <sp-menu-item>CCH</sp-menu-item>
                 <sp-menu-item>Plans</sp-menu-item>
                 <sp-menu-item>Catalog</sp-menu-item>
@@ -454,10 +455,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             zIndex: 20,
             aosAccessToken: accessToken,
             searchParameters,
-            onSelect: (offer) => {
-                onSelect();
-                this.closeOstDialog();
-            },
+            onSelect,
         });
     }
 }

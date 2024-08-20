@@ -58,8 +58,7 @@ const updateParams = (params, key, value) => {
     }
 };
 
-export const createMarkup = (
-    defaults,
+export const createMarkup = (  defaults,
     offerSelectorId,
     type,
     offer,

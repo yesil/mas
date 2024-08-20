@@ -84,6 +84,12 @@ export class RteEditor extends HTMLElement {
             },
         });
     }
+
+    appendContent(html) {
+        if (this.editor) {
+            this.editor.insertContent(html);
+        }
+    }
 }
 
 function removeComments(element) {
