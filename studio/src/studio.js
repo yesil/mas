@@ -39,7 +39,7 @@ const onSelect = (offerSelectorId, type, offer, options, promoOverride) => {
         rteEditor.appendContent(link.outerHTML);
     }
 
-    const masStudio = document.getElementById('mas-studio');
+    const masStudio = document.querySelector('mas-studio');
 
     if (masStudio && typeof masStudio.closeOstDialog === 'function') {
         masStudio.closeOstDialog();
