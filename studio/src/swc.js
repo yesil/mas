@@ -2,7 +2,7 @@ import '@spectrum-web-components/action-bar/sp-action-bar.js';
 import '@spectrum-web-components/action-button/sp-action-button.js';
 import '@spectrum-web-components/button-group/sp-button-group.js';
 import '@spectrum-web-components/button/sp-button.js';
-import '@spectrum-web-components/dialog/sp-dialog-base.js';
+import '@spectrum-web-components/dialog/sp-dialog-wrapper.js';
 import '@spectrum-web-components/dialog/sp-dialog.js';
 import '@spectrum-web-components/divider/sp-divider.js';
 import '@spectrum-web-components/field-group/sp-field-group.js';

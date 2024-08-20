@@ -153,29 +153,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 </sp-action-button>
             </sp-action-group>
             <sp-divider vertical></sp-divider>
-            <sp-action-group>
-                <overlay-trigger type="modal" receive-focus="true">
-                    <sp-dialog-base underlay slot="click-content">
-                        <sp-dialog
-                            size="l"
-                            no-divider
-                            dismissable
-                            mode="fullscreen"
-                        >
-                            <div id="ost"></div>
-                        </sp-dialog>
-                    </sp-dialog-base>
-                    <sp-action-button
-                        slot="trigger"
-                        title="Offer Selector Tool"
-                        label="Offer Selector Tool"
-                        value="offer-selector"
-                        @click="${this.editorActionClickHandler}"
-                    >
-                        <sp-icon-star slot="icon"></sp-icon-star>
-                    </sp-action-button>
-                </overlay-trigger>
-            </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
                 <sp-action-button
@@ -240,6 +217,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     data-field="prices"
                     @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
+                    @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.prices.values[0])}</rte-editor
                 >
             </sp-field-group>
@@ -274,9 +252,11 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 this.store.search.result,
                 (item) => item.path,
                 (item) => {
+                    console.log(item.isSelected);
                     switch (item.model.path) {
                         case models.merchCard.path:
                             return html`<merch-card
+                                class="${item.isSelected ? 'selected' : ''}"
                                 @dblclick="${(e) => this.editFragment(e, item)}"
                             >
                                 <merch-datasource
@@ -327,7 +307,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 >
             </div>
             ${this.result} ${this.fragmentEditor} ${this.selectFragmentDialog}
-            ${this.toast} ${this.loadingIndicator}
+            ${this.toast} ${this.loadingIndicator} ${this.offerSelectorTool}
         `;
     }
 
@@ -341,6 +321,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             indeterminate
             size="l"
         ></sp-progress-circle>`;
+    }
+
+    get offerSelectorTool() {
+        return html`
+            <sp-overlay id="ostDialog" type="modal">
+                <sp-dialog-wrapper dismissable underlay>
+                        <div id="ost"></div>
+                </sp-dialog-wrapper>
+            </overlay-trigger>
+        `;
     }
 
     get toastEl() {
@@ -426,8 +416,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
-    closeFragmentEditor(e) {
-        this.store.selectFragment();
+    async closeFragmentEditor(e) {
+        await this.store.selectFragment();
     }
 
     closeConfirmSelect() {
@@ -445,8 +435,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
+    get ostDialogEl() {
+        return document.getElementById('ostDialog');
+    }
+
+    openOstDialog() {
+        this.ostDialogEl.open = true;
+    }
+
     closeOstDialog() {
-        this.querySelector('sp-dialog-base').open = false;
+        this.ostDialogEl.open = false;
     }
 
     async doSearch() {
@@ -475,19 +473,23 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.closeOstDialog();
     }
 
-    async editorActionClickHandler(e) {
-        if (this.#ostRoot) return;
-        this.#ostRoot = document.getElementById('ost');
-        const accessToken = window.adobeid.authorize();
-        const searchParameters = new URLSearchParams();
-        window.ost.openOfferSelectorTool({
-            ...ostDefaults,
-            rootElement: this.#ostRoot,
-            zIndex: 20,
-            aosAccessToken: accessToken,
-            searchParameters,
-            onSelect: this.onSelect.bind(this),
-        });
+    async openOfferSelectorTool() {
+        if (!this.#ostRoot) {
+            this.#ostRoot = document.getElementById('ost');
+            const accessToken = window.adobeid.authorize();
+            const searchParameters = new URLSearchParams();
+            window.ost.openOfferSelectorTool({
+                ...ostDefaults,
+                rootElement: this.#ostRoot,
+                zIndex: 20,
+                aosAccessToken: accessToken,
+                searchParameters,
+                onSelect: this.onSelect.bind(this),
+            });
+        }
+        if (this.#ostRoot) {
+            this.openOstDialog();
+        }
     }
 }
 

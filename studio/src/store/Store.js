@@ -50,30 +50,39 @@ export class Store {
         this.search.setResult(fragments);
     }
 
+    setFragment(fragment) {
+        this.fragment?.unselect();
+        fragment?.select();
+        this.fragment = fragment;
+    }
+
     /**
      * @param {FocusEvent} fragment
      */
-    async selectFragment({ id } = {}) {
-        this.fragment = undefined;
+    async selectFragment(fragment) {
+        if (!fragment) {
+            this.setFragment(null);
+            return;
+        }
         this.loading = true;
-        let fragment;
-        if (id) {
-            fragment = await this.aem.sites.cf.fragments.getCfById(id);
+        let newFragment;
+        if (fragment.id) {
+            newFragment = await this.aem.sites.cf.fragments.getCfById(
+                fragment.id,
+            );
         }
-        if (fragment) {
-            this.fragment = new Fragment(fragment);
-            merchDataSourceCache?.add(fragment);
-            this.fragment = new Fragment(fragment);
-        } else {
-            this.fragment = undefined;
-        }
+        if (!newFragment) return;
+        Object.apply(fragment, newFragment);
+        this.setFragment(fragment);
         this.loading = false;
     }
 
     async saveFragment() {
-        const fragment = await this.aem.sites.cf.fragments.save(this.fragment);
+        let fragment = await this.aem.sites.cf.fragments.save(this.fragment);
+        if (!fragment) throw new Error('Failed to save fragment');
+        fragment = new Fragment(fragment);
         merchDataSourceCache?.add(fragment);
-        this.fragment = new Fragment(fragment);
+        this.setFragment(fragment);
     }
 
     async copyFragment() {
@@ -83,6 +92,6 @@ export class Store {
         merchDataSourceCache?.add(fragment);
         const newFragment = new Fragment(fragment);
         this.search.addToResult(newFragment, this.fragment);
-        this.fragment = newFragment;
+        this.setFragment(newFragment);
     }
 }

@@ -8,6 +8,7 @@ export class Fragment {
         path: '',
     };
     hasChanges = false;
+    isSelected = false;
 
     fields = [];
 
@@ -24,6 +25,7 @@ export class Fragment {
         makeObservable(this, {
             hasChanges: observable,
             updateField: action,
+            isSelected: observable,
         });
         Object.assign(this, props);
     }
@@ -36,5 +38,13 @@ export class Fragment {
                 field.values = value;
                 this.hasChanges = true;
             });
+    }
+
+    select() {
+        this.isSelected = true;
+    }
+
+    unselect() {
+        this.isSelected = false;
     }
 }

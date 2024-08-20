@@ -4,7 +4,7 @@ export class RteEditor extends HTMLElement {
     connectedCallback() {
         window.tinymce.init({
             target: this,
-            toolbar: 'bold italic underline | link openlink unlink',
+            toolbar: 'bold italic underline | link openlink unlink | ost',
             plugins: 'link',
             license_key: 'gpl',
             promotion: false,
@@ -13,6 +13,7 @@ export class RteEditor extends HTMLElement {
                 '.price-strikethrough { text-decoration: line-through;}',
             setup: (editor) => {
                 this.editor = editor;
+
                 // Add focus event listener
                 editor.on('focus', () => {
                     const focusEvent = new CustomEvent('focus', {
@@ -22,6 +23,7 @@ export class RteEditor extends HTMLElement {
                     });
                     this.dispatchEvent(focusEvent);
                 });
+
                 editor.on('blur', (e) => {
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
@@ -86,6 +88,28 @@ export class RteEditor extends HTMLElement {
                     ].forEach((el) => {
                         el.setAttribute('contenteditable', 'false');
                     });
+                });
+
+                // Add custom button
+                editor.ui.registry.addIcon(
+                    'star-icon',
+                    `<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+  <title>Star</title>
+  <rect id="ToDelete" fill="#ff13dc" opacity="0" width="18" height="18" /><path d="M9.24132.3l2.161,5.715,6.106.289a.255.255,0,0,1,.147.454l-4.77,3.823,1.612,5.9a.255.255,0,0,1-.386.28L9.00232,13.4l-5.11,3.358a.255.255,0,0,1-.386-.28l1.612-5.9-4.77-3.821a.255.255,0,0,1,.147-.457l6.107-.285L8.76332.3a.255.255,0,0,1,.478,0Z" />
+</svg>`,
+                );
+
+                // Add custom button
+                editor.ui.registry.addButton('ost', {
+                    icon: 'star-icon',
+                    tooltip: 'Open Offer Selector Tool',
+                    onAction: () => {
+                        const customEvent = new CustomEvent('ost-open', {
+                            bubbles: true,
+                            composed: true,
+                        });
+                        this.dispatchEvent(customEvent);
+                    },
                 });
             },
         });

@@ -110,6 +110,11 @@ rte-editor + .tox.tox-tinymce {
 merch-card {
     cursor: pointer;
     user-select: none;
+    box-sizing: border-box;
+}
+
+merch-card.selected {
+    border: 2px solid var(--spectrum-global-color-blue-600);
 }
 
 sp-progress-circle {
