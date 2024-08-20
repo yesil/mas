@@ -14,36 +14,13 @@ import './rte-editor.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { defaults as ostDefaults, createMarkup } from './ost.js';
+import { RteEditor } from './rte-editor.js';
 
 const models = {
     merchCard: {
         path: '/conf/sandbox/settings/dam/cfm/models/merch-card',
         name: 'Merch Card',
     },
-};
-
-const onSelect = (offerSelectorId, type, offer, options, promoOverride) => {
-    const link = createMarkup(
-        ostDefaults,
-        offerSelectorId,
-        type,
-        offer,
-        options,
-        promoOverride,
-    );
-
-    console.log(`Use Link: ${link.outerHTML}`);
-    const rteEditor = document.querySelector('rte-editor[data-field="prices"]');
-
-    if (rteEditor) {
-        rteEditor.appendContent(link.outerHTML);
-    }
-
-    const masStudio = document.querySelector('mas-studio');
-
-    if (masStudio && typeof masStudio.closeOstDialog === 'function') {
-        masStudio.closeOstDialog();
-    }
 };
 
 class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
@@ -66,6 +43,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     };
 
     #ostRoot;
+    /**
+     * @type {RteEditor}
+     */
+    #currentRte;
 
     constructor() {
         super();
@@ -251,7 +232,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor data-field="prices" @blur="${this.updateFragment}"
+                <rte-editor
+                    data-field="prices"
+                    @focus="${this.focusOnRte}"
+                    @blur="${this.updateFragment}"
                     >${unsafeHTML(form.prices.values[0])}</rte-editor
                 >
             </sp-field-group>
@@ -259,13 +243,17 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
                     data-field="description"
+                    @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
                     >${unsafeHTML(form.description.values[0])}</rte-editor
                 >
             </sp-field-group>
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor data-field="ctas" @blur="${this.updateFragment}"
+                <rte-editor
+                    data-field="ctas"
+                    @focus="${this.focusOnRte}"
+                    @blur="${this.updateFragment}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-editor
                 >
             </sp-field-group> `;
@@ -391,6 +379,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
+    focusOnRte(e) {
+        this.#currentRte = e.detail.rte;
+    }
+
     updateFragment(e) {
         const fieldName = e.target.dataset.field;
         let value = e.target.value || e.detail.value;
@@ -444,6 +436,23 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.store.doSearch(search);
     }
 
+    onSelect(offerSelectorId, type, offer, options, promoOverride) {
+        const link = createMarkup(
+            ostDefaults,
+            offerSelectorId,
+            type,
+            offer,
+            options,
+            promoOverride,
+        );
+
+        console.log(`Use Link: ${link.outerHTML}`);
+
+        this.#currentRte?.appendContent(link.outerHTML);
+
+        this.closeOstDialog();
+    }
+
     async editorActionClickHandler(e) {
         if (this.#ostRoot) return;
         this.#ostRoot = document.getElementById('ost');
@@ -455,7 +464,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             zIndex: 20,
             aosAccessToken: accessToken,
             searchParameters,
-            onSelect,
+            onSelect: this.onSelect.bind(this),
         });
     }
 }

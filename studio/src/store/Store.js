@@ -51,10 +51,18 @@ export class Store {
     /**
      * @param {FocusEvent} fragment
      */
-    async selectFragment({ id }) {
-        const fragment = await this.aem.sites.cf.fragments.getCfById(id);
-        merchDataSourceCache?.add(fragment);
-        this.fragment = new Fragment(fragment);
+    async selectFragment({ id } = {}) {
+        let fragment;
+        if (id) {
+            fragment = await this.aem.sites.cf.fragments.getCfById(id);
+        }
+        if (fragment) {
+            this.fragment = new Fragment(fragment);
+            merchDataSourceCache?.add(fragment);
+            this.fragment = new Fragment(fragment);
+        } else {
+            this.fragment = undefined;
+        }
     }
 
     async saveFragment() {

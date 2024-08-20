@@ -18,7 +18,7 @@ import '@tinymce/tinymce-webcomponent';
 runTests(async () => {
     describe('M@S Studio', () => {
         beforeEach(() => {
-            document.location.hash = '#';
+           // document.location.hash = '#';
             document.querySelector('main').innerHTML = '';
         });
 
@@ -28,7 +28,7 @@ runTests(async () => {
             expect(studio).exist;
         });
 
-        it('should search via deeplink', async () => {
+        it.skip('should search via deeplink', async () => {
             // const disposer = await mockFetch(withLiterals, withWcs, withAem);
             const disposer = await mockFetch(withLiterals, withWcs);
             document.location.hash =

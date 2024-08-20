@@ -1,8 +1,5 @@
 export class RteEditor extends HTMLElement {
-    constructor() {
-        super();
-        this.editor = null;
-    }
+    editor = null;
 
     connectedCallback() {
         window.tinymce.init({
@@ -16,8 +13,16 @@ export class RteEditor extends HTMLElement {
                 '.price-strikethrough { text-decoration: line-through;}',
             setup: (editor) => {
                 this.editor = editor;
-
-                editor.on('blur', () => {
+                // Add focus event listener
+                editor.on('focus', () => {
+                    const focusEvent = new CustomEvent('focus', {
+                        bubbles: true,
+                        composed: true,
+                        detail: { rte: this },
+                    });
+                    this.dispatchEvent(focusEvent);
+                });
+                editor.on('blur', (e) => {
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
                         (p) => {
@@ -71,6 +76,7 @@ export class RteEditor extends HTMLElement {
                     pandoraScript.innerHTML = 'window.process = { env: {} };';
                     editor.contentDocument.head.appendChild(pandoraScript);
                 });
+
                 // make merch links not editable
                 editor.on('SetContent', (e) => {
                     [

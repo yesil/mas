@@ -58,7 +58,8 @@ const updateParams = (params, key, value) => {
     }
 };
 
-export const createMarkup = (  defaults,
+export const createMarkup = (
+    defaults,
     offerSelectorId,
     type,
     offer,
@@ -136,6 +137,7 @@ export const createMarkup = (  defaults,
         );
         inlinePrice.setAttribute('data-template', 'price');
         inlinePrice.setAttribute('data-wcs-osi', offerSelectorId);
+        inlinePrice.innerHTML = '&nbsp;';
         return inlinePrice;
     }
 };
