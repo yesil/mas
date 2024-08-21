@@ -277,6 +277,15 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-editor
                 >
+            </sp-field-group>
+            <sp-field-label for="horizontal"> XLG </sp-field-label>
+            <sp-field-group horizontal id="horizontal">
+                <rte-editor
+                    data-field="xlg"
+                    @focus="${this.focusOnRte}"
+                    @blur="${this.updateFragment}"
+                    >${unsafeHTML(form.xlg.values[0])}</rte-editor
+                >
             </sp-field-group> `;
     }
 
