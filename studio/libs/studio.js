@@ -155,6 +155,14 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
                 value="${r.backgroundImage.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
+            <sp-field-label for="xlg">XLG</sp-field-label>
+            <sp-textfield
+                placeholder="XLG"
+                id="xlg"
+                data-field="xlg"
+                value="${r.xlg.values[0]}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
@@ -184,16 +192,6 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
                     @ost-open="${this.openOfferSelectorTool}"
                     >${Ft(r.ctas.values[0])}</rte-editor
                 >
-            </sp-field-group>
-            <sp-field-group horizontal id="horizontal">
-                <sp-field-label for="xlg">XLG</sp-field-label>
-                <sp-textfield
-                    placeholder="XLG"
-                    id="xlg"
-                    data-field="xlg"
-                    value="${r.xlg.values[0]}"
-                    @change="${this.updateFragment}"
-                ></sp-textfield>
             </sp-field-group>`}get fragmentEditorEl(){return this.querySelector("#editor")}get result(){return this.store.search.result.length===0?E:k`<ul id="result" class="three-merch-cards special-offers">
             ${ds(this.store.search.result,t=>t.path,t=>{switch(t.model.path){case Ra.merchCard.path:return k`<merch-card
                                 class="${t.isSelected?"selected":""}"

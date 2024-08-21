@@ -255,6 +255,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 value="${form.backgroundImage.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
+            <sp-field-label for="xlg">XLG</sp-field-label>
+            <sp-textfield
+                placeholder="XLG"
+                id="xlg"
+                data-field="xlg"
+                value="${form.xlg.values[0]}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
@@ -284,16 +292,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-editor
                 >
-            </sp-field-group>
-            <sp-field-group horizontal id="horizontal">
-                <sp-field-label for="xlg">XLG</sp-field-label>
-                <sp-textfield
-                    placeholder="XLG"
-                    id="xlg"
-                    data-field="xlg"
-                    value="${form.xlg.values[0]}"
-                    @change="${this.updateFragment}"
-                ></sp-textfield>
             </sp-field-group>`;
     }
 
