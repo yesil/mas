@@ -53,6 +53,17 @@ export class RteEditor extends HTMLElement {
                         ),
                     ];
 
+                    elements.forEach((el) => {
+                        if (el.dataset.wcsOsi) {
+                            if (el.tagName === 'A') {
+                                el.setAttribute('is', 'checkout-link');
+                            } else if (el.tagName === 'SPAN') {
+                                el.setAttribute('is', 'inline-price');
+                            }
+                        }
+                    });
+                    editor.contentDocument.body.innerHTML = `${editor.contentDocument.body.innerHTML}`;
+
                     // clean-up merch links
                     elements.forEach((el) => {
                         if (el.isInlinePrice) {
@@ -62,13 +73,13 @@ export class RteEditor extends HTMLElement {
                             el.setAttribute('href', '');
                         }
                         el.removeAttribute('class');
-                        el.removeAttribute('contenteditable');
+                        //el.removeAttribute('contenteditable');
                     });
 
                     removeComments(editor.contentDocument.body);
                     const value = editor.contentDocument.body.innerHTML;
                     elements.forEach((el) => {
-                        el.setAttribute('contenteditable', 'false');
+                        //el.setAttribute('contenteditable', 'false');
                         el.render?.();
                     });
                     const changeEvent = new CustomEvent('blur', {
@@ -102,7 +113,7 @@ export class RteEditor extends HTMLElement {
                             'a[is],span[is]',
                         ),
                     ].forEach((el) => {
-                        el.setAttribute('contenteditable', 'false');
+                        // el.setAttribute('contenteditable', 'false');
                     });
                 });
 

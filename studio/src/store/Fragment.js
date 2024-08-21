@@ -9,6 +9,7 @@ export class Fragment {
     };
     hasChanges = false;
     isSelected = false;
+    status = '';
 
     fields = [];
 
