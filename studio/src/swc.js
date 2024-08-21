@@ -10,6 +10,7 @@ import '@spectrum-web-components/field-label/sp-field-label.js';
 import '@spectrum-web-components/help-text/sp-help-text.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-cancel.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-close-circle.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-copy.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-delete-outline.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-duplicate.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';

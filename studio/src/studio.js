@@ -162,6 +162,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     <sp-icon-publish-remove
                         slot="icon"
                     ></sp-icon-publish-remove>
+                    <sp-divider vertical></sp-divider>
                 </sp-action-button>
                 <sp-action-button
                     label="Open in Odin"
@@ -169,6 +170,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     @click="${this.openFragmentInOdin}"
                 >
                     <sp-icon-open-in slot="icon"></sp-icon-open-in>
+                </sp-action-button>
+                <sp-action-button
+                    label="Use"
+                    value="use"
+                    @click="${this.copyToUse}"
+                >
+                    <sp-icon-copy slot="icon"></sp-icon-copy>
                 </sp-action-button>
                 <sp-action-button
                     label="Delete fragment"
@@ -180,7 +188,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     ></sp-icon-delete-outline>
                 </sp-action-button>
             </sp-action-group>
-            <sp-divider vertical></sp-divider>
             <sp-divider vertical></sp-divider>
             <sp-action-group>
                 <sp-action-button
@@ -569,6 +576,22 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     async deleteFragment() {
         // uncomment to use the feature  :)
         // this.store.deleteFragment();
+    }
+
+    async copyToUse() {
+        const link = document.createElement('a');
+        link.href = `https://www.adobe.com/mas/studio.html#path=${this.store.fragment.path}`;
+        link.innerHTML =
+            '<strong>Merch Card</strong>: ' + this.store.fragment.path;
+        const linkBlob = new Blob([link.outerHTML], { type: 'text/html' });
+        const textBlob = new Blob([link.href], { type: 'text/plain' });
+        const data = [
+            new ClipboardItem({
+                [linkBlob.type]: linkBlob,
+                [textBlob.type]: textBlob,
+            }),
+        ];
+        navigator.clipboard.write(data, console.debug, console.error);
     }
 }
 
