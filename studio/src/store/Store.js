@@ -44,7 +44,7 @@ export class Store {
         const fragments = await this.aem.sites.cf.fragments
             .search(this.search)
             .then((items) => {
-                return items.map((item) => new Fragment(item));
+                return items?.map((item) => new Fragment(item)) ?? [];
             });
         merchDataSourceCache?.add(...fragments);
         this.search.setResult(fragments);
@@ -72,7 +72,7 @@ export class Store {
             );
         }
         if (!newFragment) return;
-        Object.apply(fragment, newFragment);
+        Object.assign(fragment, newFragment);
         this.setFragment(fragment);
         this.loading = false;
     }

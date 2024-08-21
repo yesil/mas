@@ -31,6 +31,18 @@ export class RteEditor extends HTMLElement {
                             if (p.innerText.trim() === '') p.remove();
                         },
                     );
+
+                    // cleanup mce data attributes
+                    [...editor.contentDocument.querySelectorAll('a')].forEach(
+                        (a) => {
+                            Object.keys(a.dataset).forEach((key) => {
+                                if (/mce/.test(key)) {
+                                    delete a.dataset[key];
+                                }
+                            });
+                        },
+                    );
+
                     const elements = [
                         ...editor.contentDocument.querySelectorAll(
                             'span[is="inline-price"],a[is="checkout-link"]',

@@ -151,6 +151,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                         slot="icon"
                     ></sp-icon-publish-remove>
                 </sp-action-button>
+                <sp-action-button
+                    label="Open inOdin"
+                    value="open"
+                    @click="${this.openFragmentInOdin}"
+                >
+                    <sp-icon-open-in slot="icon"></sp-icon-open-in>
+                </sp-action-button>
             </sp-action-group>
             <sp-divider vertical></sp-divider>
             <sp-divider vertical></sp-divider>
@@ -170,6 +177,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     get fragmentEditor() {
         const classes = { open: this.store.fragment };
         return html`<div id="editor" class=${classMap(classes)}>
+            <p>${this.store.fragment?.path}</p>
             ${this.merchCardFragmentEditor} ${this.fragmentEditorToolbar}
         </div>`;
     }
@@ -189,10 +197,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             >
                 <span slot="label">Choose a variant:</span>
                 <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
-                <sp-menu-item>Special Offers</sp-menu-item>
-                <sp-menu-item>CCH</sp-menu-item>
-                <sp-menu-item>Plans</sp-menu-item>
-                <sp-menu-item>Catalog</sp-menu-item>
+                <sp-menu-item value="special-offers"
+                    >Special Offers</sp-menu-item
+                >
+                <sp-menu-item value="ah">AH</sp-menu-item>
             </sp-picker>
             <sp-field-label for="card-title">Title</sp-field-label>
             <sp-textfield
@@ -211,6 +219,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 value="${form.icon.values.join(',')}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
+            <sp-field-label for="card-icon">Background Image</sp-field-label>
+            <sp-textfield
+                placeholder="Enter backgroung image URL"
+                id="background-title"
+                data-field="backgroundImage"
+                value="${form.backgroundImage.values[0]}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
@@ -227,6 +243,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     data-field="description"
                     @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
+                    @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.description.values[0])}</rte-editor
                 >
             </sp-field-group>
@@ -236,6 +253,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     data-field="ctas"
                     @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
+                    @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-editor
                 >
             </sp-field-group> `;
@@ -247,12 +265,12 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     get result() {
         if (this.store.search.result.length === 0) return nothing;
-        return html`<ul id="result">
+        // TODO make me generic
+        return html`<ul id="result" class="three-merch-cards special-offers">
             ${repeat(
                 this.store.search.result,
                 (item) => item.path,
                 (item) => {
-                    console.log(item.isSelected);
                     switch (item.model.path) {
                         case models.merchCard.path:
                             return html`<merch-card
@@ -290,15 +308,15 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     size="m"
                 ></sp-search>
                 <sp-picker
-                    label="Fragment model"
+                    label="Card Variant"
                     size="m"
-                    value=${this.store.search.modelId}
+                    value=${this.store.search.variant}
                 >
                     <sp-menu-item value="all">All</sp-menu-item>
-                    <sp-menu-item
-                        value="L2NvbmYvc2FuZGJveC9zZXR0aW5ncy9kYW0vY2ZtL21vZGVscy9tZXJjaC1jYXJk"
-                        >Merch Card</sp-menu-item
+                    <sp-menu-item value="special-offers"
+                        >Special Offers</sp-menu-item
                     >
+                    <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
                 </sp-picker>
                 <sp-button
                     ?disabled="${!this.searchText}"
@@ -327,7 +345,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         return html`
             <sp-overlay id="ostDialog" type="modal">
                 <sp-dialog-wrapper dismissable underlay>
-                        <div id="ost"></div>
+                    <div id="ost"></div>
                 </sp-dialog-wrapper>
             </overlay-trigger>
         `;
@@ -338,9 +356,9 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     async startDeeplink() {
-        this.deeplinkDisposer = deeplink(({ path, modelId, query }) => {
+        this.deeplinkDisposer = deeplink(({ path, variant, query }) => {
             this.searchText = query;
-            this.store.search.update({ path, modelId });
+            this.store.search.update({ path, variant });
         });
         if (this.searchText) {
             await this.updateComplete;
@@ -449,9 +467,9 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     async doSearch() {
         const query = this.searchText;
-        const modelId = this.picker.value.replace('all', '');
+        const variant = this.picker.value.replace('all', '');
         const path = '/content/dam/sandbox/mas';
-        const search = { query, path, modelId };
+        const search = { query, path, variant };
         pushState(search);
         this.store.doSearch(search);
     }
@@ -464,6 +482,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             offer,
             options,
             promoOverride,
+            this.store.fragment.variant,
         );
 
         console.log(`Use Link: ${link.outerHTML}`);
@@ -490,6 +509,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         if (this.#ostRoot) {
             this.openOstDialog();
         }
+    }
+
+    openFragmentInOdin() {
+        // TODO make me generic
+        window.open(
+            `https://experience.adobe.com/?repo=${this.bucket}.adobeaemcloud.com#/@odin02/aem/cf/admin/?appId=aem-cf-admin&q=${this.store.fragment.fragmentName}`,
+            '_blank',
+        );
     }
 }
 

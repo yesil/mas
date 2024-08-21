@@ -1,3 +1,20 @@
+const ctaTexts = {
+    'buy-now': 'Buy now',
+    'free-trial': 'Free trial',
+    'start-free-trial': 'Start free trial',
+    'get-started': 'Get started',
+    'choose-a-plan': 'Choose a plan',
+    'learn-more': 'Learn more',
+    'change-plan-team-plans': 'Change Plan Team Plans',
+    upgrade: 'Upgrade',
+    'change-plan-team-payment': 'Change Plan Team Payment',
+    'take-the-quiz': 'Take the quiz',
+    'see-more': 'See more',
+    'upgrade-now': 'Upgrade now',
+};
+
+const noPlaceholderCardVariants = ['ccd-action', 'ah'];
+
 export const defaults = {
     aosApiKey: 'wcms-commerce-ims-user-prod',
     checkoutClientId: 'creative',
@@ -16,24 +33,7 @@ export const defaults = {
     },
     wcsApiKey: 'wcms-commerce-ims-ro-user-cc',
     ctaTextOption: {
-        ctaTexts: [
-            { id: 'buy-now', name: 'Buy now' },
-            { id: 'free-trial', name: 'Free trial' },
-            { id: 'start-free-trial', name: 'Start free trial' },
-            { id: 'get-started', name: 'Get started' },
-            { id: 'choose-a-plan', name: 'Choose a plan' },
-            { id: 'learn-more', name: 'Learn more' },
-            { id: 'change-plan-team-plans', name: 'Change Plan Team Plans' },
-            { id: 'upgrade', name: 'Upgrade' },
-            {
-                id: 'change-plan-team-payment',
-                name: 'Change Plan Team Payment',
-            },
-            { id: 'take-the-quiz', name: 'Take the quiz' },
-            { id: 'see-more', name: 'See more' },
-            { id: 'upgrade-now', name: 'Upgrade now' },
-        ],
-
+        ctaTexts: Object.entries(ctaTexts).map(([id, name]) => ({ id, name })),
         getDefaultText() {
             return this.ctaTexts[0].id;
         },
@@ -65,6 +65,7 @@ export const createMarkup = (
     offer,
     options,
     promo,
+    cardVariant,
 ) => {
     const isCta = !!type?.startsWith('checkout');
 
@@ -119,7 +120,11 @@ export const createMarkup = (
         cta.href = createHref();
 
         const span = document.createElement('span');
-        span.textContent = options.ctaText ?? 'buy-now';
+        let ctaText = options.ctaText ?? 'buy-now';
+        if (noPlaceholderCardVariants.includes(cardVariant)) {
+            ctaText = ctaTexts[ctaText];
+        }
+        span.textContent = ctaText;
         cta.appendChild(span);
 
         return cta;

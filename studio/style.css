@@ -29,9 +29,6 @@ mas-studio > ul > li {
 
 #result {
     margin-top: 32px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: var(--spectrum-spacing-200);
     padding-inline-start: 0;
     background-color: var(--spectrum-background-layer-2-color);
 }

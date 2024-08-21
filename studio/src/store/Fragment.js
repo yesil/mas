@@ -47,4 +47,13 @@ export class Fragment {
     unselect() {
         this.isSelected = false;
     }
+
+    get variant() {
+        return this.fields.find((field) => field.name === 'variant')
+            ?.values?.[0];
+    }
+
+    get fragmentName() {
+        return this.path.split('/').pop();
+    }
 }

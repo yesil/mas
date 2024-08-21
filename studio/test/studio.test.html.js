@@ -18,7 +18,7 @@ import '@tinymce/tinymce-webcomponent';
 runTests(async () => {
     describe('M@S Studio', () => {
         beforeEach(() => {
-           // document.location.hash = '#';
+            // document.location.hash = '#';
             document.querySelector('main').innerHTML = '';
         });
 
