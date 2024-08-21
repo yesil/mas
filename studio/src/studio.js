@@ -511,7 +511,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.closeOstDialog();
     }
 
-    async openOfferSelectorTool() {
+    async openOfferSelectorTool(e) {
         if (!this.#ostRoot) {
             this.#ostRoot = document.getElementById('ost');
             const accessToken = window.adobeid.authorize();
