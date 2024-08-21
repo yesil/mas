@@ -73,13 +73,13 @@ export class RteEditor extends HTMLElement {
                             el.setAttribute('href', '');
                         }
                         el.removeAttribute('class');
-                        //el.removeAttribute('contenteditable');
+                        el.removeAttribute('contenteditable');
                     });
 
                     removeComments(editor.contentDocument.body);
                     const value = editor.contentDocument.body.innerHTML;
                     elements.forEach((el) => {
-                        //el.setAttribute('contenteditable', 'false');
+                        el.setAttribute('contenteditable', 'false');
                         el.render?.();
                     });
                     const changeEvent = new CustomEvent('blur', {
@@ -113,7 +113,7 @@ export class RteEditor extends HTMLElement {
                             'a[is],span[is]',
                         ),
                     ].forEach((el) => {
-                        // el.setAttribute('contenteditable', 'false');
+                        el.setAttribute('contenteditable', 'false');
                     });
                 });
 

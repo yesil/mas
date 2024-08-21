@@ -69,43 +69,6 @@ export const createMarkup = (
 ) => {
     const isCta = !!type?.startsWith('checkout');
 
-    const createHref = () => {
-        const params = new URLSearchParams([
-            ['osi', offerSelectorId],
-            ['type', type],
-        ]);
-        if (promo) params.set('promo', promo);
-        if (offer.commitment === 'PERPETUAL') params.set('perp', true);
-
-        if (isCta) {
-            const { workflow, workflowStep } = options;
-            params.set('text', options.ctaText ?? DEFAULT_CTA_TEXT);
-            if (workflow && workflow !== defaults.checkoutWorkflow) {
-                params.set('workflow', workflow);
-            }
-            if (
-                workflowStep &&
-                workflowStep !== defaults.checkoutWorkflowStep
-            ) {
-                params.set('workflowStep', workflowStep);
-            }
-        } else {
-            const {
-                displayRecurrence,
-                displayPerUnit,
-                displayTax,
-                displayOldPrice,
-                forceTaxExclusive,
-            } = options;
-            updateParams(params, 'term', displayRecurrence);
-            updateParams(params, 'seat', displayPerUnit);
-            updateParams(params, 'tax', displayTax);
-            updateParams(params, 'old', displayOldPrice);
-            updateParams(params, 'exclusive', forceTaxExclusive);
-        }
-        return `https://milo.adobe.com/tools/ost?${params.toString()}`;
-    };
-
     if (isCta) {
         const cta = document.createElement('a', { is: 'checkout-link' });
         cta.setAttribute('data-checkout-workflow', options.workflow);
@@ -117,7 +80,7 @@ export const createMarkup = (
         cta.setAttribute('data-quantity', '1');
         cta.setAttribute('data-wcs-osi', offerSelectorId);
 
-        cta.href = createHref();
+        cta.href = '#';
 
         const span = document.createElement('span');
         let ctaText = options.ctaText ?? 'buy-now';
