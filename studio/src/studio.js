@@ -51,6 +51,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     constructor() {
         super();
         this.confirmSelect = false;
+        document.addEventListener(
+            'editor-action-click',
+            this.openOfferSelectorTool.bind(this),
+        );
     }
 
     connectedCallback() {
@@ -62,6 +66,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     disconnectedCallback() {
         super.disconnectedCallback();
         this.deeplinkDisposer();
+        this.removeEventListener(
+            'editor-action-click',
+            this.openOfferSelectorTool,
+        );
     }
 
     get search() {
@@ -497,6 +505,21 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             this.#ostRoot = document.getElementById('ost');
             const accessToken = window.adobeid.authorize();
             const searchParameters = new URLSearchParams();
+            const clickedOffer = e.detail?.clickedElement;
+            if (clickedOffer) {
+                ['wcs-osi', 'template', 'promotion-code'].forEach((attr) => {
+                    const value = clickedOffer.getAttribute(`data-${attr}`);
+                    if (value) {
+                        searchParameters.set(
+                            attr
+                                .replace('wcs-', '')
+                                .replace('template', 'type')
+                                .replace('promotion-code', 'promo'),
+                            value,
+                        );
+                    }
+                });
+            }
             window.ost.openOfferSelectorTool({
                 ...ostDefaults,
                 rootElement: this.#ostRoot,

@@ -2,6 +2,10 @@ export class RteEditor extends HTMLElement {
     editor = null;
 
     connectedCallback() {
+        this.addEventListener(
+            'editor-action-click',
+            this.handleEditorActionClick,
+        );
         window.tinymce.init({
             target: this,
             toolbar: 'bold italic underline | link openlink unlink | ost',
@@ -123,8 +127,29 @@ export class RteEditor extends HTMLElement {
                         this.dispatchEvent(customEvent);
                     },
                 });
+
+                // Add double-click event listener
+                editor.on('dblclick', (e) => {
+                    let target = e.target.parentNode;
+                    target = target.parentNode;
+                    if (target.classList.contains('placeholder-resolved')) {
+                        const event = new CustomEvent('editor-action-click', {
+                            bubbles: true,
+                            composed: true,
+                            detail: { clickedElement: target },
+                        });
+                        this.dispatchEvent(event);
+                    }
+                });
             },
         });
+    }
+
+    disconnectedCallback() {
+        this.removeEventListener(
+            'editor-action-click',
+            this.handleEditorActionClick,
+        );
     }
 
     appendContent(html) {
