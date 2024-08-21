@@ -285,15 +285,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     >${unsafeHTML(form.ctas.values[0])}</rte-editor
                 >
             </sp-field-group>
-            <sp-field-label for="horizontal"> XLG </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor
+                <sp-field-label for="xlg">XLG</sp-field-label>
+                <sp-textfield
+                    placeholder="XLG"
+                    id="xlg"
                     data-field="xlg"
-                    @focus="${this.focusOnRte}"
-                    @blur="${this.updateFragment}"
-                    >${unsafeHTML(form.xlg.values[0])}</rte-editor
-                >
-            </sp-field-group> `;
+                    value="${form.xlg.values[0]}"
+                    @change="${this.updateFragment}"
+                ></sp-textfield>
+            </sp-field-group>`;
     }
 
     get fragmentEditorEl() {
