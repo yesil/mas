@@ -56,4 +56,8 @@ export class Fragment {
     get fragmentName() {
         return this.path.split('/').pop();
     }
+
+    get statusVariant() {
+        return this.status === 'PUBLISHED' ? 'positive' : 'info';
+    }
 }

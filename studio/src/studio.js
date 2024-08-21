@@ -151,7 +151,11 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 >
                     <sp-icon-duplicate slot="icon"></sp-icon-duplicate>
                 </sp-action-button>
-                <sp-action-button label="Publish" value="publish">
+                <sp-action-button
+                    label="Publish"
+                    value="publish"
+                    @click="${this.publishFragment}"
+                >
                     <sp-icon-publish-check slot="icon"></sp-icon-publish-check>
                 </sp-action-button>
                 <sp-action-button label="Unpublish" value="unpublish">
@@ -160,11 +164,20 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     ></sp-icon-publish-remove>
                 </sp-action-button>
                 <sp-action-button
-                    label="Open inOdin"
+                    label="Open in Odin"
                     value="open"
                     @click="${this.openFragmentInOdin}"
                 >
                     <sp-icon-open-in slot="icon"></sp-icon-open-in>
+                </sp-action-button>
+                <sp-action-button
+                    label="Delete fragment"
+                    value="delete"
+                    @click="${this.deleteFragment}"
+                >
+                    <sp-icon-delete-outline
+                        slot="icon"
+                    ></sp-icon-delete-outline>
                 </sp-action-button>
             </sp-action-group>
             <sp-divider vertical></sp-divider>
@@ -288,12 +301,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                                 <merch-datasource
                                     path="${item.path}"
                                 ></merch-datasource>
-                                ${item.hasChanges
-                                    ? html` <sp-status-light
-                                          size="l"
-                                          variant="yellow"
-                                      ></sp-status-light>`
-                                    : ''}
+                                <sp-status-light
+                                    size="l"
+                                    variant="${item.statusVariant}"
+                                ></sp-status-light>
                             </merch-card>`;
                         default:
                             return nothing;
@@ -540,6 +551,15 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             `https://experience.adobe.com/?repo=${this.bucket}.adobeaemcloud.com#/@odin02/aem/cf/admin/?appId=aem-cf-admin&q=${this.store.fragment.fragmentName}`,
             '_blank',
         );
+    }
+
+    async publishFragment() {
+        this.store.publishFragment();
+    }
+
+    async deleteFragment() {
+        // uncomment to use the feature  :)
+        // this.store.deleteFragment();
     }
 }
 

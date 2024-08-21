@@ -51,4 +51,9 @@ export class Search {
     update(props) {
         Object.assign(this, props);
     }
+
+    removeFromResult(fragment) {
+        const index = this.result.indexOf(fragment);
+        this.result.splice(index, 1);
+    }
 }

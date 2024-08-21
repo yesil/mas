@@ -94,4 +94,15 @@ export class Store {
         this.search.addToResult(newFragment, this.fragment);
         this.setFragment(newFragment);
     }
+
+    async publishFragment() {
+        await this.aem.sites.cf.fragments.publish(this.fragment);
+        await this.selectFragment(this.fragment);
+    }
+
+    async deleteFragment() {
+        await this.aem.sites.cf.fragments.delete(this.fragment);
+        this.search.removeFromResult(this.fragment);
+        this.setFragment(null);
+    }
 }
