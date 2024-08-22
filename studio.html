@@ -42,7 +42,7 @@
                         window.adobeIMS?.getAccessToken() ?? {};
                     if (token && (expire?.valueOf() ?? 0) > Date.now())
                         return token;
-                    adobeIMS.signIn();
+                    window.adobeIMS?.signIn();
                 },
                 onError(error) {
                     console.error('[M@S Studio] IMS error: ', error);
