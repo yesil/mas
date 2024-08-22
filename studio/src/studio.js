@@ -85,34 +85,23 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     get selectFragmentDialog() {
         return html`
-            <sp-underlay ?open=${this.confirmSelect}></sp-underlay>
-            <sp-dialog size="m">
-                <h1 slot="heading">You have unsaved changes!</h1>
-                <p>
-                    Do you want to save your changes before selecting another
-                    merch card?
-                </p>
-                <sp-button
-                    slot="button"
-                    @click="${() => this.editFragment(this.fragment, true)}"
+            <sp-overlay type="modal" ?open=${this.confirmSelect}>
+                <sp-dialog-wrapper
+                    headline="You have unsaved changes!"
+                    underlay
+                    @confirm=${() => this.editFragment(this.fragment, true)}
+                    @secondary="${() => this.editFragment(this.fragment, true)}"
+                    @cancel="${this.closeConfirmSelect}"
+                    confirm-label="Save"
+                    secondary-label="Discard"
+                    cancel-label="Cancel"
                 >
-                    Save
-                </sp-button>
-                <sp-button
-                    slot="button"
-                    variant="primary"
-                    @click="${() => this.editFragment(this.fragment, true)}"
-                >
-                    Discard
-                </sp-button>
-                <sp-button
-                    slot="button"
-                    variant="secondary"
-                    @click="${this.closeConfirmSelect}"
-                >
-                    Cancel
-                </sp-button>
-            </sp-dialog>
+                    <p>
+                        Do you want to save your changes before selecting
+                        another merch card?
+                    </p>
+                </sp-dialog-wrapper>
+            </sp-overlay>
         `;
     }
 
@@ -158,7 +147,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     <sp-icon-publish-remove
                         slot="icon"
                     ></sp-icon-publish-remove>
-                    <sp-divider vertical></sp-divider>
                 </sp-action-button>
                 <sp-action-button
                     label="Open in Odin"
@@ -268,7 +256,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
                     data-field="prices"
-                    @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
                     @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.prices.values[0])}</rte-editor
@@ -278,7 +265,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
                     data-field="description"
-                    @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
                     @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.description.values[0])}</rte-editor
@@ -288,7 +274,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             <sp-field-group horizontal id="horizontal">
                 <rte-editor
                     data-field="ctas"
-                    @focus="${this.focusOnRte}"
                     @blur="${this.updateFragment}"
                     @ost-open="${this.openOfferSelectorTool}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-editor
@@ -445,11 +430,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
-    focusOnRte(e) {
-        this.#currentRte = e.detail.rte;
-    }
-
     updateFragment(e) {
+        if (e.target.tagName === 'RTE-EDITOR') {
+            this.#currentRte = e.target;
+        }
         const fieldName = e.target.dataset.field;
         let value = e.target.value || e.detail.value;
         value = e.target.multiline ? value.split(',') : [value];
@@ -586,7 +570,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     async deleteFragment() {
         // uncomment to use the feature  :)
-        this.store.deleteFragment();
+        // this.store.deleteFragment();
     }
 
     async copyToUse() {

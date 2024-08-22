@@ -43,6 +43,7 @@ export class Fragment {
 
     select() {
         this.isSelected = true;
+        this.hasChanges = false;
     }
 
     unselect() {

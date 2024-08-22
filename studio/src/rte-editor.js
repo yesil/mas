@@ -18,16 +18,6 @@ export class RteEditor extends HTMLElement {
             setup: (editor) => {
                 this.editor = editor;
 
-                // Add focus event listener
-                editor.on('focus', () => {
-                    const focusEvent = new CustomEvent('focus', {
-                        bubbles: true,
-                        composed: true,
-                        detail: { rte: this },
-                    });
-                    this.dispatchEvent(focusEvent);
-                });
-
                 editor.on('blur', (e) => {
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
