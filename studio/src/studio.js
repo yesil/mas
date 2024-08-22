@@ -11,7 +11,6 @@ import {
 } from '@adobecom/milo/libs/features/mas/web-components/src/deeplink.js';
 import { Fragment } from './store/Fragment.js';
 import './rte-editor.js';
-import { classMap } from 'lit/directives/class-map.js';
 
 import { defaults as ostDefaults, createMarkup } from './ost.js';
 import { RteEditor } from './rte-editor.js';
@@ -85,9 +84,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get selectFragmentDialog() {
-        if (!this.confirmSelect) return nothing;
         return html`
-            <sp-underlay open></sp-underlay>
+            <sp-underlay ?open=${this.confirmSelect}></sp-underlay>
             <sp-dialog size="m">
                 <h1 slot="heading">You have unsaved changes!</h1>
                 <p>
@@ -96,16 +94,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 </p>
                 <sp-button
                     slot="button"
-                    @click="${() =>
-                        this.editFragment(null, this.fragment, true)}"
+                    @click="${() => this.editFragment(this.fragment, true)}"
                 >
                     Save
                 </sp-button>
                 <sp-button
                     slot="button"
                     variant="primary"
-                    @click="${() =>
-                        this.editFragment(null, this.fragment, true)}"
+                    @click="${() => this.editFragment(this.fragment, true)}"
                 >
                     Discard
                 </sp-button>
@@ -203,11 +199,15 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get fragmentEditor() {
-        const classes = { open: this.store.fragment };
-        return html`<div id="editor" class=${classMap(classes)}>
-            <p>${this.store.fragment?.path}</p>
-            ${this.merchCardFragmentEditor} ${this.fragmentEditorToolbar}
-        </div>`;
+        const open = this.store.fragment !== null;
+        return html`<sp-overlay type="manual" ?open=${open}>
+            <sp-popover id="editor">
+                <sp-dialog no-divider>
+                    ${this.merchCardFragmentEditor}
+                    ${this.fragmentEditorToolbar}
+                </sp-dialog>
+            </sp-popover>
+        </sp-overlay>`;
     }
 
     get merchCardFragmentEditor() {
@@ -216,7 +216,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         const form = Object.fromEntries(
             fragment.fields.map((f) => [f.name, f]),
         );
-        return html`<sp-field-label for="card-variant">Variant</sp-field-label>
+        return html` <p>${fragment.path}</p>
+            <sp-field-label for="card-variant">Variant</sp-field-label>
             <sp-picker
                 id="card-variant"
                 data-field="variant"
@@ -295,10 +296,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             </sp-field-group>`;
     }
 
-    get fragmentEditorEl() {
-        return this.querySelector('#editor');
-    }
-
     get result() {
         if (this.store.search.result.length === 0) return nothing;
         // TODO make me generic
@@ -311,7 +308,12 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                         case models.merchCard.path:
                             return html`<merch-card
                                 class="${item.isSelected ? 'selected' : ''}"
-                                @dblclick="${(e) => this.editFragment(e, item)}"
+                                @dblclick="${(e) =>
+                                    this.editFragment(
+                                        item,
+                                        false,
+                                        e.currentTarget,
+                                    )}"
                             >
                                 <merch-datasource
                                     path="${item.path}"
@@ -409,16 +411,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     /**
-     * @param {Event} e click event, maybe null
      * @param {Fragment} fragment
      * @param {boolean} force - discard unsaved changes
      */
-    async editFragment(e, fragment, force = false) {
-        if (e) {
-            const merchCard = e.target.closest('merch-card');
-            const { offsetTop, offsetHeight } = merchCard;
-            this.fragmentOffsets = [`${offsetTop + offsetHeight + 20}px`];
-        }
+    async editFragment(fragment, force, target) {
         if (fragment && fragment === this.store.fragment) return;
         if (this.store.fragment?.hasChanges && !force) {
             this.fragment = fragment;
@@ -427,9 +423,23 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             await this.store.selectFragment(fragment);
             this.fragment = undefined;
             this.confirmSelect = false;
-            // re-position the form
-            await this.updateComplete;
-            this.fragmentEditorEl.style.top = this.fragmentOffsets[0];
+        }
+        if (target) {
+            // reposition the editor
+            const viewportCenterX = window.innerWidth / 2;
+            const [left, right] =
+                target.offsetLeft < viewportCenterX
+                    ? ['inherit', '1em']
+                    : ['1em', 'inherit'];
+            this.style.setProperty('--editor--left', left);
+            this.style.setProperty('--editor--right', right);
+            const viewportCenterY = window.innerHeight / 2;
+            const [top, bottom] =
+                target.offsetTop < viewportCenterY
+                    ? ['inherit', '1em']
+                    : ['1em', 'inherit'];
+            this.style.setProperty('--editor--top', top);
+            this.style.setProperty('--editor--bottom', bottom);
         }
     }
 
@@ -468,7 +478,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
-    async closeFragmentEditor(e) {
+    async closeFragmentEditor() {
         await this.store.selectFragment();
     }
 
@@ -574,7 +584,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     async deleteFragment() {
         // uncomment to use the feature  :)
-        // this.store.deleteFragment();
+        this.store.deleteFragment();
     }
 
     async copyToUse() {

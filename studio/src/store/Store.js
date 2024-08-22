@@ -23,7 +23,7 @@ export class Store {
      * Selected fragment
      * @type {Fragment}
      */
-    fragment;
+    fragment = null;
 
     loading = false;
 
@@ -67,7 +67,7 @@ export class Store {
         this.loading = true;
         let newFragment;
         if (fragment.id) {
-            newFragment = await this.aem.sites.cf.fragments.getCfById(
+            newFragment = await this.aem.sites.cf.fragments.getById(
                 fragment.id,
             );
         }
@@ -86,9 +86,7 @@ export class Store {
     }
 
     async copyFragment() {
-        const fragment = await this.aem.sites.cf.fragments.copyFragment(
-            this.fragment,
-        );
+        const fragment = await this.aem.sites.cf.fragments.copy(this.fragment);
         merchDataSourceCache?.add(fragment);
         const newFragment = new Fragment(fragment);
         this.search.addToResult(newFragment, this.fragment);

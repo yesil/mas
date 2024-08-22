@@ -53,24 +53,24 @@ sp-underlay + sp-dialog {
     position: fixed;
     top: 50%;
     left: 50%;
-    z-index: 11;
+    z-index: 100;
     transform: translate(-50%, -50%);
     background: var(--spectrum-gray-100);
 }
 
 #editor {
-    display: none;
-    min-width: 640px;
-    flex-direction: column;
-    background-color: var(--spectrum-background-base-color);
-    position: absolute;
-    padding: var(--spectrum-spacing-500);
-    border-radius: calc(var(--swc-scale-factor) * 4px);
-    border: 1px solid var(--spectrum-global-color-gray-300);
+    position: fixed;
+    bottom: 1em;
+    left: var(--editor--left);
+    right: var(--editor--right);
+    top: var(--editor--top);
+    bottom: var(--editor--bottom);
+    height: 800px;
 }
 
-#editor.open {
-    display: flex;
+#editor sp-dialog {
+    width: 800px;
+    overflow-y: scroll;
 }
 
 #actions {
