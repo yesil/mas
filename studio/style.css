@@ -69,7 +69,7 @@ sp-underlay + sp-dialog {
 }
 
 #editor sp-dialog {
-    width: 800px;
+    width: 600px;
     overflow-y: scroll;
 }
 
