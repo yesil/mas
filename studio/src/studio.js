@@ -567,7 +567,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     async publishFragment() {
-        this.store.publishFragment();
+        this.showToast('Publishing fragment...');
+        try {
+            await this.store.publishFragment();
+            this.showToast('Fragment published', 'positive');
+        } catch (e) {
+            this.showToast('Fragment could not be published', 'negative');
+        }
     }
 
     async deleteFragment() {
