@@ -420,6 +420,8 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             this.fragment = fragment;
             this.confirmSelect = true; // TODO make me smart
         } else {
+            await this.store.selectFragment();
+            await this.updateComplete;
             await this.store.selectFragment(fragment);
             this.fragment = undefined;
             this.confirmSelect = false;
