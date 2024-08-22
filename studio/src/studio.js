@@ -435,7 +435,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             this.#currentRte = e.target;
         }
         const fieldName = e.target.dataset.field;
-        let value = e.target.value || e.detail.value;
+        let value = e.target.value || e.detail?.value;
         value = e.target.multiline ? value.split(',') : [value];
         this.store.fragment.updateField(fieldName, value);
         const merchDataSource = this.querySelector(
@@ -570,7 +570,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     async deleteFragment() {
         // uncomment to use the feature  :)
-        // this.store.deleteFragment();
+        this.store.deleteFragment();
     }
 
     async copyToUse() {
