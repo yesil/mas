@@ -27,14 +27,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         store: { type: Object, state: true },
         bucket: { type: String, attribute: 'aem-bucket' },
         searchText: { type: String, state: true },
-        confirmSelect: {
-            type: Boolean,
-            state: true,
-        } /* display dialog to save changes before selecting a new fragment */,
-        fragmentOffsets: {
+        newFragment: {
             type: Object,
             state: true,
-        } /* the offset top of last clicked fragment */,
+        } /* display dialog to save changes before selecting a new fragment */,
     };
 
     #ostRoot;
@@ -45,7 +41,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     constructor() {
         super();
-        this.confirmSelect = false;
+        this.newFragment = null;
         document.addEventListener(
             'editor-action-click',
             this.openOfferSelectorTool.bind(this),
@@ -81,14 +77,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     get selectFragmentDialog() {
         return html`
-            <sp-overlay type="modal" ?open=${this.confirmSelect}>
+            <sp-overlay type="modal" ?open=${this.newFragment}>
                 <sp-dialog-wrapper
                     headline="You have unsaved changes!"
                     underlay
-                    @confirm=${() =>
-                        this.editFragment(this.store.fragment, true)}
+                    @confirm=${() => this.saveAndEditFragment(this.newFragment)}
                     @secondary="${() =>
-                        this.editFragment(this.store.fragment, true)}"
+                        this.editFragment(this.newFragment, true)}"
                     @cancel="${this.closeConfirmSelect}"
                     confirm-label="Save"
                     secondary-label="Discard"
@@ -401,11 +396,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     async editFragment(fragment, force) {
         if (fragment && fragment === this.store.fragment) return;
         if (this.store.fragment?.hasChanges && !force) {
-            this.confirmSelect = true; // TODO make me smart
+            this.newFragment = fragment;
         } else {
             await this.store.selectFragment(fragment);
-            this.confirmSelect = false;
+            this.newFragment = null;
         }
+    }
+
+    async saveAndEditFragment(fragment) {
+        await this.saveFragment();
+        await this.editFragment(fragment, true);
     }
 
     async adjustEditorPosition() {
@@ -464,7 +464,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             await this.store.copyFragment();
             this.showToast('Fragment cloned', 'positive');
         } catch (e) {
-            console.error(e);
             this.showToast('Fragment could not be cloned', 'negative');
         }
     }
@@ -474,7 +473,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     closeConfirmSelect() {
-        this.confirmSelect = false;
+        this.newFragment = null;
     }
 
     /**

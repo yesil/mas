@@ -40,6 +40,7 @@ export class Store {
     }
 
     async doSearch(props) {
+        this.selectFragment();
         this.search.update(props);
         const fragments = await this.aem.sites.cf.fragments
             .search(this.search)
