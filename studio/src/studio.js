@@ -31,10 +31,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             type: Boolean,
             state: true,
         } /* display dialog to save changes before selecting a new fragment */,
-        fragment: {
-            type: Object,
-            state: true,
-        } /* refence to fragment while the dialog is open */,
         fragmentOffsets: {
             type: Object,
             state: true,
@@ -89,8 +85,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 <sp-dialog-wrapper
                     headline="You have unsaved changes!"
                     underlay
-                    @confirm=${() => this.editFragment(this.fragment, true)}
-                    @secondary="${() => this.editFragment(this.fragment, true)}"
+                    @confirm=${() =>
+                        this.editFragment(this.store.fragment, true)}
+                    @secondary="${() =>
+                        this.editFragment(this.store.fragment, true)}"
                     @cancel="${this.closeConfirmSelect}"
                     confirm-label="Save"
                     secondary-label="Discard"
@@ -351,7 +349,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get toast() {
-        return html`<sp-toast timeout="6000"></sp-toast>`;
+        return html`<sp-toast timeout="6000" popover></sp-toast>`;
     }
 
     get loadingIndicator() {
@@ -393,41 +391,47 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.toastEl.innerHTML = message;
         this.toastEl.variant = variant;
         this.toastEl.open = true;
+        this.toastEl.showPopover();
     }
 
     /**
      * @param {Fragment} fragment
      * @param {boolean} force - discard unsaved changes
      */
-    async editFragment(fragment, force, target) {
+    async editFragment(fragment, force) {
         if (fragment && fragment === this.store.fragment) return;
         if (this.store.fragment?.hasChanges && !force) {
-            this.fragment = fragment;
             this.confirmSelect = true; // TODO make me smart
         } else {
-            await this.store.selectFragment();
-            await this.updateComplete;
             await this.store.selectFragment(fragment);
-            this.fragment = undefined;
             this.confirmSelect = false;
         }
-        if (target) {
-            // reposition the editor
-            const viewportCenterX = window.innerWidth / 2;
-            const [left, right] =
-                target.offsetLeft < viewportCenterX
-                    ? ['inherit', '1em']
-                    : ['1em', 'inherit'];
-            this.style.setProperty('--editor--left', left);
-            this.style.setProperty('--editor--right', right);
-            const viewportCenterY = window.innerHeight / 2;
-            const [top, bottom] =
-                target.offsetTop < viewportCenterY
-                    ? ['inherit', '1em']
-                    : ['1em', 'inherit'];
-            this.style.setProperty('--editor--top', top);
-            this.style.setProperty('--editor--bottom', bottom);
-        }
+    }
+
+    async adjustEditorPosition() {
+        await this.updateComplete;
+        const target = this.querySelector('merch-card.selected');
+        if (target === null) return;
+        // reposition the editor
+        const viewportCenterX = window.innerWidth / 2;
+        const [left, right] =
+            target.offsetLeft < viewportCenterX
+                ? ['inherit', '1em']
+                : ['1em', 'inherit'];
+        this.style.setProperty('--editor--left', left);
+        this.style.setProperty('--editor--right', right);
+        const viewportCenterY = window.innerHeight / 2;
+        const [top, bottom] =
+            target.offsetTop < viewportCenterY
+                ? ['inherit', '1em']
+                : ['1em', 'inherit'];
+        this.style.setProperty('--editor--top', top);
+        this.style.setProperty('--editor--bottom', bottom);
+    }
+
+    updated(changedProperties) {
+        super.updated(changedProperties);
+        this.adjustEditorPosition();
     }
 
     updateFragment(e) {
@@ -460,6 +464,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             await this.store.copyFragment();
             this.showToast('Fragment cloned', 'positive');
         } catch (e) {
+            console.error(e);
             this.showToast('Fragment could not be cloned', 'negative');
         }
     }

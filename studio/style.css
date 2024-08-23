@@ -41,19 +41,10 @@ sp-textfield {
     width: 360px;
 }
 
-sp-underlay:not([open]) + sp-dialog {
-    display: none;
-}
-
-sp-underlay {
-    z-index: 10;
-}
-
 sp-underlay + sp-dialog {
     position: fixed;
     top: 50%;
     left: 50%;
-    z-index: 100;
     transform: translate(-50%, -50%);
     background: var(--spectrum-gray-100);
 }
@@ -87,8 +78,9 @@ sp-underlay + sp-dialog {
 
 sp-toast {
     position: fixed;
-    top: 4px;
-    right: 4px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 sp-status-light {

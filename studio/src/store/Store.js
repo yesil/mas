@@ -60,8 +60,8 @@ export class Store {
      * @param {FocusEvent} fragment
      */
     async selectFragment(fragment) {
+        this.setFragment(null);
         if (!fragment) {
-            this.setFragment(null);
             return;
         }
         this.loading = true;
@@ -86,10 +86,12 @@ export class Store {
     }
 
     async copyFragment() {
-        const fragment = await this.aem.sites.cf.fragments.copy(this.fragment);
+        const oldFragment = this.fragment;
+        this.setFragment(null);
+        const fragment = await this.aem.sites.cf.fragments.copy(oldFragment);
         merchDataSourceCache?.add(fragment);
         const newFragment = new Fragment(fragment);
-        this.search.addToResult(newFragment, this.fragment);
+        this.search.addToResult(newFragment, oldFragment);
         this.setFragment(newFragment);
     }
 
