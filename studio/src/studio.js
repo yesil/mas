@@ -440,12 +440,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
         const fieldName = e.target.dataset.field;
         let value = e.target.value || e.detail?.value;
-        value = e.target.multiline ? value.split(',') : [value];
-        this.store.fragment.updateField(fieldName, value);
-        const merchDataSource = this.querySelector(
-            `merch-datasource[path="${this.store.fragment.path}"]`,
-        );
-        merchDataSource.refresh(false);
+        value = e.target.multiline ? value?.split(',') : [value ?? ''];
+        if (this.store.fragment.updateField(fieldName, value)) {
+            const merchDataSource = this.querySelector(
+                `merch-datasource[path="${this.store.fragment.path}"]`,
+            );
+            merchDataSource.refresh(false);
+        }
     }
 
     async saveFragment() {

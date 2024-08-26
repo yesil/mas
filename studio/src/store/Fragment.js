@@ -32,13 +32,20 @@ export class Fragment {
     }
 
     updateField(fieldName, value) {
+        let change = false;
         this.fields
             .filter((field) => field.name === fieldName)
             .forEach((field) => {
-                if (field.values === value) return;
+                if (
+                    field.values.length === value.length &&
+                    field.values.every((v, index) => v === value[index])
+                )
+                    return;
                 field.values = value;
                 this.hasChanges = true;
+                change = true;
             });
+        return change;
     }
 
     select() {
@@ -60,6 +67,7 @@ export class Fragment {
     }
 
     get statusVariant() {
+        if (this.hasChanges) return 'yellow';
         return this.status === 'PUBLISHED' ? 'positive' : 'info';
     }
 }
