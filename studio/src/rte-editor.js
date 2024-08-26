@@ -82,7 +82,9 @@ export class RteEditor extends HTMLElement {
 
                 // load mas in the RTE iframes
                 editor.on('init', (e) => {
-                    const masMinSource = window.__mas__lib;
+                    const masMinSource = document.querySelector(
+                        'script[src$="mas.js"]',
+                    ).src;
                     if (!masMinSource) return;
                     const script =
                         editor.contentDocument.createElement('script');

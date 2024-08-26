@@ -57,9 +57,6 @@ export class Store {
         this.fragment = fragment;
     }
 
-    /**
-     * @param {FocusEvent} fragment
-     */
     async selectFragment(fragment) {
         this.setFragment(null);
         if (!fragment) {
