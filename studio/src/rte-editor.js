@@ -18,7 +18,7 @@ export class RteEditor extends HTMLElement {
             setup: (editor) => {
                 this.editor = editor;
 
-                editor.on('blur', (e) => {
+                editor.on('blur', async () => {
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
                         (p) => {
@@ -37,13 +37,14 @@ export class RteEditor extends HTMLElement {
                         },
                     );
 
-                    const elements = [
+                    let elements = [
                         ...editor.contentDocument.querySelectorAll(
-                            'span[is="inline-price"],a[is="checkout-link"]',
+                            '[data-wcs-osi]',
                         ),
                     ];
 
                     elements.forEach((el) => {
+                        // repair merch links if is attribute is missing
                         if (el.dataset.wcsOsi) {
                             if (el.tagName === 'A') {
                                 el.setAttribute('is', 'checkout-link');
@@ -54,6 +55,11 @@ export class RteEditor extends HTMLElement {
                     });
                     editor.contentDocument.body.innerHTML = `${editor.contentDocument.body.innerHTML}`;
 
+                    elements = [
+                        ...editor.contentDocument.querySelectorAll(
+                            '[data-wcs-osi]',
+                        ),
+                    ];
                     // clean-up merch links
                     elements.forEach((el) => {
                         if (el.isInlinePrice) {

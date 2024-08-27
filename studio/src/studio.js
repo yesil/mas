@@ -294,6 +294,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                                     )}"
                             >
                                 <merch-datasource
+                                    aem-bucket="${this.bucket}"
                                     path="${item.path}"
                                 ></merch-datasource>
                                 <sp-status-light
