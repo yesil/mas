@@ -1,3 +1,4 @@
+let savedBookmark;
 export class RteEditor extends HTMLElement {
     editor = null;
 
@@ -19,6 +20,7 @@ export class RteEditor extends HTMLElement {
                 this.editor = editor;
 
                 editor.on('blur', async () => {
+                    savedBookmark = editor.selection.getBookmark(2);
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
                         (p) => {
@@ -163,6 +165,10 @@ export class RteEditor extends HTMLElement {
 
     appendContent(html) {
         if (this.editor) {
+            if (savedBookmark) {
+                this.editor.focus();
+                this.editor.selection.moveToBookmark(savedBookmark);
+            }
             this.editor.insertContent(html);
         }
     }
