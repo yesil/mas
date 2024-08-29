@@ -58,7 +58,7 @@ export class Store {
     }
 
     async selectFragment(fragment) {
-        this.setFragment(null);
+        this.fragment = null;
         if (!fragment) {
             return;
         }

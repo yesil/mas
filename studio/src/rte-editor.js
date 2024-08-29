@@ -1,6 +1,6 @@
-let savedBookmark;
 export class RteEditor extends HTMLElement {
     editor = null;
+    savedBookmark = null;
 
     connectedCallback() {
         this.addEventListener(
@@ -20,7 +20,7 @@ export class RteEditor extends HTMLElement {
                 this.editor = editor;
 
                 editor.on('blur', async () => {
-                    savedBookmark = editor.selection.getBookmark(2);
+                    this.savedBookmark = editor.selection.getBookmark(2);
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
                         (p) => {
@@ -45,6 +45,7 @@ export class RteEditor extends HTMLElement {
                         ),
                     ];
 
+                    console.log('elements', elements);
                     elements.forEach((el) => {
                         // repair merch links if is attribute is missing
                         if (el.dataset.wcsOsi) {
@@ -90,9 +91,9 @@ export class RteEditor extends HTMLElement {
 
                 // load mas in the RTE iframes
                 editor.on('init', (e) => {
-                    const masMinSource = document.querySelector(
-                        'script[src$="mas.js"]',
-                    ).src;
+                    const masMinSource =
+                        document.querySelector('script[src$="mas.js"]')?.src ??
+                        document.getElementById('mas-src').content;
                     if (!masMinSource) return;
                     const script =
                         editor.contentDocument.createElement('script');
@@ -165,9 +166,9 @@ export class RteEditor extends HTMLElement {
 
     appendContent(html) {
         if (this.editor) {
-            if (savedBookmark) {
+            if (this.savedBookmark) {
                 this.editor.focus();
-                this.editor.selection.moveToBookmark(savedBookmark);
+                this.editor.selection.moveToBookmark(this.savedBookmark);
             }
             this.editor.insertContent(html);
         }
