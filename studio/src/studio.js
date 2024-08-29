@@ -510,7 +510,14 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.store.doSearch(search);
     }
 
-    onSelect(offerSelectorId, type, offer, options, promoOverride) {
+    onSelect(
+        offerSelectorId,
+        type,
+        offer,
+        options,
+        promoOverride,
+        clickedOffer,
+    ) {
         const link = createMarkup(
             ostDefaults,
             offerSelectorId,
@@ -523,7 +530,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
         console.log(`Use Link: ${link.outerHTML}`);
 
-        this.#currentRte?.appendContent(link.outerHTML);
+        this.#currentRte?.appendContent(link.outerHTML, clickedOffer);
 
         this.closeOstDialog();
     }
