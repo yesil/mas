@@ -1,3 +1,5 @@
+const SELECTOR_DATA_WCS_OSI = '[data-wcs-osi]';
+
 export class RteEditor extends HTMLElement {
     editor = null;
     savedBookmark = null;
@@ -19,7 +21,8 @@ export class RteEditor extends HTMLElement {
             setup: (editor) => {
                 this.editor = editor;
 
-                editor.on('blur', async () => {
+                editor.on('blur', async (e) => {
+                    console.log('blur', e.focusedEditor);
                     this.savedBookmark = editor.selection.getBookmark(2);
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
@@ -41,7 +44,7 @@ export class RteEditor extends HTMLElement {
 
                     let elements = [
                         ...editor.contentDocument.querySelectorAll(
-                            '[data-wcs-osi]',
+                            SELECTOR_DATA_WCS_OSI,
                         ),
                     ];
 
@@ -60,7 +63,7 @@ export class RteEditor extends HTMLElement {
 
                     elements = [
                         ...editor.contentDocument.querySelectorAll(
-                            '[data-wcs-osi]',
+                            SELECTOR_DATA_WCS_OSI,
                         ),
                     ];
                     // clean-up merch links
@@ -98,9 +101,10 @@ export class RteEditor extends HTMLElement {
                     const script =
                         editor.contentDocument.createElement('script');
                     script.src = masMinSource;
+                    //TODO handle locale.
                     script.setAttribute('type', 'module');
                     editor.contentDocument.head.appendChild(script);
-                    // TODO: remove this once the issue is fixed
+                    // TODO: remove this once pandora is removed from mas.
                     const pandoraScript =
                         editor.contentDocument.createElement('script');
                     pandoraScript.innerHTML = 'window.process = { env: {} };';
@@ -142,10 +146,11 @@ export class RteEditor extends HTMLElement {
 
                 // Add double-click event listener
                 editor.on('dblclick', (e) => {
-                    let target = e.target.parentNode;
-                    target = target.parentNode;
-                    if (target.classList.contains('placeholder-resolved')) {
-                        const event = new CustomEvent('editor-action-click', {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    let target = e.target.closest(SELECTOR_DATA_WCS_OSI);
+                    if (target) {
+                        const event = new CustomEvent('ost-open', {
                             bubbles: true,
                             composed: true,
                             detail: { clickedElement: target },

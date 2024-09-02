@@ -1,5 +1,4 @@
 import { html, LitElement, nothing } from 'lit';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { Store } from './store/Store.js';
 import { EVENT_SUBMIT } from './events.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -10,10 +9,10 @@ import {
     pushState,
 } from '@adobecom/milo/libs/features/mas/web-components/src/deeplink.js';
 import { Fragment } from './store/Fragment.js';
+import './editors/merch-card-editor.js';
 import './rte-editor.js';
 
-import { defaults as ostDefaults, createMarkup } from './ost.js';
-import { RteEditor } from './rte-editor.js';
+import { getOffferSelectorTool, openOfferSelectorTool } from './ost.js';
 
 const models = {
     merchCard: {
@@ -27,25 +26,16 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         store: { type: Object, state: true },
         bucket: { type: String, attribute: 'aem-bucket' },
         searchText: { type: String, state: true },
+        variant: { type: String, state: true },
         newFragment: {
             type: Object,
             state: true,
         } /* display dialog to save changes before selecting a new fragment */,
     };
 
-    #ostRoot;
-    /**
-     * @type {RteEditor}
-     */
-    #currentRte;
-
     constructor() {
         super();
         this.newFragment = null;
-        document.addEventListener(
-            'editor-action-click',
-            this.openOfferSelectorTool.bind(this),
-        );
     }
 
     connectedCallback() {
@@ -57,10 +47,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     disconnectedCallback() {
         super.disconnectedCallback();
         this.deeplinkDisposer();
-        this.removeEventListener(
-            'editor-action-click',
-            this.openOfferSelectorTool,
-        );
     }
 
     get search() {
@@ -77,7 +63,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
 
     get selectFragmentDialog() {
         return html`
-            <sp-overlay type="modal" ?open=${this.newFragment}>
+            <sp-overlay type="modal" ?open=${this.fragment}>
                 <sp-dialog-wrapper
                     headline="You have unsaved changes!"
                     underlay
@@ -99,7 +85,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get fragmentEditorToolbar() {
-        if (!this.store.fragment) return nothing;
         return html`<div id="actions">
             <sp-action-group
                 aria-label="Fragment actions"
@@ -153,7 +138,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     value="use"
                     @click="${this.copyToUse}"
                 >
-                    <sp-icon-copy slot="icon"></sp-icon-copy>
+                    <sp-icon-code slot="icon"></sp-icon-code>
                 </sp-action-button>
                 <sp-action-button
                     label="Delete fragment"
@@ -180,104 +165,28 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     get fragmentEditor() {
-        const open = this.store.fragment !== null;
-        return html`<sp-overlay type="manual" ?open=${open}>
+        return html`<sp-overlay type="manual" ?open=${this.store.isEditing}>
             <sp-popover id="editor">
                 <sp-dialog no-divider>
-                    ${this.merchCardFragmentEditor}
-                    ${this.fragmentEditorToolbar}
+                    ${this.store.fragment &&
+                    html`
+                        <merch-card-editor
+                            .fragment=${this.store.fragment}
+                            @ost-open="${this.openOfferSelectorTool}"
+                            @update-fragment="${this.updateFragment}"
+                        >
+                        </merch-card-editor>
+                        ${this.fragmentEditorToolbar}
+                    `}
                 </sp-dialog>
             </sp-popover>
         </sp-overlay>`;
     }
 
-    get merchCardFragmentEditor() {
-        const { fragment } = this.store;
-        if (!fragment) return nothing;
-        const form = Object.fromEntries(
-            fragment.fields.map((f) => [f.name, f]),
-        );
-        return html` <p>${fragment.path}</p>
-            <sp-field-label for="card-variant">Variant</sp-field-label>
-            <sp-picker
-                id="card-variant"
-                data-field="variant"
-                value="${form.variant.values[0]}"
-                @change="${this.updateFragment}"
-            >
-                <span slot="label">Choose a variant:</span>
-                <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
-                <sp-menu-item value="special-offers"
-                    >Special Offers</sp-menu-item
-                >
-                <sp-menu-item value="ah">AH</sp-menu-item>
-            </sp-picker>
-            <sp-field-label for="card-title">Title</sp-field-label>
-            <sp-textfield
-                placeholder="Enter card title"
-                id="card-title"
-                data-field="title"
-                value="${form.title.values[0]}"
-                @change="${this.updateFragment}"
-            ></sp-textfield>
-            <sp-field-label for="card-icon">Icons</sp-field-label>
-            <sp-textfield
-                placeholder="Enter icon URLs"
-                id="card-icon"
-                data-field="icon"
-                multiline
-                value="${form.icon.values.join(',')}"
-                @change="${this.updateFragment}"
-            ></sp-textfield>
-            <sp-field-label for="card-icon">Background Image</sp-field-label>
-            <sp-textfield
-                placeholder="Enter backgroung image URL"
-                id="background-title"
-                data-field="backgroundImage"
-                value="${form.backgroundImage.values[0]}"
-                @change="${this.updateFragment}"
-            ></sp-textfield>
-            <sp-field-label for="xlg">XLG</sp-field-label>
-            <sp-textfield
-                placeholder="XLG"
-                id="xlg"
-                data-field="xlg"
-                value="${form.xlg.values[0]}"
-                @change="${this.updateFragment}"
-            ></sp-textfield>
-            <sp-field-label for="horizontal"> Prices </sp-field-label>
-            <sp-field-group horizontal id="horizontal">
-                <rte-editor
-                    data-field="prices"
-                    @blur="${this.updateFragment}"
-                    @ost-open="${this.openOfferSelectorTool}"
-                    >${unsafeHTML(form.prices.values[0])}</rte-editor
-                >
-            </sp-field-group>
-            <sp-field-label for="horizontal"> Description </sp-field-label>
-            <sp-field-group horizontal id="horizontal">
-                <rte-editor
-                    data-field="description"
-                    @blur="${this.updateFragment}"
-                    @ost-open="${this.openOfferSelectorTool}"
-                    >${unsafeHTML(form.description.values[0])}</rte-editor
-                >
-            </sp-field-group>
-            <sp-field-label for="horizontal"> Footer </sp-field-label>
-            <sp-field-group horizontal id="horizontal">
-                <rte-editor
-                    data-field="ctas"
-                    @blur="${this.updateFragment}"
-                    @ost-open="${this.openOfferSelectorTool}"
-                    >${unsafeHTML(form.ctas.values[0])}</rte-editor
-                >
-            </sp-field-group>`;
-    }
-
     get result() {
         if (this.store.search.result.length === 0) return nothing;
         // TODO make me generic
-        return html`<ul id="result" class="three-merch-cards special-offers">
+        return html`<ul id="result">
             ${repeat(
                 this.store.search.result,
                 (item) => item.path,
@@ -322,16 +231,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                     value=${this.searchText}
                     size="m"
                 ></sp-search>
-                <sp-picker
-                    label="Card Variant"
-                    size="m"
-                    value=${this.store.search.variant}
-                >
+                <sp-picker label="Card Variant" size="m" value=${this.variant}>
                     <sp-menu-item value="all">All</sp-menu-item>
                     <sp-menu-item value="special-offers"
                         >Special Offers</sp-menu-item
                     >
                     <sp-menu-item value="ccd-action">CCD Action</sp-menu-item>
+                    <sp-menu-item value="catalog">Catalog</sp-menu-item>
                 </sp-picker>
                 <sp-button
                     ?disabled="${!this.searchText}"
@@ -340,7 +246,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
                 >
             </div>
             ${this.result} ${this.fragmentEditor} ${this.selectFragmentDialog}
-            ${this.toast} ${this.loadingIndicator} ${this.offerSelectorTool}
+            ${this.toast} ${this.loadingIndicator} ${getOffferSelectorTool()}
         `;
     }
 
@@ -356,29 +262,18 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         ></sp-progress-circle>`;
     }
 
-    get offerSelectorTool() {
-        return html`
-            <sp-overlay id="ostDialog" type="modal">
-                <sp-dialog-wrapper dismissable underlay>
-                    <div id="ost"></div>
-                </sp-dialog-wrapper>
-            </overlay-trigger>
-        `;
-    }
-
     get toastEl() {
         return this.querySelector('sp-toast');
     }
 
     async startDeeplink() {
-        this.deeplinkDisposer = deeplink(({ path, variant, query }) => {
+        this.deeplinkDisposer = deeplink(async ({ variant, query }) => {
             this.searchText = query;
-            this.store.search.update({ path, variant });
-        });
-        if (this.searchText) {
+            this.variant = variant;
             await this.updateComplete;
             this.doSearch();
-        } else {
+        });
+        if (!this.searchText) {
             this.store.search.setResult([]);
         }
     }
@@ -435,10 +330,7 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         this.adjustEditorPosition();
     }
 
-    updateFragment(e) {
-        if (e.target.tagName === 'RTE-EDITOR') {
-            this.#currentRte = e.target;
-        }
+    updateFragment({ detail: e }) {
         const fieldName = e.target.dataset.field;
         let value = e.target.value || e.detail?.value;
         value = e.target.multiline ? value?.split(',') : [value ?? ''];
@@ -489,18 +381,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         }
     }
 
-    get ostDialogEl() {
-        return document.getElementById('ostDialog');
-    }
-
-    openOstDialog() {
-        this.ostDialogEl.open = true;
-    }
-
-    closeOstDialog() {
-        this.ostDialogEl.open = false;
-    }
-
     async doSearch() {
         const query = this.searchText;
         const variant = this.picker.value.replace('all', '');
@@ -508,60 +388,6 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
         const search = { query, path, variant };
         pushState(search);
         this.store.doSearch(search);
-    }
-
-    onSelect(offerSelectorId, type, offer, options, promoOverride) {
-        const link = createMarkup(
-            ostDefaults,
-            offerSelectorId,
-            type,
-            offer,
-            options,
-            promoOverride,
-            this.store.fragment.variant,
-        );
-
-        console.log(`Use Link: ${link.outerHTML}`);
-
-        this.#currentRte?.appendContent(link.outerHTML);
-
-        this.closeOstDialog();
-    }
-
-    async openOfferSelectorTool(e) {
-        if (!this.#ostRoot) {
-            this.#ostRoot = document.getElementById('ost');
-            const accessToken =
-                sessionStorage.getItem('masAccessToken') ??
-                window.adobeid.authorize();
-            const searchParameters = new URLSearchParams();
-            const clickedOffer = e.detail?.clickedElement;
-            if (clickedOffer) {
-                ['wcs-osi', 'template', 'promotion-code'].forEach((attr) => {
-                    const value = clickedOffer.getAttribute(`data-${attr}`);
-                    if (value) {
-                        searchParameters.set(
-                            attr
-                                .replace('wcs-', '')
-                                .replace('template', 'type')
-                                .replace('promotion-code', 'promo'),
-                            value,
-                        );
-                    }
-                });
-            }
-            window.ost.openOfferSelectorTool({
-                ...ostDefaults,
-                rootElement: this.#ostRoot,
-                zIndex: 20,
-                aosAccessToken: accessToken,
-                searchParameters,
-                onSelect: this.onSelect.bind(this),
-            });
-        }
-        if (this.#ostRoot) {
-            this.openOstDialog();
-        }
     }
 
     openFragmentInOdin() {
@@ -588,12 +414,13 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
     }
 
     async copyToUse() {
+        const code = `<merch-card><merch-datasource path="${this.store.fragment.path}"></merch-datasource></merch-card>`;
         const link = document.createElement('a');
         link.href = `https://www.adobe.com/mas/studio.html#path=${this.store.fragment.path}`;
         link.innerHTML =
             '<strong>Merch Card</strong>: ' + this.store.fragment.path;
         const linkBlob = new Blob([link.outerHTML], { type: 'text/html' });
-        const textBlob = new Blob([link.href], { type: 'text/plain' });
+        const textBlob = new Blob([code], { type: 'text/plain' });
         const data = [
             new ClipboardItem({
                 [linkBlob.type]: linkBlob,
@@ -601,6 +428,10 @@ class MasStudio extends MobxReactionUpdateCustom(LitElement, Reaction) {
             }),
         ];
         navigator.clipboard.write(data, console.debug, console.error);
+    }
+
+    openOfferSelectorTool(e) {
+        openOfferSelectorTool(e, e.target, this.store.fragment.variant);
     }
 }
 

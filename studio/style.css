@@ -28,7 +28,10 @@ mas-studio > ul > li {
 }
 
 #result {
-    margin-top: 32px;
+    margin: 32px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
     padding-inline-start: 0;
     align-items: start;
     background-color: var(--spectrum-background-layer-2-color);
@@ -112,4 +115,28 @@ sp-progress-circle {
     position: absolute;
     top: 50%;
     margin: 0 auto;
+}
+
+merch-card[variant='catalog'] {
+    width: var(--consonant-merch-card-catalog-width);
+}
+
+merch-card[variant='catalog'][size='wide'] {
+    width: calc(var(--consonant-merch-card-catalog-width) * 2);
+}
+
+merch-card[variant='special-offers'] {
+    width: var(--consonant-merch-card-special-offers-width);
+}
+
+merch-card[variant='special-offers'][size='wide'] {
+    width: calc(var(--consonant-merch-card-special-offers-width) * 2);
+}
+
+merch-card[variant='ccd-action'] {
+    width: var(--consonant-merch-card-ccd-action-width);
+}
+
+merch-card[variant='ccd-action'][size='wide'] {
+    width: calc(var(--consonant-merch-card-ccd-action-width) * 2);
 }

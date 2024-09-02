@@ -1,4 +1,4 @@
-import { makeAutoObservable, makeObservable, observable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { Search } from './Search.js';
 
 import { AEM } from '@adobecom/milo/libs/features/mas/web-components/src/aem.js';
@@ -58,7 +58,7 @@ export class Store {
     }
 
     async selectFragment(fragment) {
-        this.fragment = null;
+        this.setFragment(null);
         if (!fragment) {
             return;
         }
@@ -72,7 +72,9 @@ export class Store {
         if (!newFragment) return;
         Object.assign(fragment, newFragment);
         this.setFragment(fragment);
-        this.loading = false;
+        runInAction(() => {
+            this.loading = false;
+        });
     }
 
     async saveFragment() {
@@ -102,5 +104,9 @@ export class Store {
         await this.aem.sites.cf.fragments.delete(this.fragment);
         this.search.removeFromResult(this.fragment);
         this.setFragment(null);
+    }
+
+    get isEditing() {
+        return this.fragment !== null;
     }
 }
