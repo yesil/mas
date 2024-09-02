@@ -169,7 +169,10 @@ export class RteEditor extends HTMLElement {
         );
     }
 
-    appendContent(html) {
+    appendContent(html, clickedOffer) {
+        if (clickedOffer) {
+            clickedOffer.remove();
+        }
         if (this.editor) {
             if (this.savedBookmark) {
                 this.editor.focus();
