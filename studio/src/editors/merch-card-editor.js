@@ -1,11 +1,9 @@
 import { html, LitElement, nothing } from 'lit';
-import { Reaction } from 'mobx';
-import { MobxReactionUpdateCustom } from '@adobe/lit-mobx/lib/mixin-custom.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
-const MODEL_PATH = '/conf/sandbox/settings/dam/cfm/models/merch-card';
+const MODEL_PATH = '/conf/mas/settings/dam/cfm/models/card';
 
-class MerchCardEditor extends MobxReactionUpdateCustom(LitElement, Reaction) {
+class MerchCardEditor extends LitElement {
     static properties = {
         fragment: { type: Object },
     };
@@ -39,17 +37,17 @@ class MerchCardEditor extends MobxReactionUpdateCustom(LitElement, Reaction) {
             <sp-textfield
                 placeholder="Enter card title"
                 id="card-title"
-                data-field="title"
-                value="${form.title.values[0]}"
+                data-field="cardTitle"
+                value="${form.cardTitle.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
             <sp-field-label for="card-icon">Icons</sp-field-label>
             <sp-textfield
                 placeholder="Enter icon URLs"
                 id="card-icon"
-                data-field="icon"
+                data-field="mnemonicIcon"
                 multiline
-                value="${form.icon.values.join(',')}"
+                value="${form.mnemonicIcon.values.join(',')}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
             <sp-field-label for="card-icon">Background Image</sp-field-label>

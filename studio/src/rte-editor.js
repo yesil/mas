@@ -15,6 +15,7 @@ export class RteEditor extends HTMLElement {
             plugins: 'link',
             license_key: 'gpl',
             promotion: false,
+            branding: false,
             extended_valid_elements: 'a[is|href|class],span[is|class]',
             content_style:
                 '.price-strikethrough { text-decoration: line-through;}',
@@ -22,7 +23,6 @@ export class RteEditor extends HTMLElement {
                 this.editor = editor;
 
                 editor.on('blur', async (e) => {
-                    console.log('blur', e.focusedEditor);
                     this.savedBookmark = editor.selection.getBookmark(2);
                     // clean-up empty paragraphs
                     [...editor.contentDocument.querySelectorAll('p')].forEach(
