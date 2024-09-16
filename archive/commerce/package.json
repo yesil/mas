@@ -1,0 +1,36 @@
+{
+    "name": "@adobe/mas-commerce",
+    "version": "2.0.0",
+    "files": [
+        "lib",
+        "src",
+        "README.md"
+    ],
+    "main": "src/index.js",
+    "type": "module",
+    "types": "src/index.d.ts",
+    "sideEffects": false,
+    "scripts": {
+        "build": "npm run build:bundle && npm run build:types",
+        "build:milo": "npm run build:bundle milo && npm run build:types",
+        "build:bundle": "node ./build.mjs",
+        "build:types": "cp ./src/index.d.ts ../libs/commerce.d.ts",
+        "build:watch": "npm run build:bundle --watch",
+        "test": "wtr --config ./web-test-runner.config.mjs --coverage --watch",
+        "test:ci": "wtr --config ./web-test-runner.config.mjs"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+        "@web/dev-server-import-maps": "^0.1.1",
+        "@web/test-runner": "^0.13.27",
+        "@web/test-runner-commands": "^0.6.1",
+        "@web/test-runner-visual-regression": "^0.9.0",
+        "esbuild": "0.18.11"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:adobecom/mas.git",
+        "directory": "commerce"
+    }
+}
