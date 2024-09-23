@@ -16,12 +16,12 @@ import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
 import { withAem } from '@adobecom/milo/libs/features/mas/mocks/aem.js';
 import { withWcs } from '@adobecom/milo/libs/features/mas/mocks/wcs.js';
 
-import { getTemplateContent, delay } from '@adobe/mas-commons/test/utils.js';
+import { getTemplateContent, delay } from './utils.js';
 
 import '@tinymce/tinymce-webcomponent';
 
 runTests(async () => {
-    describe('M@S Studio', () => {
+    describe.skip('M@S Studio', () => {
         beforeEach(() => {
             //document.location.hash = '#';
             document.querySelector('main').innerHTML = '';

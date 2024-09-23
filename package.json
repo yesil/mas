@@ -5,7 +5,6 @@
     "main": "mas.js",
     "private": true,
     "workspaces": [
-        "commons",
         "studio"
     ],
     "scripts": {

@@ -22,6 +22,15 @@ const targetUrl = new URL(targetOrigin);
 const server = createServer((req, res) => {
     const { method, headers, url } = req;
 
+    // shutdown mechanism
+    if (url === '/shutdown') {
+        res.end('Server is shutting down');
+        server.close(() => {
+            console.log('Proxy server has been stopped');
+            process.exit(0);
+        });
+    }
+
     if (method === 'OPTIONS') {
         // Handle OPTIONS request directly
         res.writeHead(200, {
@@ -95,7 +104,7 @@ const server = createServer((req, res) => {
 
             proxyRequest.on('error', (err) => {
                 console.error(`Error: ${err.message}`);
-                res.writeHead(500, {});
+                res.writeHead(500, corsHeaders);
                 res.end(`Error: ${err.message}`);
             });
 

@@ -9,7 +9,7 @@ import '../../src/aem/render-view.js';
 
 import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
 import { withAem } from '@adobecom/milo/libs/features/mas/mocks/aem.js';
-import { getTemplateContent } from '../../../commons/test/utils.js';
+import { getTemplateContent } from '../utils.js';
 
 const spTheme = document.querySelector('sp-theme');
 

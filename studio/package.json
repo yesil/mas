@@ -6,7 +6,7 @@
         "build": "node build.mjs",
         "build:milo": "echo",
         "test": "wtr --config ./web-test-runner.config.mjs --coverage --watch --debug",
-        "test:ci": "npm run proxy & wtr --config ./web-test-runner.config.mjs",
+        "test:ci": "wtr --config ./web-test-runner.config.mjs",
         "proxy": "node ./proxy-server.mjs https://author-p22655-e155390.adobeaemcloud.com"
     },
     "type": "module",
@@ -17,7 +17,6 @@
     "dependencies": {
         "@adobe/lit-mobx": "^2.2.2",
         "@adobe/mas": "^0.0.1",
-        "@adobe/mas-commons": "^0.0.1",
         "@tinymce/tinymce-webcomponent": "^2.1.0",
         "mobx": "^6.12.4",
         "tinymce": "^7.2.1"
