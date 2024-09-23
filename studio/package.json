@@ -6,7 +6,7 @@
         "build": "node build.mjs",
         "build:milo": "echo",
         "test": "wtr --config ./web-test-runner.config.mjs --coverage --watch --debug",
-        "test:ci": "wtr --config ./web-test-runner.config.mjs",
+        "test:ci": "npm run proxy & wtr --config ./web-test-runner.config.mjs",
         "proxy": "node ./proxy-server.mjs https://author-p22655-e155390.adobeaemcloud.com"
     },
     "type": "module",
