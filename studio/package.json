@@ -13,5 +13,8 @@
     "main": "src/index.js",
     "keywords": [],
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "@adobecom/milo": "github:adobecom/milo#content-navigation"
+    }
 }
