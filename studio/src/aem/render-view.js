@@ -1,5 +1,6 @@
 import { html, LitElement, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
+import { EVENT_CHANGE, EVENT_LOAD } from '../events';
 
 const MODE = 'render';
 
@@ -11,23 +12,38 @@ const models = {
 };
 
 class RenderView extends LitElement {
+    constructor() {
+        super();
+        this.forceUpdate = this.forceUpdate.bind(this);
+    }
+
     createRenderRoot() {
         return this;
     }
 
-    refreshItems() {
+    connectedCallback() {
+        super.connectedCallback();
+        this.parentElement.addEventListener(EVENT_CHANGE, this.forceUpdate);
+        this.parentElement.source.addEventListener(
+            EVENT_LOAD,
+            this.forceUpdate,
+        );
+        this.parentElement.source.addEventListener(
+            EVENT_CHANGE,
+            this.forceUpdate,
+        );
+    }
+
+    async forceUpdate(e) {
         this.requestUpdate();
     }
 
     renderItem(fragment) {
+        const selected =
+            this.parentElement.source.selectedFragments.includes(fragment);
         return html`<merch-card
-            class="${fragment.isSelected ? 'selected' : ''}"
-            @dblclick="${(e) =>
-                this.parentElement.source.openFragment(
-                    e.clientX,
-                    e.clientY,
-                    fragment,
-                )}"
+            class="${selected ? 'selected' : ''}"
+            @dblclick="${(e) => this.handleDoubleClick(e, fragment)}"
         >
             <merch-datasource
                 aem-bucket="${this.parentElement.source.bucket}"
@@ -37,13 +53,21 @@ class RenderView extends LitElement {
                 size="l"
                 variant="${fragment.statusVariant}"
             ></sp-status-light>
-            <div
-                class="overlay"
-                @click="${() => this.handleSelectionChange(fragment)}"
-            >
-                <sp-icon-add slot="icon"></sp-icon-add>
+            <div class="overlay" @click="${() => fragment.toggleSelection()}">
+                ${selected
+                    ? html`<sp-icon-remove slot="icon"></sp-icon-remove>`
+                    : html`<sp-icon-add slot="icon"></sp-icon-add>`}
             </div>
         </merch-card>`;
+    }
+
+    handleDoubleClick(e, fragment) {
+        if (this.parentElement.inSelection) return;
+        this.parentElement.source.selectFragment(
+            e.clientX,
+            e.clientY,
+            fragment,
+        );
     }
 
     canRender() {
@@ -70,34 +94,12 @@ class RenderView extends LitElement {
         )}`;
     }
 
-    get selection() {
-        return [];
-    }
-
     get actionData() {
         return [
             MODE,
             'Render view',
             html`<sp-icon-view-card slot="icon"></sp-icon-view-card>`,
         ];
-    }
-
-    handleSelectionChange(fragment) {
-        fragment.toggleSelect();
-        this.requestUpdate();
-        this.dispatchEvent(
-            new CustomEvent('selection-change', {
-                bubbles: true,
-            }),
-        );
-    }
-
-    get selectionCount() {
-        return (
-            this.parentElement.source.fragments.filter(
-                (fragment) => fragment.isSelected,
-            ).length ?? 0
-        );
     }
 }
 

@@ -1,4 +1,5 @@
 import { css, html, LitElement, nothing } from 'lit';
+import { EVENT_CHANGE, EVENT_LOAD } from '../events.js';
 
 const MODE = 'table';
 
@@ -22,40 +23,19 @@ class TableView extends LitElement {
         };
     }
 
+    constructor() {
+        super();
+        this.forceUpdate = this.forceUpdate.bind(this);
+        this.itemValue = this.itemValue.bind(this);
+        this.renderItem = this.renderItem.bind(this);
+    }
+
     get table() {
         return this.shadowRoot?.querySelector('sp-table');
     }
 
     get tableBody() {
         return this.table?.querySelector('sp-table-body');
-    }
-
-    get selection() {
-        return this.table.selected;
-    }
-
-    refreshItems() {
-        this.requestUpdate();
-        if (this.parentElement?.mode !== MODE) return;
-        this.updateComplete.then(() => {
-            this.updateTableSelection();
-            if (!this.table) return;
-            this.table.items = this.parentElement.source?.fragments;
-        });
-    }
-
-    updateTableSelection() {
-        if (!this.parentElement.inSelection) {
-            this.table?.deselectAllRows();
-        }
-    }
-
-    handleTableSelectionChange() {
-        this.dispatchEvent(
-            new CustomEvent('selection-change', {
-                bubbles: true,
-            }),
-        );
     }
 
     canRender() {
@@ -69,11 +49,13 @@ class TableView extends LitElement {
             <sp-table
                 emphasized
                 scroller
-                .renderItem=${this.renderItem.bind(this)}
+                .itemValue=${this.itemValue}
+                .renderItem=${this.renderItem}
                 selects=${this.parentElement.inSelection
                     ? 'multiple'
                     : undefined}
                 @change=${this.handleTableSelectionChange}
+                @dblclick="${this.handleDoubleClick}"
             >
                 <sp-table-head>
                     <sp-table-head-cell sortable>Title</sp-table-head-cell>
@@ -91,6 +73,22 @@ class TableView extends LitElement {
         `;
     }
 
+    updated() {
+        (async () => {
+            if (this.table) {
+                if (!this.parentElement.inSelection) {
+                    this.table.deselectAllRows();
+                }
+                this.table.items = this.parentElement.source.fragments;
+                this.table.renderVirtualizedItems(); /* hack: force to render when items.lenght = 0 */
+            }
+        })();
+    }
+
+    itemValue(item) {
+        return item.id;
+    }
+
     renderItem(item) {
         if (!item) return nothing;
         return html` <sp-table-cell>${item.title}</sp-table-cell>
@@ -101,6 +99,21 @@ class TableView extends LitElement {
             <sp-table-cell>${item.modified.by}</sp-table-cell>`;
     }
 
+    handleDoubleClick(e) {
+        if (this.parentElement.inSelection) return;
+        const { value } = e.target.closest('sp-table-row');
+        if (!value) return;
+        const fragment = this.parentElement.source.fragments.find(
+            (f) => f.id === value,
+        );
+        if (!fragment) return;
+        this.parentElement.source.selectFragment(
+            e.clientX,
+            e.clientY,
+            fragment,
+        );
+    }
+
     connectedCallback() {
         super.connectedCallback();
 
@@ -108,6 +121,27 @@ class TableView extends LitElement {
         if (this.rowCount) {
             this.style.setProperty('--table-height', `${this.rowCount * 40}px`);
         }
+
+        this.parentElement.addEventListener(EVENT_CHANGE, this.forceUpdate);
+        this.parentElement.source.addEventListener(
+            EVENT_LOAD,
+            this.forceUpdate,
+        );
+        this.parentElement.source.addEventListener(
+            EVENT_CHANGE,
+            this.forceUpdate,
+        );
+    }
+
+    async forceUpdate() {
+        this.requestUpdate();
+    }
+
+    handleTableSelectionChange(e) {
+        const { selected } = e.target;
+        this.parentElement.source.fragments.forEach((fragment) => {
+            fragment.toggleSelection(selected.includes(fragment.id));
+        });
     }
 
     disconnectedCallback() {
@@ -120,10 +154,6 @@ class TableView extends LitElement {
             'Table view',
             html`<sp-icon-table slot="icon"></sp-icon-table>`,
         ];
-    }
-
-    get selectionCount() {
-        return this.table?.selected?.length ?? 0;
     }
 }
 

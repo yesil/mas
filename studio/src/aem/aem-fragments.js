@@ -2,10 +2,7 @@ import { LitElement, nothing } from 'lit';
 import { AEM } from '@adobecom/milo/libs/features/mas/web-components/src/aem.js';
 import { Folder } from './folder.js';
 import { Fragment } from './fragment.js';
-
-const EVENT_LOAD_START = 'load-start';
-const EVENT_LOAD_END = 'load-end';
-const EVENT_LOAD = 'load'; // parts of the content are loaded
+import { EVENT_LOAD, EVENT_LOAD_END, EVENT_LOAD_START } from '../events.js';
 
 /**
  * Reference to single
@@ -103,12 +100,12 @@ class AemFragments extends LitElement {
         this.currentFolder.open(self, children);
     }
 
-    async openFragment(x, y, fragment) {
+    async selectFragment(x, y, fragment) {
         const latest = await this.#aem.sites.cf.fragments.getById(fragment.id);
         Object.assign(fragment, latest);
         this.setFragment(fragment);
         this.dispatchEvent(
-            new CustomEvent('open-fragment', {
+            new CustomEvent('select-fragment', {
                 detail: { x, y, fragment },
                 bubbles: true,
                 composed: true,
@@ -136,7 +133,7 @@ class AemFragments extends LitElement {
         for await (const result of cursor) {
             if (cursor.cancelled) break;
             this.#loading = true;
-            const fragments = result.map((item) => new Fragment(item));
+            const fragments = result.map((item) => new Fragment(item, this));
             if (search) {
                 this.#searchResult = [...this.#searchResult, ...fragments];
             } else {
@@ -200,10 +197,20 @@ class AemFragments extends LitElement {
         this.setFragment(null);
     }
 
+    clearSelection() {
+        this.fragments.forEach((fragment) => fragment.toggleSelection(false));
+    }
+
     get fragments() {
-        return this.searchText
-            ? this.#searchResult
-            : this.currentFolder?.fragments;
+        return (
+            (this.searchText
+                ? this.#searchResult
+                : this.currentFolder?.fragments) ?? []
+        );
+    }
+
+    get selectedFragments() {
+        return this.fragments.filter((fragment) => fragment.selected);
     }
 
     get folders() {
@@ -225,4 +232,4 @@ class AemFragments extends LitElement {
 
 customElements.define('aem-fragments', AemFragments);
 
-export { EVENT_LOAD, EVENT_LOAD_END, EVENT_LOAD_START, AemFragments };
+export { AemFragments };

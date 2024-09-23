@@ -1,6 +1,8 @@
 import { css, html, LitElement, nothing } from 'lit';
-import { EVENT_LOAD } from './aem-fragments.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { EVENT_CHANGE, EVENT_LOAD } from '../events.js';
+
+const MAS_RENDER_MODE = 'mas-render-mode';
 
 class ContentNavigation extends LitElement {
     static get styles() {
@@ -40,20 +42,15 @@ class ContentNavigation extends LitElement {
                 attribute: 'in-selection',
                 reflect: true,
             },
-            selectionCount: {
-                type: Number,
-            },
         };
     }
 
     constructor() {
         super();
-        this.mode = 'render';
-        this.inSelection = false;
-        this.selectionCount = 0;
+        this.mode = sessionStorage.getItem(MAS_RENDER_MODE) ?? 'render';
+        this.inSelection = true;
         this.disabled = false;
-        this.updateRenderers = this.updateRenderers.bind(this);
-        this.updateSelectionCount = this.updateSelectionCount.bind(this);
+        this.forceUpdate = this.forceUpdate.bind(this);
     }
 
     connectedCallback() {
@@ -68,30 +65,30 @@ class ContentNavigation extends LitElement {
 
     registerToSource() {
         this.source = document.getElementById(this.getAttribute('source'));
-        if (!this.source) return;
-        this.source.addEventListener(EVENT_LOAD, this.updateRenderers);
-        [...this.children].forEach((child) => {
-            child.addEventListener(
-                'selection-change',
-                this.updateSelectionCount,
-            );
-        });
+        if (!this.source) return;   
+        this.source.addEventListener(EVENT_LOAD, this.forceUpdate);
+        this.source.addEventListener(EVENT_CHANGE, this.forceUpdate);
+    }
+
+    async forceUpdate() {
+        this.requestUpdate();
+    }
+
+    unregisterFromSource() {
+        this.source?.removeEventListener(EVENT_LOAD, this.forceUpdate);
+        this.source?.removeEventListener(EVENT_CHANGE, this.forceUpdate);
     }
 
     updated(changedProperties) {
         if (changedProperties.size === 0) return;
-        this.updateRenderers();
+        if (changedProperties.has('mode')) {
+            sessionStorage.setItem(MAS_RENDER_MODE, this.mode);
+        }
+        this.forceUpdate();
     }
 
-    async updateRenderers() {
-        this.requestUpdate();
-        [...this.children].forEach((child) => {
-            child.refreshItems();
-        });
-    }
-
-    unregisterFromSource() {
-        this.source?.removeEventListener(EVENT_LOAD, this.updateRenderers);
+    get currentRenderer() {
+        return [...this.children].find((child) => child.canRender());
     }
 
     get searchInfo() {
@@ -125,11 +122,6 @@ class ContentNavigation extends LitElement {
         this.source.listFragments();
     }
 
-    updateSelectionCount(e) {
-        const el = [...this.children].find((child) => child.canRender());
-        this.selectionCount = el?.selectionCount;
-    }
-
     render() {
         return html`<div id="toolbar">
                 ${this.source.searchText ? this.searchInfo : this.breadcrumbs}
@@ -140,13 +132,16 @@ class ContentNavigation extends LitElement {
             <slot></slot> `;
     }
 
-    toggleSelectionMode() {
-        if (this.inSelection) {
-            this.selectionCount = 0;
-            this.source.fragments.forEach((fragment) => fragment.unselect());
+    toggleSelectionMode(force) {
+        this.inSelection = force !== undefined ? force : !this.inSelection;
+        if (!this.inSelection) {
+            this.source.clearSelection();
         }
-        this.inSelection = !this.inSelection;
-        this.updateRenderers();
+        this.notify();
+    }
+
+    get selectionCount() {
+        return this.source.selectedFragments.length ?? 0;
     }
 
     get selectionActions() {
@@ -161,7 +156,7 @@ class ContentNavigation extends LitElement {
             emphasized
             ?open=${this.inSelection}
             variant="fixed"
-            @close=${this.toggleSelectionMode}
+            @close=${() => this.toggleSelectionMode(false)}
         >
             ${this.selectionCount} selected
             <sp-action-button
@@ -228,7 +223,7 @@ class ContentNavigation extends LitElement {
             <sp-action-menu
                 style=${inNoSelectionStyle}
                 selects="single"
-                value="render"
+                value="${this.mode}"
                 placement="left-end"
                 @change=${this.handleRenderModeChange}
             >
@@ -239,7 +234,11 @@ class ContentNavigation extends LitElement {
 
     handleRenderModeChange(e) {
         this.mode = e.target.value;
-        this.updateRenderers();
+        this.notify();
+    }
+
+    notify() {
+        this.dispatchEvent(new CustomEvent(EVENT_CHANGE));
     }
 }
 

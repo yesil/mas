@@ -1,12 +1,20 @@
 export class Fragment {
     path = '';
     hasChanges = false;
-    isSelected = false;
     status = '';
 
     fields = [];
 
-    constructor({ id, model, path, title, status, modified, fields }) {
+    selected = false;
+
+    /**
+     * @param {*} AEM Fragment JSON object
+     * @param {*} eventTarget DOM element to dispatch events from
+     */
+    constructor(
+        { id, model, path, title, status, modified, fields },
+        eventTarget,
+    ) {
         this.id = id;
         this.model = model;
         this.path = path;
@@ -15,6 +23,7 @@ export class Fragment {
         this.status = status;
         this.modified = modified;
         this.fields = fields;
+        this.eventTarget = eventTarget;
     }
 
     get variant() {
@@ -31,16 +40,16 @@ export class Fragment {
         return this.status === 'PUBLISHED' ? 'positive' : 'info';
     }
 
-    select() {
-        this.isSelected = true;
+    notify() {
+        this.eventTarget.dispatchEvent(
+            new CustomEvent('change', { detail: this }),
+        );
     }
 
-    toggleSelect() {
-        this.isSelected = !this.isSelected;
-    }
-
-    unselect() {
-        this.isSelected = false;
+    toggleSelection(value) {
+        if (value !== undefined) this.selected = value;
+        else this.selected = !this.selected;
+        this.notify();
     }
 
     updateField(fieldName, value) {
@@ -57,6 +66,7 @@ export class Fragment {
                 this.hasChanges = true;
                 change = true;
             });
+        this.notify();
         return change;
     }
 }

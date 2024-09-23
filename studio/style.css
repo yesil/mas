@@ -61,9 +61,8 @@ sp-underlay + sp-dialog {
 
 #actions {
     display: flex;
-    position: absolute;
-    top: var(--spectrum-spacing-100);
-    right: var(--spectrum-spacing-100);
+    grid-column: 1 / -1;
+    justify-content: end;
 }
 
 #ost {

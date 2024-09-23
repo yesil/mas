@@ -39,9 +39,23 @@ class MasStudio extends LitElement {
     }
 
     registerListeners() {
-        this.addEventListener(EVENT_LOAD_START, () => this.updateDeeplink());
+        this.addEventListener(EVENT_LOAD_START, () => {
+            this.requestUpdate();
+            this.updateDeeplink();
+    });
         this.addEventListener(EVENT_LOAD_END, () => this.requestUpdate());
-        this.addEventListener('open-fragment', (e) =>
+
+        // Listen for ESC key to close the fragment editor and quit selection mode
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeFragmentEditor();
+                this.source.clearSelection();
+                this.contentNavigation.toggleSelectionMode(false);
+                document.activeElement.blur();
+            }
+        });
+
+        this.addEventListener('select-fragment', (e) =>
             this.handleOpenFragment(e),
         );
     }
@@ -81,6 +95,10 @@ class MasStudio extends LitElement {
         return this.querySelector('aem-fragments');
     }
 
+    get contentNavigation() {
+        return this.querySelector('content-navigation');
+    }
+
     get fragment() {
         return this.source?.fragment;
     }
@@ -116,7 +134,7 @@ class MasStudio extends LitElement {
     }
 
     get fragmentEditorToolbar() {
-        return html`<div id="actions">
+        return html`<div id="actions" slot="heading">
             <sp-action-group
                 aria-label="Fragment actions"
                 role="group"
