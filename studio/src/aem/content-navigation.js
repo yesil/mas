@@ -48,7 +48,7 @@ class ContentNavigation extends LitElement {
     constructor() {
         super();
         this.mode = sessionStorage.getItem(MAS_RENDER_MODE) ?? 'render';
-        this.inSelection = true;
+        this.inSelection = false;
         this.disabled = false;
         this.forceUpdate = this.forceUpdate.bind(this);
     }
