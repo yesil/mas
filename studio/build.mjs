@@ -1,41 +1,31 @@
 import { build } from 'esbuild';
-import { lessLoader } from 'esbuild-plugin-less';
 
-build({
+const defaults = {
+    alias: { react: '../mocks/react.js' },
+    bundle: true,
+    define: { 'process.env.NODE_ENV': '"production"' },
+    external: [],
+    format: 'esm',
+    minify: true,
+    platform: 'browser',
+    sourcemap: true,
+    target: ['es2020'],
+};
+
+await build({
+    ...defaults,
     entryPoints: ['src/swc.js'],
-    format: 'esm',
-    bundle: true,
     outfile: 'libs/swc.js',
-    platform: 'browser',
-    sourcemap: true,
-    define: {
-        'process.env.NODE_ENV': '"production"',
-    },
-}).catch(() => process.exit(1));
+});
 
-build({
+await build({
+    ...defaults,
+    entryPoints: ['src/aem/index.js'],
+    outfile: 'libs/aem.js',
+});
+
+await build({
+    ...defaults,
     entryPoints: ['src/studio.js'],
-    format: 'esm',
-    bundle: true,
     outfile: 'libs/studio.js',
-    platform: 'browser',
-    sourcemap: true,
-    define: {
-        'process.env.NODE_ENV': '"production"',
-    },
-    external: ['../libs/ost.js'],
-}).catch(() => process.exit(1));
-
-build({
-    entryPoints: ['src/ost.js'],
-    format: 'esm',
-    bundle: true,
-    outfile: 'libs/ost.js',
-    plugins: [lessLoader()],
-    sourcemap: true,
-    define: {
-        'process.env': JSON.stringify({
-            APP_ENV: '',
-        }),
-    },
-}).catch(() => process.exit(1));
+});

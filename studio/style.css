@@ -7,6 +7,7 @@ sp-theme {
 }
 
 mas-studio {
+    margin: 0 16px;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -27,15 +28,6 @@ mas-studio > ul > li {
     justify-content: center;
 }
 
-#result {
-    margin-top: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-inline-start: 0;
-    background-color: var(--spectrum-background-layer-2-color);
-}
-
 action-bar {
     align-self: flex-end;
 }
@@ -44,49 +36,110 @@ sp-textfield {
     width: 360px;
 }
 
-sp-underlay:not([open]) + sp-dialog {
-    display: none;
-}
-
-sp-underlay {
-    z-index: 10;
-}
-
 sp-underlay + sp-dialog {
     position: fixed;
     top: 50%;
     left: 50%;
-    z-index: 11;
     transform: translate(-50%, -50%);
     background: var(--spectrum-gray-100);
 }
 
-.tox-tinymce {
-    width: 100%;
-}
-
 #editor {
-    display: none;
-    min-width: 640px;
-    flex-direction: column;
-    background-color: var(--spectrum-background-layer-1-color);
-    position: absolute;
-    padding: var(--spectrum-spacing-500);
-    border-radius: calc(var(--swc-scale-factor)*4px);
+    position: fixed;
+    bottom: 1em;
+    left: var(--editor--left);
+    right: var(--editor--right);
+    top: var(--editor--top);
+    bottom: var(--editor--bottom);
+    height: 800px;
 }
 
-#editor.open {
-    display: flex;
+#editor sp-dialog {
+    width: 600px;
+    overflow-y: scroll;
 }
 
 #actions {
     display: flex;
-    position: absolute;
-    top: var(--spectrum-spacing-100);
-    right: var(--spectrum-spacing-100);
+    grid-column: 1 / -1;
+    justify-content: end;
 }
 
 #ost {
+    height: 80vh;
+    width: 80vw;
+}
+
+sp-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    z-index: 10;
+    transform: translateX(-50%);
+}
+
+sp-status-light {
     position: absolute;
-    z-index: 2000;
+    bottom: -6px;
+    left: 6px;
+}
+
+/* tinymce styles */
+rte-editor + .tox.tox-tinymce {
+    width: 100%;
+    border: 1px solid var(--spectrum-global-color-gray-500);
+    border-radius: var(--spectrum-corner-radius-100);
+}
+
+merch-card {
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+merch-card.selected {
+    outline: 2px solid var(--spectrum-global-color-blue-600);
+}
+
+sp-progress-circle {
+    position: absolute;
+    top: 50%;
+    margin: 0 auto;
+}
+
+content-navigation {
+    align-self: stretch;
+    flex: 1;
+}
+
+render-view {
+    margin: 32px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-inline-start: 0;
+    align-items: start;
+    background-color: var(--spectrum-background-layer-2-color);
+}
+
+content-navigation render-view merch-card .overlay {
+    display: none;
+}
+
+merch-card-editor {
+    display: block;
+    margin-top: 32px;
+}
+
+content-navigation[in-selection] render-view merch-card .overlay {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
