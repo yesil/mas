@@ -5,10 +5,13 @@
         <meta property="og:title" content="Merch at Scale Studio" />
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="aem-base-url" content="http://localhost:8080" />
+
+        <!-- this is injected in the iframes created by the TinyMCE RTE -->
         <meta
             id="mas-src"
             content="/__wds-outside-root__/1/node_modules/@adobecom/milo/libs/deps/mas/mas.js"
-        /> <!-- this is injected in the iframes created by the TinyMCE RTE -->
+        />
         <script>
             window.process = { env: {} };
             window.adobeid = {
@@ -17,11 +20,12 @@
         </script>
         <script src="/__wds-outside-root__/1/node_modules/tinymce/tinymce.js"></script>
         <script src="studio.test.html.js" type="module"></script>
+
         <!-- OST -->
         <script src="../ost/index.js"></script>
         <link rel="stylesheet" href="../ost/index.css" />
 
-        <!-- MAS Studo styles -->
+        <!-- MAS Studio styles -->
         <link rel="stylesheet" href="../style.css" />
     </head>
 
@@ -29,9 +33,7 @@
         <main></main>
         <template id="studio">
             <sp-theme color="light" scale="medium">
-                <mas-studio
-                    base-url="http://localhost:8080"
-                ></mas-studio>
+                <mas-studio base-url="http://localhost:8080"></mas-studio>
             </sp-theme>
             <div id="ost"></div>
         </template>

@@ -20,9 +20,10 @@ const renderVariants = () => {
 
 export const renderVariantPicker = (value, handler, id) => {
     return html`<sp-picker
-        id="${id || 'card-variant'}"
+        id="${id || 'card-variant'}"
         label="Card Variant"
         size="m"
+        data-field="variant"
         value=${value}
         @change="${handler}"
     >

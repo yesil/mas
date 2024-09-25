@@ -44,7 +44,7 @@ class MasStudio extends LitElement {
         this.addEventListener(EVENT_LOAD_START, () => {
             this.requestUpdate();
             this.updateDeeplink();
-    });
+        });
         this.addEventListener(EVENT_LOAD_END, () => this.requestUpdate());
 
         // Listen for ESC key to close the fragment editor and quit selection mode
@@ -374,10 +374,10 @@ class MasStudio extends LitElement {
         let value = e.target.value || e.detail?.value;
         value = e.target.multiline ? value?.split(',') : [value ?? ''];
         if (this.fragment.updateField(fieldName, value)) {
-            const merchDataSource = this.querySelector(
-                `merch-datasource[path="${this.fragment.path}"]`,
+            const aemFragment = this.querySelector(
+                `aem-fragment[fragment="${this.fragment.id}"]`,
             );
-            merchDataSource?.refresh(false);
+            aemFragment?.refresh(false);
         }
     }
 
@@ -476,7 +476,7 @@ class MasStudio extends LitElement {
     }
 
     async copyToUse() {
-        const code = `<merch-card><merch-datasource path="${this.fragment?.path}"></merch-datasource></merch-card>`;
+        const code = `<merch-card><aem-fragment fragment="${this.fragment?.id}"></aem-fragment></merch-card>`;
         try {
             await navigator.clipboard.writeText(code);
             this.showToast('Code copied to clipboard', 'positive');
