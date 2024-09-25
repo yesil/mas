@@ -2,8 +2,8 @@
 import { runTests } from '@web/test-runner-mocha';
 import { expect } from '@esm-bundle/chai';
 
-import '@adobecom/milo/libs/features/mas/mas/src/mas.js';
-// import '@adobecom/milo/libs/deps/mas/mas.js';
+//import '@adobecom/milo/libs/features/mas/mas/src/mas.js';
+import '@adobecom/milo/libs/deps/mas/mas.js';
 
 import '../../src/aem/content-navigation.js';
 import '../../src/aem/aem-fragments.js';
