@@ -45,10 +45,7 @@ class RenderView extends LitElement {
             class="${selected ? 'selected' : ''}"
             @dblclick="${(e) => this.handleDoubleClick(e, fragment)}"
         >
-            <merch-datasource
-                aem-bucket="${this.parentElement.source.bucket}"
-                path="${fragment.path}"
-            ></merch-datasource>
+            <aem-fragment fragment="${fragment.id}" ims></aem-fragment>
             <sp-status-light
                 size="l"
                 variant="${fragment.statusVariant}"

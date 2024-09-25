@@ -4,7 +4,7 @@ import { request as httpsRequest } from 'node:https';
 import { URL } from 'node:url';
 
 const corsHeaders = {
-    'access-control-allow-origin': '*',
+    'access-control-allow-origin': '*', // keep this in lowercase
     'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Expose-Headers': '*',
