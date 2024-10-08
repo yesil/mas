@@ -8,6 +8,8 @@ import './editors/merch-card-editor.js';
 import './editors/variant-picker.js';
 import './rte-editor.js';
 import './top-nav.js';
+import './mas-filter-panel.js';
+import './mas-filter-toolbar.js';
 
 import { getOffferSelectorTool, openOfferSelectorTool } from './ost.js';
 
@@ -287,6 +289,10 @@ class MasStudio extends LitElement {
                     @change="${this.handleVariantChange}"
                 ></variant-picker>
                 <sp-button @click=${this.doSearch}>Search</sp-button>
+            </div>
+            <div>
+                <mas-filter-toolbar></mas-filter-toolbar>
+                <mas-filter-panel></mas-filter-panel>
             </div>
             ${this.content} ${this.fragmentEditor} ${this.selectFragmentDialog}
             ${this.toast} ${this.loadingIndicator} ${getOffferSelectorTool()}
