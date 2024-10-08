@@ -1,6 +1,8 @@
-import { createServer } from 'node:http';
+import { createServer as createHttpServer } from 'node:http';
+import { createServer as createHttpsServer } from 'node:https';
 import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
+import { readFileSync } from 'fs';
 import { URL } from 'node:url';
 
 const corsHeaders = {
@@ -11,25 +13,40 @@ const corsHeaders = {
 };
 
 const targetOrigin = process.argv[2];
+const keyPath = process.argv[3];
+const certPath = process.argv[4];
 
 if (!targetOrigin) {
-    console.error('Usage: node proxy.mjs <targetOrigin>');
+    console.error('Usage: node proxy.mjs <targetOrigin> [keyPath] [certPath]');
     process.exit(1);
 }
 
 const targetUrl = new URL(targetOrigin);
 
-const server = createServer((req, res) => {
-    const { method, headers, url } = req;
+// Variables to hold the server and protocol
+let server;
+let serverProtocol;
+let serverPort;
 
-    // shutdown mechanism
-    if (url === '/shutdown') {
-        res.end('Server is shutting down');
-        server.close(() => {
-            console.log('Proxy server has been stopped');
-            process.exit(0);
-        });
-    }
+if (keyPath && certPath) {
+    // Read the SSL certificate and private key
+    const httpsOptions = {
+        key: readFileSync(keyPath),
+        cert: readFileSync(certPath),
+    };
+
+    server = createHttpsServer(httpsOptions, requestHandler);
+    serverProtocol = 'https';
+    serverPort = 8443; // Use 8443 for HTTPS
+} else {
+    server = createHttpServer(requestHandler);
+    serverProtocol = 'http';
+    serverPort = 8080; // Use 8080 for HTTP
+}
+
+// Common request handler
+function requestHandler(req, res) {
+    const { method, headers, url } = req;
 
     if (method === 'OPTIONS') {
         // Handle OPTIONS request directly
@@ -116,8 +133,10 @@ const server = createServer((req, res) => {
             proxyRequest.end();
         });
     }
-});
+}
 
-server.listen(8080, () => {
-    console.log('Proxy server is running on port 8080');
+server.listen(serverPort, () => {
+    console.log(
+        `Proxy server is running on ${serverProtocol}://localhost:${serverPort}`,
+    );
 });
