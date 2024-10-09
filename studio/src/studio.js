@@ -97,7 +97,7 @@ class MasStudio extends LitElement {
     }
 
     get search() {
-        return this.querySelector('sp-search');
+        return this.shadowRoot.querySelector('sp-search');
     }
 
     get picker() {
