@@ -44,7 +44,11 @@ class MasStudio extends LitElement {
         this.addEventListener('toggle-filter-panel', this.toggleFilterPanel);
         this.addEventListener('clear-search', this.clearSearch);
         this.addEventListener('search-fragments', this.doSearch);
-        this.addEventListener('variant-change', this.handleVariantChange);
+        this.addEventListener('variant-changed', this.handleVariantChange);
+        this.addEventListener(
+            'search-text-changed',
+            this.handleSearchTextChange,
+        );
     }
 
     registerListeners() {
@@ -86,6 +90,18 @@ class MasStudio extends LitElement {
         this.showFilterPanel = !this.showFilterPanel;
     }
 
+    clearSearch() {
+        this.searchText = '';
+        pushState({
+            query: undefined,
+            path: undefined,
+        });
+    }
+
+    handleSearchTextChange(e) {
+        this.searchText = e.detail.searchText;
+    }
+
     updated(changedProperties) {
         if (
             changedProperties.has('searchText') ||
@@ -97,7 +113,7 @@ class MasStudio extends LitElement {
     }
 
     get search() {
-        return this.shadowRoot.querySelector('sp-search');
+        return this.querySelector('sp-search');
     }
 
     get picker() {

@@ -81,13 +81,41 @@ class MasFilterToolbar extends LitElement {
         }
     }
 
+    handleSearch(e) {
+        this.searchText = e.target.value;
+        this.dispatchEvent(
+            new CustomEvent('search-text-changed', {
+                detail: { searchText: this.searchText },
+                bubbles: true,
+                composed: true,
+            }),
+        );
+        if (!this.searchText) {
+            this.dispatchEvent(
+                new CustomEvent('clear-search', {
+                    bubbles: true,
+                    composed: true,
+                }),
+            );
+        }
+        if (e.type === 'submit') {
+            e.preventDefault();
+            this.dispatchEvent(
+                new CustomEvent('search-fragments', {
+                    bubbles: true,
+                    composed: true,
+                }),
+            );
+        }
+    }
+
     handleVariantChange(e) {
         this.variant = e.target.value;
         this.dispatchEvent(
-            new CustomEvent('variant-change', {
+            new CustomEvent('variant-changed', {
+                detail: { variant: this.variant },
                 bubbles: true,
                 composed: true,
-                detail: { variant: this.variant },
             }),
         );
     }
