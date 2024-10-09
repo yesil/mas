@@ -61,27 +61,6 @@ class MasFilterToolbar extends LitElement {
     }
 
     handleSearch(e) {
-        this.searchText = this.search.value;
-        if (!this.searchText) {
-            this.dispatchEvent(
-                new CustomEvent('clear-search', {
-                    bubbles: true,
-                    composed: true,
-                }),
-            );
-        }
-        if (e.type === 'submit') {
-            e.preventDefault();
-            this.dispatchEvent(
-                new CustomEvent('search-fragments', {
-                    bubbles: true,
-                    composed: true,
-                }),
-            );
-        }
-    }
-
-    handleSearch(e) {
         this.searchText = e.target.value;
         this.dispatchEvent(
             new CustomEvent('search-text-changed', {
