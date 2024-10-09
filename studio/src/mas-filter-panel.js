@@ -7,7 +7,7 @@ class MasFilterPanel extends LitElement {
             align-items: center;
             gap: 16px;
             padding: 10px;
-            background-color: var(--spectrum-global-color-gray-50);
+            align-self: flex-end;
         }
         sp-picker {
             width: 150px;
@@ -17,16 +17,18 @@ class MasFilterPanel extends LitElement {
     render() {
         return html`
             <sp-picker label="Offer Type" selected="None">
-                <sp-menu-item>None</sp-menu-item>
-                <sp-menu-item>Free</sp-menu-item>
-                <sp-menu-item>Discounted</sp-menu-item>
-                <sp-menu-item>Full Price</sp-menu-item>
+                <sp-menu-item>Base</sp-menu-item>
+                <sp-menu-item>Trial</sp-menu-item>
+                <sp-menu-item>Promotion</sp-menu-item>
             </sp-picker>
 
             <sp-picker label="Plan Type">
-                <sp-menu-item>Monthly</sp-menu-item>
-                <sp-menu-item>Annual</sp-menu-item>
-                <sp-menu-item>Lifetime</sp-menu-item>
+                <sp-menu-item>All</sp-menu-item>
+                <sp-menu-item>ABM</sp-menu-item>
+                <sp-menu-item>PUF</sp-menu-item>
+                <sp-menu-item>M2M</sp-menu-item>
+                <sp-menu-item>P3Y</sp-menu-item>
+                <sp-menu-item>Perpetual</sp-menu-item>
             </sp-picker>
 
             <sp-picker label="Country">
@@ -38,8 +40,12 @@ class MasFilterPanel extends LitElement {
 
             <sp-picker label="Market Segment">
                 <sp-menu-item>Individual</sp-menu-item>
-                <sp-menu-item>Small Business</sp-menu-item>
-                <sp-menu-item>Enterprise</sp-menu-item>
+                <sp-menu-item>Team</sp-menu-item>
+            </sp-picker>
+
+            <sp-picker label="Tags">
+                <sp-menu-item>black-friday-2024</sp-menu-item>
+                <sp-menu-item>cyber-monday-2024</sp-menu-item>
             </sp-picker>
         `;
     }

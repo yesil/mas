@@ -1,4 +1,5 @@
 import { html, css, LitElement } from 'lit';
+import './editors/variant-picker.js';
 
 class MasFilterToolbar extends LitElement {
     static styles = css`
@@ -7,31 +8,106 @@ class MasFilterToolbar extends LitElement {
             align-items: center;
             gap: 16px;
             padding: 10px;
-            background-color: var(--spectrum-global-color-gray-100);
+            align-self: flex-end;
+        }
+        sp-picker {
+            width: 100px;
         }
         sp-textfield {
             width: 200px;
         }
     `;
 
+    static properties = {
+        searchText: { type: String, state: true },
+        variant: { type: String, state: true },
+    };
+
+    constructor() {
+        super();
+        this.searchText = '';
+        this.variant = 'all';
+    }
+
     render() {
         return html`
-            <sp-action-button label="Individual" selected
-                >Individual</sp-action-button
+            <sp-button
+                label="Filter"
+                variant="secondary"
+                @click=${this.handleFilterClick}
+                >Filter</sp-button
             >
-            <sp-action-button label="Student">Student</sp-action-button>
-            <sp-action-button label="Business">Business</sp-action-button>
-
-            <sp-button label="Filter" variant="primary">Filter</sp-button>
-
             <sp-picker label="Sort">
-                <sp-menu-item>Sort by Relevance</sp-menu-item>
-                <sp-menu-item>Sort by Price</sp-menu-item>
-                <sp-menu-item>Sort by Popularity</sp-menu-item>
+                <sp-menu-item>Ascending</sp-menu-item>
+                <sp-menu-item>Descending</sp-menu-item>
             </sp-picker>
-
-            <sp-textfield placeholder="Search"></sp-textfield>
+            <div>
+                <sp-search
+                    placeholder="Search"
+                    @change="${this.handleSearch}"
+                    @submit="${this.handleSearch}"
+                    value=${this.searchText}
+                    size="m"
+                ></sp-search>
+                <variant-picker
+                    id="vpick"
+                    show-all="true"
+                    default-value="${this.variant}"
+                    @change="${this.handleVariantChange}"
+                ></variant-picker>
+                <sp-button @click=${this.doSearch}>Search</sp-button>
+            </div>
         `;
+    }
+
+    handleSearch(e) {
+        this.searchText = this.search.value;
+        if (!this.searchText) {
+            this.dispatchEvent(
+                new CustomEvent('clear-search', {
+                    bubbles: true,
+                    composed: true,
+                }),
+            );
+        }
+        if (e.type === 'submit') {
+            e.preventDefault();
+            this.dispatchEvent(
+                new CustomEvent('search-fragments', {
+                    bubbles: true,
+                    composed: true,
+                }),
+            );
+        }
+    }
+
+    handleVariantChange(e) {
+        this.variant = e.target.value;
+        this.dispatchEvent(
+            new CustomEvent('variant-change', {
+                bubbles: true,
+                composed: true,
+                detail: { variant: this.variant },
+            }),
+        );
+    }
+
+    doSearch() {
+        this.dispatchEvent(
+            new CustomEvent('search-fragments', {
+                bubbles: true,
+                composed: true,
+            }),
+        );
+    }
+
+    handleFilterClick() {
+        this.dispatchEvent(
+            new CustomEvent('toggle-filter-panel', {
+                bubbles: true,
+                composed: true,
+            }),
+        );
     }
 }
 

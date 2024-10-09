@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit';
 
-class TopNav extends LitElement {
+class MasTopNav extends LitElement {
     static get styles() {
         return css`
             :host {
@@ -29,7 +29,7 @@ class TopNav extends LitElement {
                 padding-inline-start: 5px;
             }
             sp-top-nav-item[placement='bottom-end'] {
-                margin-inline-end: 20px;
+                margin-inline-end: 10px;
             }
         `;
     }
@@ -78,4 +78,4 @@ class TopNav extends LitElement {
     }
 }
 
-customElements.define('top-nav', TopNav);
+customElements.define('mas-top-nav', MasTopNav);
