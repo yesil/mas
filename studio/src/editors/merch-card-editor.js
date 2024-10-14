@@ -21,7 +21,7 @@ class MerchCardEditor extends LitElement {
             <sp-field-label for="card-variant">Variant</sp-field-label>
             <variant-picker
                 id="card-variant"
-                show-all="false"
+                ?show-all="false"
                 data-field="variant"
                 default-value="${form.variant.values[0]}"
                 @change="${this.updateFragment}"
@@ -32,6 +32,14 @@ class MerchCardEditor extends LitElement {
                 id="card-title"
                 data-field="cardTitle"
                 value="${form.cardTitle.values[0]}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
+            <sp-field-label for="card-subtitle">Subtitle</sp-field-label>
+            <sp-textfield
+                placeholder="Enter card subtitle"
+                id="card-subtitle"
+                data-field="subtitle"
+                value="${form.subtitle.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
             <sp-field-label for="card-size">Size</sp-field-label>

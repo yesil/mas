@@ -4,10 +4,8 @@ import { Folder } from './folder.js';
 import { Fragment } from './fragment.js';
 import { EVENT_LOAD, EVENT_LOAD_END, EVENT_LOAD_START } from '../events.js';
 
-/**
- * Reference to single
- */
-let aemDataSourceCache;
+/** aem-fragment cache */
+let aemFragmentCache;
 
 class AemFragments extends LitElement {
     static get properties() {
@@ -19,11 +17,6 @@ class AemFragments extends LitElement {
             searchText: { type: String, attribute: 'search' },
             fragment: { type: Object },
         };
-    }
-
-    constructor() {
-        super();
-        aemDataSourceCache = document.createElement('aem-datasource').cache;
     }
 
     createRenderRoot() {
@@ -139,7 +132,13 @@ class AemFragments extends LitElement {
             } else {
                 this.currentFolder.add(...fragments);
             }
-            aemDataSourceCache?.add(...fragments);
+            if (!aemFragmentCache) {
+                await customElements.whenDefined('aem-fragment').then(() => {
+                    aemFragmentCache =
+                        document.createElement('aem-fragment').cache;
+                });
+            }
+            aemFragmentCache.add(...fragments);
             this.dispatchEvent(new CustomEvent(EVENT_LOAD));
         }
         this.#loading = false;
@@ -173,7 +172,7 @@ class AemFragments extends LitElement {
         let fragment = await this.#aem.sites.cf.fragments.save(this.fragment);
         if (!fragment) throw new Error('Failed to save fragment');
         fragment = new Fragment(fragment);
-        aemDataSourceCache?.add(fragment);
+        aemFragmentCache.add(fragment);
         this.setFragment(fragment);
     }
 
@@ -181,7 +180,7 @@ class AemFragments extends LitElement {
         const oldFragment = this.fragment;
         this.setFragment(null);
         const fragment = await this.#aem.sites.cf.fragments.copy(oldFragment);
-        aemDataSourceCache?.add(fragment);
+        aemFragmentCache?.add(fragment);
         const newFragment = new Fragment(fragment);
         this.#search.addToResult(newFragment, oldFragment);
         this.setFragment(newFragment);
