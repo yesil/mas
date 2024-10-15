@@ -45,6 +45,7 @@ export default {
         }),
     ],
     nodeResolve: true,
+    preserveSymlinks: true,
     port: 2023,
     testRunnerHtml,
 };
