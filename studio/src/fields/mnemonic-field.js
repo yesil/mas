@@ -1,4 +1,5 @@
-import { html, LitElement } from 'lit';
+import { css, html, LitElement } from 'lit';
+import { EVENT_CHANGE } from '../events.js';
 
 class MnemonicField extends LitElement {
     static get properties() {
@@ -23,20 +24,20 @@ class MnemonicField extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        this.shadowRoot.addEventListener('change', this.handleChange);
+        this.shadowRoot.addEventListener(EVENT_CHANGE, this.handleChange);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.shadowRoot.removeEventListener('change', this.handleChange);
+        this.shadowRoot.removeEventListener(EVENT_CHANGE, this.handleChange);
     }
 
     handleChange(event) {
         if (event.target === this) return;
-        this[event.target.id] = event.target.value;
+        this[event.target.id] = event.target.value ?? '';
         event.stopPropagation();
         this.dispatchEvent(
-            new CustomEvent('change', {
+            new CustomEvent(EVENT_CHANGE, {
                 bubbles: true,
                 composed: true,
                 detail: this,
@@ -62,6 +63,12 @@ class MnemonicField extends LitElement {
             <sp-textfield id="link" placeholder="Enter target link" value="${this.link}" @change="${this.handleChange}"></sp-textfield
         `;
     }
+
+    static styles = css`
+        sp-textfield {
+            width: 100%;
+        }
+    `;
 }
 
 customElements.define('mas-mnemonic-field', MnemonicField);

@@ -3,57 +3,12 @@ import '@spectrum-web-components/button/sp-button.js';
 import '@spectrum-web-components/textfield/sp-textfield.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';
+import { EVENT_CHANGE } from '../events.js';
 
 class MasMultifield extends LitElement {
-    static styles = css`
-        :host {
-            display: block;
-        }
-
-        .field-wrapper {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 5px;
-            border: 1px solid transparent;
-            border-radius: 4px;
-        }
-
-        .field-wrapper.dragging {
-            opacity: 0.5;
-        }
-
-        .field-wrapper.dragover {
-            border: 1px dashed #007bff;
-        }
-
-        .field {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-
-        sp-icon-drag-handle {
-            cursor: grab;
-            pointer-events: auto;
-            margin-right: 10px;
-        }
-
-        sp-icon-close {
-            pointer-events: auto;
-            padding: 8px;
-            margin-block-start: 24px;
-            align-self: start;
-            cursor: pointer;
-        }
-
-        sp-icon-close:hover {
-            cursor: pointer;
-        }
-    `;
-
     static get properties() {
         return {
-            values: { type: Array },
+            value: { type: Array },
             draggingIndex: { type: Number },
         };
     }
@@ -66,31 +21,29 @@ class MasMultifield extends LitElement {
     constructor() {
         super();
         this.draggingIndex = -1;
-        this.initValues();
+        this.initValue();
     }
 
-    initValues() {
-        this.values = this.values ?? [];
+    initValue() {
         // auto assign ids.
-        this.values = this.values.map((field, i) => ({
-            id: i.toString(),
-            ...field,
-        }));
+        this.value =
+            this.value?.map((field, i) => ({
+                id: i.toString(),
+                ...field,
+            })) ?? [];
     }
 
     firstUpdated() {
-        this.initValues();
+        this.initValue();
     }
 
     connectedCallback() {
         super.connectedCallback();
         this.initFieldTemplate();
-        this.addEventListener('change', this.handleChange);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.removeEventListener('change', this.handleChange);
     }
 
     // Initialize the field template
@@ -100,38 +53,41 @@ class MasMultifield extends LitElement {
             console.warn('Template field not found', this);
         }
         this.#template = template.content;
-        if (this.values.length === 0) {
+        if (this.value.length === 0) {
             this.addField();
         }
     }
 
     // Add a new field
     addField() {
-        this.values = [...this.values, { id: Date.now().toString() }];
+        this.value = [...this.value, { id: Date.now().toString() }];
+        this.#changed();
     }
 
     // Remove a field by its id
     removeField(id) {
-        this.values = this.values.filter((field) => field.id !== id);
+        this.value = this.value.filter((field) => field.id !== id);
+        this.#changed();
+    }
+
+    #changed() {
+        this.dispatchEvent(
+            new CustomEvent(EVENT_CHANGE, {
+                bubbles: true,
+                composed: true,
+            }),
+        );
     }
 
     // Handle the value change of a field
     handleChange(e) {
-        if (e.detail === undefined) return;
         e.stopPropagation();
         const { id, value: newValue } = e.detail;
-        console.log('Field value changed', id, newValue);
-        const value = this.values.find((f) => f.id === id);
+        const value = this.value.find((f) => f.id === id);
         if (!value) return;
         Object.assign(value, newValue);
         // Dispatch change event
-        this.dispatchEvent(
-            new CustomEvent('change', {
-                bubbles: true,
-                composed: true,
-                detail: this,
-            }),
-        );
+        this.#changed();
     }
 
     // Handle drag start
@@ -157,21 +113,22 @@ class MasMultifield extends LitElement {
     // Handle drop
     drop(e, index) {
         e.preventDefault();
-        const draggingField = this.values[this.draggingIndex];
+        const draggingField = this.value[this.draggingIndex];
 
         // Remove the dragging field from its original position
-        let updatedValues = [...this.values];
-        updatedValues.splice(this.draggingIndex, 1);
+        let updatedValue = [...this.value];
+        updatedValue.splice(this.draggingIndex, 1);
 
         // Insert the dragging field into the new position
-        updatedValues.splice(index, 0, draggingField);
+        updatedValue.splice(index, 0, draggingField);
 
         // Update the fields
-        this.values = updatedValues;
+        this.value = updatedValue;
 
         // Reset drag state
         e.target.classList.remove('dragover');
         this.draggingIndex = -1;
+        this.#changed();
     }
 
     // Handle drag end
@@ -197,22 +154,85 @@ class MasMultifield extends LitElement {
                 @drop=${(e) => this.drop(e, index)}
                 @dragend=${this.dragEnd}
             >
-                <sp-icon-drag-handle label="Order"></sp-icon-drag-handle>
                 ${fieldEl}
                 <sp-icon-close
                     label="Remove field"
                     @click=${() => this.removeField(field.id)}
                 ></sp-icon-close>
+                <sp-icon-drag-handle label="Order"></sp-icon-drag-handle>
             </div>
         `;
     }
 
     render() {
         return html`
-            ${this.values.map((field, index) => this.renderField(field, index))}
-            <sp-button @click=${this.addField}>Add</sp-button>
+            <div @change="${this.handleChange}">
+                ${this.value.map((field, index) =>
+                    this.renderField(field, index),
+                )}
+                <sp-action-button quiet @click=${this.addField}>
+                    <sp-icon-add label="Add" slot="icon"></sp-icon-add>Add
+                </sp-action-button>
+            </div>
         `;
     }
+
+    static styles = css`
+        :host {
+            display: block;
+        }
+
+        :host > div {
+            display: contents;
+        }
+
+        .field-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .field-wrapper > *:first-child {
+            flex: 1;
+        }
+
+        .field-wrapper.dragging {
+            opacity: 0.5;
+        }
+
+        .field-wrapper.dragover {
+            border: 1px dashed #007bff;
+        }
+
+        .field {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        sp-icon-drag-handle {
+            visibility: hidden;
+            margin-block-start: 24px;
+            cursor: grab;
+            pointer-events: auto;
+        }
+
+        .field-wrapper:hover sp-icon-drag-handle {
+            visibility: visible;
+        }
+
+        sp-icon-close {
+            pointer-events: auto;
+            padding: 8px;
+            margin-block-start: 24px;
+            align-self: start;
+            cursor: pointer;
+        }
+
+        sp-icon-close:hover {
+            cursor: pointer;
+        }
+    `;
 }
 
 customElements.define('mas-multifield', MasMultifield);

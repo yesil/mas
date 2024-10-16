@@ -12,7 +12,7 @@ describe('Multifield', () => {
     it.skip('should support sp-textffield', async () => {});
 
     it('should support mas-mnemonic-field', async () => {
-        const values = [
+        const value = [
             {
                 icon: 'https://www.adobe.com/cc-shared/assets/img/product-icons/svg/creative-cloud.svg',
                 alt: 'This is an alt text',
@@ -26,7 +26,12 @@ describe('Multifield', () => {
         ];
         const el = await fixture(
             html`
-                <mas-multifield .values="${values}">
+                <style>
+                    mas-multifield {
+                        width: 600px;
+                    }
+                </style>
+                <mas-multifield .value="${value}">
                     <template>
                         <mas-mnemonic-field></mas-mnemonic-field>
                     </template>
