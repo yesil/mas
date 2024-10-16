@@ -9,7 +9,52 @@ import '../../src/fields/mnemonic-field.js';
 import { spTheme } from '../utils.js';
 
 describe('Multifield', () => {
-    it.skip('should support sp-textffield', async () => {});
+    it('should render without throwing an exception', async () => {
+        let error = null;
+        let el;
+        try {
+            el = await fixture(html`<mas-multifield></mas-multifield>`, {
+                parentNode: spTheme(),
+            });
+        } catch (e) {
+            error = e;
+        }
+        expect(error).to.be.null;
+        expect(el.shadowRoot.textContent).to.equal('');
+    });
+
+    it('should support adding/removing', async () => {
+        const el = await fixture(
+            html`
+                <mas-multifield>
+                    <template>
+                        <div>
+                            <sp-field-label required for="test1"
+                                >Test field</sp-field-label
+                            >
+                            <sp-textfield id="test1"></sp-textfield>
+                        </div>
+                    </template>
+                </mas-multifield>
+            `,
+            { parentNode: spTheme() },
+        );
+        expect(
+            el.shadowRoot.querySelectorAll('.field-wrapper').length,
+        ).to.equal(1);
+        const addButton = el.shadowRoot.querySelector('sp-action-button');
+        addButton.click();
+        await el.updateComplete;
+        expect(
+            el.shadowRoot.querySelectorAll('.field-wrapper').length,
+        ).to.equal(2);
+        const removeButton = el.shadowRoot.querySelector('sp-icon-close');
+        removeButton.click();
+        await el.updateComplete;
+        expect(
+            el.shadowRoot.querySelectorAll('.field-wrapper').length,
+        ).to.equal(1);
+    });
 
     it('should support mas-mnemonic-field', async () => {
         const value = [
@@ -26,19 +71,31 @@ describe('Multifield', () => {
         ];
         const el = await fixture(
             html`
-                <style>
-                    mas-multifield {
-                        width: 600px;
-                    }
-                </style>
                 <mas-multifield .value="${value}">
                     <template>
                         <mas-mnemonic-field></mas-mnemonic-field>
                     </template>
                 </mas-multifield>
+                <style>
+                    mas-multifield {
+                        width: 600px;
+                    }
+                </style>
             `,
             { parentNode: spTheme() },
         );
+        expect(
+            el.shadowRoot.querySelectorAll('.field-wrapper').length,
+        ).to.equal(2);
+
+        const [, mnemonic2] =
+            el.shadowRoot.querySelectorAll('mas-mnemonic-field');
         const listener = oneEvent(el, 'change');
+        mnemonic2.altElement.value = 'This is new alt text';
+        mnemonic2.altElement.dispatchEvent(new Event('change'));
+        await listener;
+        const [value1, value2] = el.value;
+        const newValue = [value1, { ...value2, alt: 'This is new alt text' }];
+        expect(el.value).to.deep.equal(newValue);
     });
 });

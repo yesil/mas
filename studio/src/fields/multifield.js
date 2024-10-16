@@ -1,4 +1,4 @@
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, nothing } from 'lit';
 import '@spectrum-web-components/button/sp-button.js';
 import '@spectrum-web-components/textfield/sp-textfield.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';
@@ -42,17 +42,15 @@ class MasMultifield extends LitElement {
         this.initFieldTemplate();
     }
 
-    disconnectedCallback() {
-        super.disconnectedCallback();
-    }
-
     // Initialize the field template
     initFieldTemplate() {
         const template = this.querySelector('template');
         if (!template) {
             console.warn('Template field not found', this);
+            return;
         }
         this.#template = template.content;
+        template.remove();
         if (this.value.length === 0) {
             this.addField();
         }
@@ -90,6 +88,7 @@ class MasMultifield extends LitElement {
         this.#changed();
     }
 
+    /* c8 ignore start */
     // Handle drag start
     dragStart(e, index) {
         this.draggingIndex = index;
@@ -135,6 +134,7 @@ class MasMultifield extends LitElement {
     dragEnd(e) {
         e.target.classList.remove('dragging');
     }
+    /* c8 ignore end */
 
     // Render individual field with reorder and delete options
     renderField(field, index) {
@@ -165,6 +165,7 @@ class MasMultifield extends LitElement {
     }
 
     render() {
+        if (!this.#template) return nothing;
         return html`
             <div @change="${this.handleChange}">
                 ${this.value.map((field, index) =>
