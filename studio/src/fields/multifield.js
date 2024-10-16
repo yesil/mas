@@ -1,8 +1,4 @@
 import { html, css, LitElement, nothing } from 'lit';
-import '@spectrum-web-components/button/sp-button.js';
-import '@spectrum-web-components/textfield/sp-textfield.js';
-import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';
-import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';
 import { EVENT_CHANGE } from '../events.js';
 
 class MasMultifield extends LitElement {
