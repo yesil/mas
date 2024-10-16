@@ -440,7 +440,7 @@ var Qe=Object.defineProperty;var we=n=>{throw TypeError(n)};var Xe=(n,e,t)=>e in
                                   @update-fragment="${this.updateFragment}"
                               >
                               </merch-card-editor>
-                              <p>Fragment details</p>
+                              <p>Fragment details (not shown on the card)</p>
                               <sp-divider size="s"></sp-divider>
                               <sp-field-label for="fragment-title"
                                   >Fragment Title</sp-field-label
