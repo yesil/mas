@@ -52,6 +52,14 @@ class MerchCardEditor extends LitElement {
                 value="${form.size.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
+            <sp-field-label for="card-icon">Badge</sp-field-label>
+            <sp-textfield
+                placeholder="Enter badge text"
+                id="card-badge"
+                data-field="badge"
+                value="${form.badge.values[0]}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
             <sp-field-label for="mnemonic">Mnemonics</sp-field-label>
             <mas-multifield
                 id="mnemonic"

@@ -123,6 +123,14 @@ var Qe=Object.defineProperty;var we=n=>{throw TypeError(n)};var Xe=(n,e,t)=>e in
                 value="${e.size.values[0]}"
                 @change="${this.updateFragment}"
             ></sp-textfield>
+            <sp-field-label for="card-icon">Badge</sp-field-label>
+            <sp-textfield
+                placeholder="Enter badge text"
+                id="card-badge"
+                data-field="badge"
+                value="${e.badge.values[0]}"
+                @change="${this.updateFragment}"
+            ></sp-textfield>
             <sp-field-label for="mnemonic">Mnemonics</sp-field-label>
             <mas-multifield
                 id="mnemonic"
