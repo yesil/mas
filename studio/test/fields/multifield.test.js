@@ -8,6 +8,12 @@ import '../../src/fields/mnemonic-field.js';
 
 import { spTheme } from '../utils.js';
 
+const styles = html`<style>
+    mas-multifield {
+        width: 600px;
+    }
+</style>`;
+
 describe('Multifield', () => {
     it('should render without throwing an exception', async () => {
         let error = null;
@@ -32,10 +38,14 @@ describe('Multifield', () => {
                             <sp-field-label required for="test1"
                                 >Test field</sp-field-label
                             >
-                            <sp-textfield id="test1"></sp-textfield>
+                            <sp-textfield
+                                class="field"
+                                id="test1"
+                            ></sp-textfield>
                         </div>
                     </template>
                 </mas-multifield>
+                ${styles}
             `,
             { parentNode: spTheme() },
         );
@@ -65,10 +75,14 @@ describe('Multifield', () => {
                             <sp-field-label required for="test1"
                                 >Test field</sp-field-label
                             >
-                            <sp-textfield id="test1"></sp-textfield>
+                            <sp-textfield
+                                class="field"
+                                id="test1"
+                            ></sp-textfield>
                         </div>
                     </template>
                 </mas-multifield>
+                ${styles}
             `,
             { parentNode: spTheme() },
         );
@@ -97,11 +111,7 @@ describe('Multifield', () => {
                         <mas-mnemonic-field></mas-mnemonic-field>
                     </template>
                 </mas-multifield>
-                <style>
-                    mas-multifield {
-                        width: 600px;
-                    }
-                </style>
+                ${styles}
             `,
             { parentNode: spTheme() },
         );

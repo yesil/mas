@@ -26,7 +26,6 @@ class MasMultifield extends LitElement {
         // auto assign ids.
         this.value =
             this.value?.map((field, i) => ({
-                id: i.toString(),
                 ...field,
             })) ?? [];
     }
@@ -58,13 +57,20 @@ class MasMultifield extends LitElement {
 
     // Add a new field
     addField() {
-        this.value = [...this.value, { id: Date.now().toString() }];
+        this.value = [...this.value, {}];
         this.#changed();
     }
 
-    // Remove a field by its id
-    removeField(id) {
-        this.value = this.value.filter((field) => field.id !== id);
+    getFieldIndex(element) {
+        return Array.from(
+            this.shadowRoot.querySelectorAll('.field-wrapper'),
+        ).indexOf(element.closest('.field-wrapper'));
+    }
+
+    // Remove a field by its index
+    removeField(index) {
+        this.value.splice(index, 1);
+        this.value = [...this.value];
         this.#changed();
     }
 
@@ -80,8 +86,12 @@ class MasMultifield extends LitElement {
     // Handle the value change of a field
     handleChange(e) {
         e.stopPropagation();
-        const { id, value: newValue } = e.detail;
-        const value = this.value.find((f) => f.id === id);
+        let newValue = e.target.value;
+        if (typeof newValue === 'string') {
+            newValue = { value: newValue };
+        }
+        const index = this.getFieldIndex(e.target);
+        const value = this.value[index];
         if (!value) return;
         Object.assign(value, newValue);
         // Dispatch change event
@@ -138,8 +148,9 @@ class MasMultifield extends LitElement {
 
     // Render individual field with reorder and delete options
     renderField(field, index) {
-        const fieldEl = this.#template.cloneNode(true).firstElementChild;
-
+        let fieldEl = this.#template.cloneNode(true).firstElementChild;
+        // if the element is a wrapper, get the field element
+        fieldEl = fieldEl.querySelector('.field') ?? fieldEl;
         Object.keys(field).forEach((key) => {
             fieldEl.setAttribute(key, field[key]);
         });
@@ -157,7 +168,7 @@ class MasMultifield extends LitElement {
                 ${fieldEl}
                 <sp-icon-close
                     label="Remove field"
-                    @click=${() => this.removeField(field.id)}
+                    @click=${() => this.removeField(index)}
                 ></sp-icon-close>
                 <sp-icon-drag-handle label="Order"></sp-icon-drag-handle>
             </div>
@@ -209,11 +220,6 @@ class MasMultifield extends LitElement {
 
         .field-wrapper.dragover {
             border: 1px dashed #007bff;
-        }
-
-        .field {
-            flex-grow: 1;
-            margin-right: 10px;
         }
 
         sp-icon-drag-handle {
