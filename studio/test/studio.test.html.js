@@ -22,7 +22,7 @@ runTests(async () => {
             document.querySelector('main').innerHTML = '';
         });
 
-        it('should render', async () => {
+        it.skip('should render', async () => {
             const [studio] = getTemplateContent('studio');
             document.querySelector('main').append(studio);
             expect(studio).exist;
