@@ -57,8 +57,8 @@ class MnemonicField extends LitElement {
         return html`
             <sp-field-label required for="icon">Icon URL</sp-field-label>
             <sp-textfield id="icon" required placeholder="Enter icon URL" value="${this.icon}" @change="${this.handleChange}"></sp-textfield>
-            <sp-field-label required for="alt">Alt text</sp-field-label>
-            <sp-textfield id="alt" required placeholder="enter alt text" value="${this.alt}" @change="${this.handleChange}"></sp-textfield>
+            <sp-field-label for="alt">Alt text</sp-field-label>
+            <sp-textfield id="alt" placeholder="enter alt text" value="${this.alt}" @change="${this.handleChange}"></sp-textfield>
             <sp-field-label for="link">Link</sp-field-label>
             <sp-textfield id="link" placeholder="Enter target link" value="${this.link}" @change="${this.handleChange}"></sp-textfield
         `;
