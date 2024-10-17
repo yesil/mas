@@ -434,7 +434,6 @@ class MasStudio extends LitElement {
     /** Refresh the fragment with locally updated data and awaits until ready */
     async refreshFragment(e) {
         if (!this.fragmentElement) return;
-        console.log('Refreshing fragment', e);
         this.fragment.eventTarget ??= this.fragmentElement.parentElement;
         this.fragmentElement.refresh(false);
         await this.fragmentElement.updateComplete;

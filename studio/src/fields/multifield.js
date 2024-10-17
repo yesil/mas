@@ -4,8 +4,9 @@ import { EVENT_CHANGE } from '../events.js';
 class MasMultifield extends LitElement {
     static get properties() {
         return {
-            value: { type: Array },
-            draggingIndex: { type: Number },
+            min: { type: Number, attribute: true },
+            value: { type: Array, attribute: false },
+            draggingIndex: { type: Number, state: true },
         };
     }
 
@@ -17,6 +18,7 @@ class MasMultifield extends LitElement {
     constructor() {
         super();
         this.draggingIndex = -1;
+        this.min = 0;
         this.initValue();
     }
 
@@ -48,7 +50,9 @@ class MasMultifield extends LitElement {
         this.#template = template.content;
         template.remove();
         if (this.value.length === 0) {
-            this.addField();
+            for (let i = 0; i < this.min; i++) {
+                this.addField();
+            }
         }
     }
 
@@ -187,7 +191,12 @@ class MasMultifield extends LitElement {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
-            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .field-wrapper:hover {
+            outline: 2px dashed var(--spectrum-global-color-gray-400);
+            border-radius: var(--spectrum-global-dimension-size-50);
         }
 
         .field-wrapper > *:first-child {

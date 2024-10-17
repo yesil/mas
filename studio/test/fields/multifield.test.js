@@ -41,16 +41,37 @@ describe('Multifield', () => {
         );
         expect(
             el.shadowRoot.querySelectorAll('.field-wrapper').length,
-        ).to.equal(1);
+        ).to.equal(0);
         const addButton = el.shadowRoot.querySelector('sp-action-button');
         addButton.click();
         await el.updateComplete;
         expect(
             el.shadowRoot.querySelectorAll('.field-wrapper').length,
-        ).to.equal(2);
+        ).to.equal(1);
         const removeButton = el.shadowRoot.querySelector('sp-icon-close');
         removeButton.click();
         await el.updateComplete;
+        expect(
+            el.shadowRoot.querySelectorAll('.field-wrapper').length,
+        ).to.equal(0);
+    });
+
+    it('should support min attribute', async () => {
+        const el = await fixture(
+            html`
+                <mas-multifield min="1">
+                    <template>
+                        <div>
+                            <sp-field-label required for="test1"
+                                >Test field</sp-field-label
+                            >
+                            <sp-textfield id="test1"></sp-textfield>
+                        </div>
+                    </template>
+                </mas-multifield>
+            `,
+            { parentNode: spTheme() },
+        );
         expect(
             el.shadowRoot.querySelectorAll('.field-wrapper').length,
         ).to.equal(1);
