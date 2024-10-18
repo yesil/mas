@@ -14,7 +14,7 @@ export class Fragment {
      * @param {*} eventTarget DOM element to dispatch events from
      */
     constructor(
-        { id, etag, model, path, title, status, modified, fields },
+        { id, etag, model, path, title, description, status, modified, fields },
         eventTarget,
     ) {
         this.id = id;
@@ -23,6 +23,7 @@ export class Fragment {
         this.path = path;
         this.name = path.split('/').pop();
         this.title = title;
+        this.description = description;
         this.status = status;
         this.modified = modified;
         this.fields = fields;

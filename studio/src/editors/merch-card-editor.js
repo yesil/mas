@@ -109,9 +109,9 @@ class MerchCardEditor extends LitElement {
         const mnemonicAlt = [];
         const mnemonicLink = [];
         e.target.value.forEach(({ icon, alt, link }) => {
-            if (icon) mnemonicIcon.push(icon);
-            if (alt) mnemonicAlt.push(alt);
-            if (link) mnemonicLink.push(link);
+            mnemonicIcon.push(icon ?? '');
+            mnemonicAlt.push(alt ?? '');
+            mnemonicLink.push(link ?? '');
         });
         this.fragment.updateField('mnemonicIcon', mnemonicIcon);
         this.fragment.updateField('mnemonicAlt', mnemonicAlt);
