@@ -44,6 +44,12 @@ export class Fragment {
         return this.status === 'PUBLISHED' ? 'positive' : 'info';
     }
 
+    refreshFrom(fragmentData) {
+        Object.assign(this, fragmentData);
+        this.hasChanges = false;
+        this.notify();
+    }
+
     notify() {
         this.eventTarget.dispatchEvent(
             new CustomEvent(EVENT_CHANGE, { detail: this }),
