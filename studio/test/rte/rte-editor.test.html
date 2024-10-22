@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Porsemirror RTE Editor custom element</title>
+        <meta name="nofollow-links" content="on" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script src="./rte-editor.test.html.js" type="module"></script>
+        <style>
+            main {
+                margin: 32px;
+                display: grid;
+                gap: 32px;
+                grid-template-columns: 1fr 1fr;
+                height: 90vh;
+            }
+            sp-theme {
+                display: contents;
+            }
+            rte-editor {
+                max-height: 500px;
+            }
+        </style>
+    </head>
+    <body>
+        <mas-commerce-service></mas-commerce-service>
+        <main>
+            <sp-theme color="light" scale="medium"></sp-theme>
+        </main>
+        <template id="rte">
+            <rte-editor>
+                <p>Text and links only</p>
+                <a href="https://www.adobe.com">Adobe</a>
+                <span is="inline-price" data-wcs-osi="abm"></span>
+                <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+            </rte-editor>
+        </template>
+        <template id="rte-text-price-only">
+            <rte-editor inline-price>
+                <p>Text, links and prices</p>
+                <a href="https://www.adobe.com">Adobe</a>
+                <span is="inline-price" data-wcs-osi="abm"></span>
+                <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+            </rte-editor>
+        </template>
+        <template id="rte-link-checkout-only">
+            <rte-editor checkout-link>
+                <p>Text, links and checkout links</p>
+                <a href="https://www.adobe.com">Adobe</a>
+                <span is="inline-price" data-wcs-osi="abm"></span>
+                <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+            </rte-editor>
+        </template>
+        <template id="rte-all">
+            <rte-editor inline-price checkout-link ost>
+                <p>Text, links, prices, checkout links and OST</p>
+                <a href="https://www.adobe.com">Adobe</a>
+                <span is="inline-price" data-wcs-osi="abm"></span>
+                <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+            </rte-editor>
+        </template>
+    </body>
+</html>

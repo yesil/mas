@@ -14,3 +14,9 @@ export function spTheme() {
     theme.scale = 'medium';
     return theme;
 }
+
+export function createFromTemplate(id) {
+    const [rte] = getTemplateContent(id);
+    document.querySelector('sp-theme').append(rte);
+    return rte;
+}

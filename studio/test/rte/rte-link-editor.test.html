@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        <title>RTE link editor custom element</title>
+        <meta name="nofollow-links" content="on" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script src="./rte-link-editor.test.html.js" type="module"></script>
+        <style>
+            main {
+                margin: 32px;
+                display: grid;
+                gap: 32px;
+                grid-template-columns: 1fr 1fr;
+                height: 90vh;
+            }
+            sp-theme {
+                display: contents;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <sp-theme color="light" scale="medium"></sp-theme>
+        </main>
+        <template id="rteLink">
+            <rte-link-editor></rte-link-editor>
+        </template>
+    </body>
+</html>
