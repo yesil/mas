@@ -138,6 +138,7 @@ export function getOffferSelectorTool() {
                 <div id="ost"></div>
             </sp-dialog-wrapper>
         </overlay-trigger>
+        </sp-overlay>
     `;
 }
 

@@ -11,7 +11,7 @@ import '../../src/aem/render-view.js';
 import '../src/swc.js';
 import '../src/studio.js';
 
-import { getTemplateContent, delay } from './utils.js';
+import { getTemplateContent } from './utils.js';
 
 import '@tinymce/tinymce-webcomponent';
 
@@ -22,7 +22,7 @@ runTests(async () => {
             document.querySelector('main').innerHTML = '';
         });
 
-        it.skip('should render', async () => {
+        it('can render existing html', async () => {
             const [studio] = getTemplateContent('studio');
             document.querySelector('main').append(studio);
             expect(studio).exist;

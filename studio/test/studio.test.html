@@ -6,20 +6,14 @@
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="aem-base-url" content="https://mas-proxy-odin.corp.adobe.com" />
-
-        <!-- this is injected in the iframes created by the TinyMCE RTE -->
-        <meta
-            id="mas-src"
-            content="/__wds-outside-root__/1/node_modules/@adobecom/milo/libs/features/mas/mas/src/mas.js"
-        />
         <script>
             window.process = { env: {} };
             window.adobeid = {
                 authorize: () => localStorage.getItem('masAccessToken'),
             };
         </script>
-        <script src="/__wds-outside-root__/1/node_modules/tinymce/tinymce.js"></script>
         <script src="studio.test.html.js" type="module"></script>
+        <mas-commerce-service></mas-commerce-service>
 
         <!-- OST -->
         <script src="../ost/index.js"></script>
@@ -28,6 +22,7 @@
         <!-- MAS Studio styles -->
         <link rel="stylesheet" href="../style.css" />
     </head>
+
 
     <body>
         <main></main>
