@@ -65,7 +65,6 @@ export class RteLinkEditor extends LitElement {
                 placeholder="https://"
                 .value=${this.url}
                 @input=${(e) => (this.url = e.target.value)}
-                required
             ></sp-textfield>
         `;
     }
@@ -80,7 +79,6 @@ export class RteLinkEditor extends LitElement {
                 placeholder="Display text"
                 .value=${this.text}
                 @input=${(e) => (this.text = e.target.value)}
-                required
             ></sp-textfield>
 
             <sp-field-label for="linkTitle">Title</sp-field-label>

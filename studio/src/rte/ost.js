@@ -1,9 +1,6 @@
 import { html } from 'lit';
 
 let ostRoot;
-let currentRte;
-let currentVariant;
-let clickedOffer;
 
 const ctaTexts = {
     'buy-now': 'Buy now',
@@ -18,6 +15,7 @@ const ctaTexts = {
     'take-the-quiz': 'Take the quiz',
     'see-more': 'See more',
     'upgrade-now': 'Upgrade now',
+    'save-now': 'Save now',
 };
 
 const noPlaceholderCardVariants = ['ccd-action', 'ah'];
@@ -113,23 +111,9 @@ export function onSelect(offerSelectorId, type, offer, options, promoOverride) {
     );
 
     console.log(`Use Link: ${link.outerHTML}`);
-    if (clickedOffer) {
-        clickedOffer.outerHTML = link.outerHTML;
-    } else {
-        currentRte.appendContent(link.outerHTML);
-    }
+
     closeOstDialog();
 }
-
-const getOstEl = () => document.getElementById('ostDialog');
-
-const openOstDialog = () => {
-    getOstEl().open = true;
-};
-
-const closeOstDialog = () => {
-    getOstEl().open = false;
-};
 
 export function getOffferSelectorTool() {
     return html`
@@ -138,40 +122,31 @@ export function getOffferSelectorTool() {
                 <div id="ost"></div>
             </sp-dialog-wrapper>
         </overlay-trigger>
-        </sp-overlay>
     `;
 }
 
-export function openOfferSelectorTool(e, rte, variant) {
-    currentRte = rte;
-    currentVariant = variant;
-    clickedOffer = e.detail?.clickedElement;
+export function openOfferSelectorTool(element) {
+    const ostRoot = document.createElement('div');
     let searchOfferSelectorId;
-    if (!ostRoot || clickedOffer) {
-        ostRoot = document.getElementById('ost');
-        const aosAccessToken =
-            localStorage.getItem('masAccessToken') ??
-            window.adobeid.authorize();
-        const searchParameters = new URLSearchParams();
-        const defaultPlaceholderOptions = {
-            ...ostDefaults.defaultPlaceholderOptions,
-        };
-        if (clickedOffer) {
-            searchOfferSelectorId = clickedOffer.getAttribute('data-wcs-osi');
-            Object.assign(defaultPlaceholderOptions, clickedOffer.dataset);
-        }
-        window.ost.openOfferSelectorTool({
-            ...ostDefaults,
-            rootElement: ostRoot,
-            zIndex: 20,
-            aosAccessToken,
-            searchParameters,
-            searchOfferSelectorId,
-            defaultPlaceholderOptions,
-            onSelect,
-        });
+    const aosAccessToken =
+        localStorage.getItem('masAccessToken') ?? window.adobeid.authorize();
+    const searchParameters = new URLSearchParams();
+    const defaultPlaceholderOptions = {
+        ...ostDefaults.defaultPlaceholderOptions,
+    };
+    if (element) {
+        searchOfferSelectorId = element.getAttribute('data-wcs-osi');
+        Object.assign(defaultPlaceholderOptions, clickedOffer.dataset);
     }
-    if (ostRoot) {
-        openOstDialog();
-    }
+    window.ost.openOfferSelectorTool({
+        ...ostDefaults,
+        rootElement: ostRoot,
+        zIndex: 20,
+        aosAccessToken,
+        searchParameters,
+        searchOfferSelectorId,
+        defaultPlaceholderOptions,
+        onSelect,
+    });
+    return ostRoot;
 }

@@ -34,8 +34,11 @@
 
             runTests(async () => {
                 describe('RTE link editor', () => {
-                    it('should render empty form', async () => {
-                        const linkEditor = await createFromTemplate('default');
+                    it('should render empty form', async function () {
+                        const linkEditor = await createFromTemplate(
+                            'default',
+                            this.test.title,
+                        );
                         expect(linkEditor.shadowRoot).to.exist;
 
                         // Check default property values
@@ -67,8 +70,11 @@
                         expect(linkText.hasAttribute('required')).to.be.true;
                     });
 
-                    it('should render given values', async () => {
-                        const linkEditor = await createFromTemplate('values');
+                    it('should render given values', async function () {
+                        const linkEditor = await createFromTemplate(
+                            'values',
+                            this.test.title,
+                        );
                         expect(linkEditor.shadowRoot).to.exist;
 
                         // Verify initialized properties
@@ -95,8 +101,11 @@
                         expect(linkTarget.value).to.equal('_blank');
                     });
 
-                    it('should render empty form with extra checkout parameters field', async () => {
-                        const linkEditor = await createFromTemplate('checkout');
+                    it('should render empty form with extra checkout parameters field', async function () {
+                        const linkEditor = await createFromTemplate(
+                            'checkout',
+                            this.test.title,
+                        );
                         expect(linkEditor.shadowRoot).to.exist;
 
                         // Verify checkout parameters field exists
@@ -110,9 +119,11 @@
                         expect(checkoutParams.value).to.equal('');
                     });
 
-                    it('should emit save event with form data', async () => {
-                        const linkEditor =
-                            await createFromTemplate('checkoutFilled');
+                    it('should emit save event with form data', async function () {
+                        const linkEditor = await createFromTemplate(
+                            'checkoutFilled',
+                            this.test.title,
+                        );
 
                         const listener = oneEvent(linkEditor, 'save').then(
                             (e) => e.detail,
@@ -131,8 +142,11 @@
                         });
                     });
 
-                    it('should emit close event', async () => {
-                        const linkEditor = await createFromTemplate('default');
+                    it('should emit close event', async function () {
+                        const linkEditor = await createFromTemplate(
+                            'default',
+                            this.test.title,
+                        );
                         const listener = oneEvent(linkEditor, 'close');
 
                         const cancelButton =

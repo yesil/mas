@@ -19,6 +19,8 @@
                 max-height: 500px;
             }
         </style>
+        <!-- OST -->
+        <script src="../../ost/index.js"></script>
     </head>
     <body>
         <script type="module">
@@ -156,6 +158,32 @@
                         expect(a.title).to.equal('Adobe homepage');
                     });
                 });
+
+                // These tests are not very stable in headless chrome. Enable them for local testing.
+                describe('RTE Editor: OST features', () => {
+                    let rte;
+
+                    const openOST = async function () {
+                        rte.linkEditorButtonElement.click();
+                        rte.requestUpdate();
+                        await rte.updateComplete;
+                        await rte.linkEditorElement;
+                    };
+
+                    const firstPrice = () =>
+                        rte.shadowRoot.querySelector(
+                            '.ProseMirror span[is="inline-price"]',
+                        );
+
+                    const firstCheckoutLink = () =>
+                        rte.shadowRoot.querySelector(
+                            '.ProseMirror a[is="checkout-link"]',
+                        );
+
+                    it.only('should open OST on link click and support update', async function () {
+                        rte = await createFromTemplate('ost1', this.test.title);
+                    });
+                });
             });
         </script>
         <mas-commerce-service></mas-commerce-service>
@@ -196,6 +224,11 @@
                 <a href="https://www.adobe.com">Adobe</a>
                 <span is="inline-price" data-wcs-osi="abm"></span>
                 <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+            </rte-editor>
+        </template>
+        <template id="ost1">
+            <rte-editor inline-price ost>
+                <span is="inline-price" data-wcs-osi="abm"></span>
             </rte-editor>
         </template>
     </body>

@@ -5,6 +5,7 @@ import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history, undo, redo } from 'prosemirror-history';
+import { openOfferSelectorTool } from './ost.js';
 
 class RteEditor extends LitElement {
     static properties = {
@@ -23,7 +24,7 @@ class RteEditor extends LitElement {
             flex-direction: column;
             font-size: var(--spectrum-font-size-200);
             background-color: var(--spectrum-global-color-gray-200);
-            padding: 4px;
+            padding: 6px;
         }
 
         :host > div {
@@ -33,9 +34,27 @@ class RteEditor extends LitElement {
             color: var(--spectrum-global-color-gray-800);
             background-color: var(--spectrum-global-color-gray-50);
         }
+
+        span[is='inline-price'] {
+            cursor: default;
+            user-select: all;
+        }
+
+        sp-underlay:not([open]) + sp-dialog {
+            display: none;
+        }
+        sp-underlay + sp-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            background: var(--spectrum-gray-100);
+        }
     `;
 
     #editorSchema;
+    #ostElement = nothing;
 
     constructor() {
         super();
@@ -117,6 +136,9 @@ class RteEditor extends LitElement {
                     const inlinePrice = document.createElement('span', {
                         is: 'inline-price',
                     });
+                    inlinePrice.setAttribute('is', 'inline-price');
+                    inlinePrice.setAttribute('contenteditable', 'false');
+
                     Object.entries(node.attrs.dataset || {}).forEach(
                         ([key, value]) => {
                             inlinePrice.dataset[key] = value;
@@ -242,6 +264,12 @@ class RteEditor extends LitElement {
         this.initEditorSchema();
         this.initializeEditor();
         this.value = this.innerHTML;
+
+        // Create a link element to reference external CSS
+        const link = document.createElement('link');
+        link.setAttribute('rel', 'stylesheet');
+        link.setAttribute('href', '/ost/index.css');
+        this.shadowRoot.appendChild(link);
     }
 
     connectedCallback() {
@@ -562,7 +590,7 @@ class RteEditor extends LitElement {
         <sp-divider size="s" vertical></sp-divider>
         <sp-action-button
                     emphasized
-                    @click=${() => (this.showOfferSelectorTool = true)}
+                    @click=${this.openOfferSelectorTool}
                     title="Offer Selector Tool"
                 >
                     <sp-icon-offer slot="icon"></sp-icon-offer>
@@ -584,6 +612,30 @@ class RteEditor extends LitElement {
                 @save="${this.#handleLinkSave}"
             ></rte-link-editor>
         `;
+    }
+
+    get #ostEditorold() {
+        return html`
+            <sp-underlay ?open="${this.showOfferSelectorTool}">
+                <sp-dialog size="l"> ${this.#ostElement} </sp-dialog>
+            </sp-underlay>
+        `;
+    }
+
+    get #ostEditor() {
+        return html`
+        <sp-overlay type="modal" ?open=${this.showOfferSelectorTool}>
+            <sp-dialog-wrapper dismissable underlay>
+                 ${this.#ostElement}
+            </sp-dialog-wrapper>
+        </overlay-trigger>
+        </sp-overlay>
+        `;
+    }
+
+    async openOfferSelectorTool(e) {
+        this.#ostElement = openOfferSelectorTool();
+        this.showOfferSelectorTool = true;
     }
 
     render() {
@@ -623,7 +675,7 @@ class RteEditor extends LitElement {
                 </sp-action-button>
                 ${this.#linkEditorButton} ${this.offerSelectorToolButton}
             </sp-action-group>
-            ${this.#linkEditor}
+            ${this.#linkEditor} ${this.#ostEditor}
         `;
     }
 }
