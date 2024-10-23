@@ -4,7 +4,6 @@
         <title>Porsemirror RTE Editor custom element</title>
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script src="./rte-editor.test.html.js" type="module"></script>
         <style>
             main {
                 margin: 32px;
@@ -33,33 +32,117 @@
             import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
             import { withWcs } from '@adobecom/milo/libs/features/mas/mocks/wcs.js';
 
-            import { createFromTemplate } from '../utils.js';
+            import {
+                createFromTemplate,
+                delay,
+                simulateClick,
+                simulateSelection,
+            } from '../utils.js';
 
             runTests(async () => {
                 await mockFetch(withWcs);
                 describe('RTE Editor', () => {
-                    it.only('should render with default attributes', async () => {
-                        const rte = await createFromTemplate('rte');
+                    it('should render with default attributes', async function() {
+                        const rte = await createFromTemplate('rte', this.test.title);
                         expect(rte.shadowRoot).exist;
                     });
 
-                    it('should support inline-price', async () => {
+                    it('should support inline-price', async function() {
                         const rte = await createFromTemplate(
                             'rte-text-price-only',
+                            this.test.title,
                         );
                         expect(rte.shadowRoot).exist;
                     });
 
-                    it('should support checkout-link', async () => {
+                    it('should support checkout-link', async function() {
                         const rte = await createFromTemplate(
                             'rte-link-checkout-only',
+                            this.test.title,
                         );
                         expect(rte.shadowRoot).exist;
                     });
 
-                    it('should support OST', async () => {
-                        const rte = await createFromTemplate('rte-all');
+                    it('should support OST', async function() {
+                        const rte = await createFromTemplate('rte-all', this.test.title);
                         expect(rte.shadowRoot).exist;
+                    });
+                });
+
+                describe('RTE Editor: link features', () => {
+                    let rte;
+                    const clickSave = () => {
+                        const saveButton =
+                            rte.linkEditorElement.shadowRoot.getElementById(
+                                'saveButton',
+                            );
+                        saveButton.click();
+                    };
+
+                    const openLinkEditor = async function() {
+                        rte.linkEditorButtonElement.click();
+                        rte.requestUpdate();
+                        await rte.updateComplete;
+                        await rte.linkEditorElement;
+                    };
+
+                    const firstLink = () =>
+                        rte.shadowRoot.querySelector('.ProseMirror a');
+
+                    const firstParagraph = () =>
+                        rte.shadowRoot.querySelector('.ProseMirror p');
+
+                    it('should open the link editor on link click and support update', async function() {
+                        rte = await createFromTemplate('rte', this.test.title);
+                        await simulateClick(firstLink(), 20, 10);
+                        await openLinkEditor();
+                        const { url, text, title, target, checkoutParameters } =
+                            rte.linkEditorElement;
+                        expect(url).to.equal('https://www.adobe.com');
+                        expect(text).to.equal('Adobe');
+                        expect(title).to.equal('adobe.com homepage');
+                        expect(target).to.equal('_self');
+                        rte.linkEditorElement.url = 'https://www.adobe.com/max';
+                        rte.linkEditorElement.text = 'ebodA';
+                        rte.linkEditorElement.requestUpdate();
+                        clickSave();
+                        await delay(100);
+                        const a = firstLink();
+                        expect(a.href).to.equal('https://www.adobe.com/max');
+                        expect(a.innerText).to.equal('ebodA');
+                    });
+
+                    it('should open the link editor on selection and support update', async function() {
+                        rte = await createFromTemplate('rte', this.test.title);
+                        await simulateSelection(firstParagraph(), 360, 560);
+                        await openLinkEditor();
+
+                        expect(rte.linkEditorElement.text).to.equal('links');
+                        rte.linkEditorElement.url = 'https://www.adobe.com';
+                        rte.linkEditorElement.title = 'Adobe homepage';
+                        rte.linkEditorElement.requestUpdate();
+                        clickSave();
+                        await delay(100);
+                        const a = firstLink();
+                        expect(a.href).to.equal('https://www.adobe.com/');
+                        expect(a.innerText).to.equal('links');
+                        expect(a.title).to.equal('Adobe homepage');
+                    });
+
+                    it('should open the link editor and support inserting link', async function() {
+                        rte = await createFromTemplate('rte', this.test.title);
+                        await simulateClick(firstParagraph(), 200, 20);
+                        await openLinkEditor();
+                        rte.linkEditorElement.url = 'https://www.adobe.com';
+                        rte.linkEditorElement.text = 'Adobe';
+                        rte.linkEditorElement.title = 'Adobe homepage';
+                        rte.linkEditorElement.requestUpdate();
+                        clickSave();
+                        await delay(100);
+                        const a = firstLink();
+                        expect(a.href).to.equal('https://www.adobe.com/');
+                        expect(a.innerText).to.equal('Adobe');
+                        expect(a.title).to.equal('Adobe homepage');
                     });
                 });
             });
@@ -75,7 +158,9 @@
                     >Adobe</a
                 >
                 <span is="inline-price" data-wcs-osi="abm"></span>
+                <!--price properties will be ignored -->
                 <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+                <!--co properties will be ignored -->
             </rte-editor>
         </template>
         <template id="rte-text-price-only">

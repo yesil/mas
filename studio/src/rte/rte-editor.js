@@ -527,7 +527,7 @@ class RteEditor extends LitElement {
         const { url, text, title, checkoutParameters } = this.#getLinkAttrs();
         this.showLinkEditor = true;
         await this.updateComplete;
-        Object.assign(this.rteLinkEditorElement, {
+        Object.assign(this.linkEditorElement, {
             url,
             text,
             title,
@@ -535,9 +535,14 @@ class RteEditor extends LitElement {
         });
     }
 
-    get rteLinkEditorButton() {
+    get linkEditorButtonElement() {
+        return this.shadowRoot.querySelector('#linkEditorButton');
+    }
+
+    get #linkEditorButton() {
         return html`
             <sp-action-button
+                id="linkEditorButton"
                 emphasized
                 @click=${this.openLinkEditor}
                 title="Add Link (Ctrl+K)"
@@ -562,11 +567,11 @@ class RteEditor extends LitElement {
             `;
     }
 
-    get rteLinkEditorElement() {
+    get linkEditorElement() {
         return this.shadowRoot.querySelector('rte-link-editor');
     }
 
-    get rteLinkEditor() {
+    get #linkEditor() {
         if (!this.showLinkEditor) return nothing;
         return html`
             <rte-link-editor
@@ -612,9 +617,9 @@ class RteEditor extends LitElement {
                         slot="icon"
                     ></sp-icon-text-underline>
                 </sp-action-button>
-                ${this.rteLinkEditorButton} ${this.offerSelectorToolButton}
+                ${this.#linkEditorButton} ${this.offerSelectorToolButton}
             </sp-action-group>
-            ${this.rteLinkEditor}
+            ${this.#linkEditor}
         `;
     }
 }
