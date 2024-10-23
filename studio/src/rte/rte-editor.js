@@ -363,15 +363,31 @@ class RteEditor extends LitElement {
         const { selection } = state;
         const markType = this.#editorSchema.marks.link;
 
-        // Get the cursor position
-        const $pos = selection.$head;
+        // If there's a selection, use that instead of cursor position
+        if (!selection.empty) {
+            const { from, to } = selection;
+            // Get the first link mark in the selection if it exists
+            const marks = state.doc.rangeHasMark(from, to, markType);
+            const linkMark = marks
+                ? state.doc
+                      .resolve(from)
+                      .marks()
+                      .find((mark) => mark.type === markType)
+                : null;
 
-        // Find marks at cursor position
+            return {
+                url: linkMark ? linkMark.attrs.href : '',
+                title: linkMark ? linkMark.attrs.title : '',
+                text: state.doc.textBetween(from, to),
+            };
+        }
+
+        // If no selection, fall back to cursor position behavior
+        const $pos = selection.$head;
         const marks = $pos.marks();
         const linkMark = marks.find((mark) => mark.type === markType);
 
         if (!linkMark) {
-            // No link at cursor position
             return {
                 url: '',
                 title: '',
@@ -379,7 +395,7 @@ class RteEditor extends LitElement {
             };
         }
 
-        // Find the full node that contains this mark
+        // Find the full node that contains this mark when at cursor
         let startPos = $pos.pos;
         let endPos = $pos.pos;
 
@@ -416,29 +432,92 @@ class RteEditor extends LitElement {
         };
     }
 
-    handleLinkSave(e) {
+    #handleLinkSave(e) {
         const { url, text, title } = e.detail;
         const { state, dispatch } = this.editorView;
+        const { selection } = state;
+        const markType = this.#editorSchema.marks.link;
+        let tr = state.tr;
 
-        if (state.selection.empty) return;
+        if (!selection.empty) {
+            // Handle selection case
+            const { from, to } = selection;
 
-        // Remove existing link marks in the selection
-        const { from, to } = state.selection;
-        const tr = state.tr;
+            // First remove any existing link marks in the selection
+            if (state.doc.rangeHasMark(from, to, markType)) {
+                tr.removeMark(from, to, markType);
+            }
 
-        if (state.doc.rangeHasMark(from, to, this.#editorSchema.marks.link)) {
-            tr.removeMark(from, to, this.#editorSchema.marks.link);
+            // Update the text if it changed
+            if (text && text !== state.doc.textBetween(from, to)) {
+                tr.replaceWith(from, to, state.schema.text(text));
+            }
+
+            // Add the new link mark
+            const mark = markType.create({ href: url, title });
+            tr.addMark(from, text ? from + text.length : to, mark);
+        } else {
+            // Handle cursor position case
+            const $pos = selection.$head;
+            const marks = $pos.marks();
+            const linkMark = marks.find((mark) => mark.type === markType);
+
+            if (linkMark) {
+                // Find the full extent of the existing link
+                let startPos = $pos.pos;
+                let endPos = $pos.pos;
+
+                // Search backwards to find start of link
+                let searchPos = $pos.pos;
+                while (searchPos > 0) {
+                    const marks = state.doc.rangeHasMark(
+                        searchPos - 1,
+                        searchPos,
+                        markType,
+                    );
+                    if (!marks) break;
+                    startPos = searchPos - 1;
+                    searchPos--;
+                }
+
+                // Search forwards to find end of link
+                searchPos = $pos.pos;
+                while (searchPos < state.doc.content.size) {
+                    const marks = state.doc.rangeHasMark(
+                        searchPos,
+                        searchPos + 1,
+                        markType,
+                    );
+                    if (!marks) break;
+                    endPos = searchPos + 1;
+                    searchPos++;
+                }
+
+                // Remove the old link mark
+                tr.removeMark(startPos, endPos, markType);
+
+                // Update the text if it changed
+                if (text && text !== state.doc.textBetween(startPos, endPos)) {
+                    tr.replaceWith(startPos, endPos, state.schema.text(text));
+                }
+
+                // Add the new link mark
+                const mark = markType.create({ href: url, title });
+                tr.addMark(
+                    startPos,
+                    text ? startPos + text.length : endPos,
+                    mark,
+                );
+            } else {
+                // No existing link at cursor, create new one at cursor position
+                if (text) {
+                    const pos = selection.$head.pos;
+                    tr.replaceWith(pos, pos, state.schema.text(text));
+                    const mark = markType.create({ href: url, title });
+                    tr.addMark(pos, pos + text.length, mark);
+                }
+            }
         }
-
-        // Update the text content if it changed
-        const oldText = state.doc.textBetween(from, to);
-        if (text && text !== oldText) {
-            tr.replaceWith(from, to, this.#editorSchema.schema.text(text));
-        }
-
-        // Add the new link mark
-        const mark = this.#editorSchema.marks.link.create({ href: url, title });
-        tr.addMark(from, to, mark);
 
         dispatch(tr);
         this.showLinkEditor = false;
@@ -493,7 +572,7 @@ class RteEditor extends LitElement {
             <rte-link-editor
                 dialog
                 @close="${() => (this.showLinkEditor = false)}"
-                @change="${this.handleLinkSave}"
+                @save="${this.#handleLinkSave}"
             ></rte-link-editor>
         `;
     }

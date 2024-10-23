@@ -43,7 +43,9 @@
                         expect(linkEditor.text).to.equal('');
                         expect(linkEditor.title).to.equal('');
                         expect(linkEditor.target).to.equal('_self');
-                        expect(linkEditor.checkoutParameters).to.equal(undefined);
+                        expect(linkEditor.checkoutParameters).to.equal(
+                            undefined,
+                        );
 
                         // Verify form elements exist
                         const linkUrl =
@@ -108,24 +110,19 @@
                         expect(checkoutParams.value).to.equal('');
                     });
 
-                    it('should emit change event with form data', async () => {
+                    it('should emit save event with form data', async () => {
                         const linkEditor =
                             await createFromTemplate('checkoutFilled');
-                        let saveData = null;
 
-                        const listener = oneEvent(linkEditor, 'change').then(
-                            (e) => {
-                                saveData = e.detail;
-                            },
+                        const listener = oneEvent(linkEditor, 'save').then(
+                            (e) => e.detail,
                         );
 
                         const saveButton =
                             linkEditor.shadowRoot.getElementById('saveButton');
                         saveButton.click();
 
-                        await listener;
-
-                        expect(saveData).to.deep.equal({
+                        expect(await listener).to.deep.equal({
                             url: 'https://www.adobe.com',
                             text: 'link text',
                             title: 'test title',

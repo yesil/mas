@@ -143,7 +143,7 @@ export class RteLinkEditor extends LitElement {
             checkoutParameters: this.checkoutParameters,
         };
         this.dispatchEvent(
-            new CustomEvent('change', {
+            new CustomEvent('save', {
                 bubbles: true,
                 composed: true,
                 detail: data,
