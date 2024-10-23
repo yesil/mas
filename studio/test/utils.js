@@ -15,8 +15,9 @@ export function spTheme() {
     return theme;
 }
 
-export function createFromTemplate(id) {
-    const [rte] = getTemplateContent(id);
-    document.querySelector('sp-theme').append(rte);
-    return rte;
+export async function createFromTemplate(id) {
+    const [element] = getTemplateContent(id);
+    document.querySelector('sp-theme').append(element);
+    await element.updateComplete;
+    return element;
 }

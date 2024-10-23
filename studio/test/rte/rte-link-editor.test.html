@@ -4,7 +4,6 @@
         <title>RTE link editor custom element</title>
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script src="./rte-link-editor.test.html.js" type="module"></script>
         <style>
             main {
                 margin: 32px;
@@ -16,14 +15,169 @@
             sp-theme {
                 display: contents;
             }
+
+            rte-link-editor {
+                max-height: 500px;
+            }
         </style>
     </head>
     <body>
+        <script type="module">
+            import { runTests } from '@web/test-runner-mocha';
+            import { expect } from '@esm-bundle/chai';
+            import { oneEvent } from '@open-wc/testing-helpers/pure';
+
+            import '../../src/swc.js';
+            import '../../src/rte/rte-link-editor.js';
+
+            import { createFromTemplate } from '../utils.js';
+
+            runTests(async () => {
+                describe('RTE link editor', () => {
+                    it('should render empty form', async () => {
+                        const linkEditor = await createFromTemplate('default');
+                        expect(linkEditor.shadowRoot).to.exist;
+
+                        // Check default property values
+                        expect(linkEditor.url).to.equal('');
+                        expect(linkEditor.text).to.equal('');
+                        expect(linkEditor.title).to.equal('');
+                        expect(linkEditor.target).to.equal('_self');
+                        expect(linkEditor.checkoutParameters).to.equal(undefined);
+
+                        // Verify form elements exist
+                        const linkUrl =
+                            linkEditor.shadowRoot.querySelector('#linkUrl');
+                        const linkText =
+                            linkEditor.shadowRoot.querySelector('#linkText');
+                        const linkTitle =
+                            linkEditor.shadowRoot.querySelector('#linkTitle');
+                        const linkTarget =
+                            linkEditor.shadowRoot.querySelector('#linkTarget');
+
+                        expect(linkUrl).to.exist;
+                        expect(linkText).to.exist;
+                        expect(linkTitle).to.exist;
+                        expect(linkTarget).to.exist;
+
+                        // Verify required attributes
+                        expect(linkUrl.hasAttribute('required')).to.be.true;
+                        expect(linkText.hasAttribute('required')).to.be.true;
+                    });
+
+                    it('should render given values', async () => {
+                        const linkEditor = await createFromTemplate('values');
+                        expect(linkEditor.shadowRoot).to.exist;
+
+                        // Verify initialized properties
+                        expect(linkEditor.url).to.equal(
+                            'https://www.adobe.com',
+                        );
+                        expect(linkEditor.text).to.equal('link text');
+                        expect(linkEditor.title).to.equal('test title');
+                        expect(linkEditor.target).to.equal('_blank');
+
+                        // Verify form field values
+                        const linkUrl =
+                            linkEditor.shadowRoot.querySelector('#linkUrl');
+                        const linkText =
+                            linkEditor.shadowRoot.querySelector('#linkText');
+                        const linkTitle =
+                            linkEditor.shadowRoot.querySelector('#linkTitle');
+                        const linkTarget =
+                            linkEditor.shadowRoot.querySelector('#linkTarget');
+
+                        expect(linkUrl.value).to.equal('https://www.adobe.com');
+                        expect(linkText.value).to.equal('link text');
+                        expect(linkTitle.value).to.equal('test title');
+                        expect(linkTarget.value).to.equal('_blank');
+                    });
+
+                    it('should render empty form with extra checkout parameters field', async () => {
+                        const linkEditor = await createFromTemplate('checkout');
+                        expect(linkEditor.shadowRoot).to.exist;
+
+                        // Verify checkout parameters field exists
+                        const checkoutParams =
+                            linkEditor.shadowRoot.querySelector(
+                                '#checkoutParameters',
+                            );
+                        expect(checkoutParams).to.exist;
+
+                        // Verify initial state
+                        expect(checkoutParams.value).to.equal('');
+                    });
+
+                    it('should emit change event with form data', async () => {
+                        const linkEditor =
+                            await createFromTemplate('checkoutFilled');
+                        let saveData = null;
+
+                        const listener = oneEvent(linkEditor, 'change').then(
+                            (e) => {
+                                saveData = e.detail;
+                            },
+                        );
+
+                        const saveButton =
+                            linkEditor.shadowRoot.getElementById('saveButton');
+                        saveButton.click();
+
+                        await listener;
+
+                        expect(saveData).to.deep.equal({
+                            url: 'https://www.adobe.com',
+                            text: 'link text',
+                            title: 'test title',
+                            target: '_blank',
+                            checkoutParameters: 'promoid=test&mv=other',
+                        });
+                    });
+
+                    it('should emit close event', async () => {
+                        const linkEditor = await createFromTemplate('default');
+                        const listener = oneEvent(linkEditor, 'close');
+
+                        const cancelButton =
+                            linkEditor.shadowRoot.querySelector(
+                                'sp-button[variant="secondary"]',
+                            );
+                        cancelButton.click();
+                        expect((await listener).type).to.equal('close');
+                    });
+                });
+            });
+        </script>
+
         <main>
             <sp-theme color="light" scale="medium"></sp-theme>
         </main>
-        <template id="rteLink">
-            <rte-link-editor></rte-link-editor>
+
+        <template id="default">
+            <rte-link-editor open></rte-link-editor>
+        </template>
+
+        <template id="values">
+            <rte-link-editor
+                url="https://www.adobe.com"
+                text="link text"
+                title="test title"
+                target="_blank"
+            ></rte-link-editor>
+        </template>
+
+        <template id="checkout">
+            <rte-link-editor checkout-parameters=""></rte-link-editor>
+        </template>
+
+        <template id="checkoutFilled">
+            <rte-link-editor
+                url="https://www.adobe.com"
+                text="link text"
+                title="test title"
+                target="_blank"
+                checkout-parameters="promoid=test&mv=other"
+            ></rte-link-editor>
         </template>
     </body>
 </html>

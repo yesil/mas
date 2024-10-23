@@ -241,10 +241,23 @@ class RteEditor extends LitElement {
         this.value = this.innerHTML;
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        this.addEventListener('keydown', this.#handleEscKey);
+    }
+
     disconnectedCallback() {
         super.disconnectedCallback();
+        this.removeEventListener('keydown', this.#handleEscKey);
         if (this.editorView) {
             this.editorView.destroy();
+        }
+    }
+
+    #handleEscKey(event) {
+        if (event.key === 'Escape') {
+            this.showLinkEditor = false;
+            this.showOfferSelectorTool = false;
         }
     }
 
@@ -345,27 +358,102 @@ class RteEditor extends LitElement {
         };
     }
 
+    #getLinkAttrs() {
+        const { state } = this.editorView;
+        const { selection } = state;
+        const markType = this.#editorSchema.marks.link;
+
+        // Get the cursor position
+        const $pos = selection.$head;
+
+        // Find marks at cursor position
+        const marks = $pos.marks();
+        const linkMark = marks.find((mark) => mark.type === markType);
+
+        if (!linkMark) {
+            // No link at cursor position
+            return {
+                url: '',
+                title: '',
+                text: '',
+            };
+        }
+
+        // Find the full node that contains this mark
+        let startPos = $pos.pos;
+        let endPos = $pos.pos;
+
+        // Search backwards to find start of link
+        let searchPos = $pos.pos;
+        while (searchPos > 0) {
+            const marks = state.doc.rangeHasMark(
+                searchPos - 1,
+                searchPos,
+                markType,
+            );
+            if (!marks) break;
+            startPos = searchPos - 1;
+            searchPos--;
+        }
+
+        // Search forwards to find end of link
+        searchPos = $pos.pos;
+        while (searchPos < state.doc.content.size) {
+            const marks = state.doc.rangeHasMark(
+                searchPos,
+                searchPos + 1,
+                markType,
+            );
+            if (!marks) break;
+            endPos = searchPos + 1;
+            searchPos++;
+        }
+
+        return {
+            url: linkMark.attrs.href || '',
+            title: linkMark.attrs.title || '',
+            text: state.doc.textBetween(startPos, endPos),
+        };
+    }
+
     handleLinkSave(e) {
-        const { href, title } = e.detail;
+        const { url, text, title } = e.detail;
         const { state, dispatch } = this.editorView;
 
         if (state.selection.empty) return;
 
-        const mark = this.#editorSchema.marks.link.create({ href, title });
-        const tr = state.tr.addMark(
-            state.selection.from,
-            state.selection.to,
-            mark,
-        );
+        // Remove existing link marks in the selection
+        const { from, to } = state.selection;
+        const tr = state.tr;
+
+        if (state.doc.rangeHasMark(from, to, this.#editorSchema.marks.link)) {
+            tr.removeMark(from, to, this.#editorSchema.marks.link);
+        }
+
+        // Update the text content if it changed
+        const oldText = state.doc.textBetween(from, to);
+        if (text && text !== oldText) {
+            tr.replaceWith(from, to, this.#editorSchema.schema.text(text));
+        }
+
+        // Add the new link mark
+        const mark = this.#editorSchema.marks.link.create({ href: url, title });
+        tr.addMark(from, to, mark);
+
         dispatch(tr);
         this.showLinkEditor = false;
     }
 
-    openLinkEditor() {
-        const { state } = this.editorView;
-        if (!state.selection.empty) {
-            this.showLinkEditor = true;
-        }
+    async openLinkEditor() {
+        const { url, text, title, checkoutParameters } = this.#getLinkAttrs();
+        this.showLinkEditor = true;
+        await this.updateComplete;
+        Object.assign(this.rteLinkEditorElement, {
+            url,
+            text,
+            title,
+            checkoutParameters,
+        });
     }
 
     get rteLinkEditorButton() {
@@ -395,14 +483,18 @@ class RteEditor extends LitElement {
             `;
     }
 
+    get rteLinkEditorElement() {
+        return this.shadowRoot.querySelector('rte-link-editor');
+    }
+
     get rteLinkEditor() {
         if (!this.showLinkEditor) return nothing;
         return html`
-            <sp-underlay open>
-                <rte-link-editor
-                    @link-created=${this.handleLinkSave}
-                ></rte-link-editor>
-            </sp-underlay>
+            <rte-link-editor
+                dialog
+                @close="${() => (this.showLinkEditor = false)}"
+                @change="${this.handleLinkSave}"
+            ></rte-link-editor>
         `;
     }
 
