@@ -5,7 +5,8 @@ import {
     pushState,
 } from '@adobecom/milo/libs/features/mas/web-components/src/deeplink.js';
 import './editors/merch-card-editor.js';
-import './rte-editor.js';
+import './rte/rte-editor.js';
+import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
 import './mas-filter-panel.js';
 import './mas-filter-toolbar.js';

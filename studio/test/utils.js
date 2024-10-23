@@ -23,6 +23,7 @@ export async function createFromTemplate(id, testName) {
     document.querySelector('sp-theme').append(div);
     // add header to element.
     await element.updateComplete;
+    await delay(500);
     return element;
 }
 
@@ -99,7 +100,7 @@ export async function simulateClick(element, offsetX, offsetY) {
     const { x, y, rect } = calculateCoordinates(element, offsetX, offsetY);
     dispatchMouseEvent(element, 'click', x, y);
     setCursorPosition(element, offsetX ?? rect.width / 2, rect);
-    await delay(100);
+    await delay(500);
 }
 
 /**
@@ -146,5 +147,5 @@ export async function simulateSelection(element, startOffset, endOffset) {
         }
     }
 
-    await delay(100);
+    await delay(500);
 }
