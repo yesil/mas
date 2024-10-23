@@ -5,7 +5,9 @@ import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history, undo, redo } from 'prosemirror-history';
-import { openOfferSelectorTool } from './ost.js';
+import { openOfferSelectorTool, watchReactSpectrumPopovers } from './ost.js';
+
+watchReactSpectrumPopovers();
 
 class RteEditor extends LitElement {
     static properties = {
@@ -43,6 +45,7 @@ class RteEditor extends LitElement {
         sp-underlay:not([open]) + sp-dialog {
             display: none;
         }
+
         sp-underlay + sp-dialog {
             position: fixed;
             top: 50%;
@@ -51,9 +54,16 @@ class RteEditor extends LitElement {
             z-index: 1;
             background: var(--spectrum-gray-100);
         }
+
+        #ost > div {
+            height: 80vh;
+            width: 80vw;
+            max-width: 1440px;
+        }
     `;
 
     #editorSchema;
+    #ostRoot;
     #ostElement = nothing;
 
     constructor() {
@@ -137,8 +147,6 @@ class RteEditor extends LitElement {
                         is: 'inline-price',
                     });
                     inlinePrice.setAttribute('is', 'inline-price');
-                    inlinePrice.setAttribute('contenteditable', 'false');
-
                     Object.entries(node.attrs.dataset || {}).forEach(
                         ([key, value]) => {
                             inlinePrice.dataset[key] = value;
@@ -162,7 +170,6 @@ class RteEditor extends LitElement {
                     {
                         tag: 'a[is="checkout-link"]',
                         getAttrs(dom) {
-                            // Collect all data attributes
                             const dataset = {};
                             Object.keys(dom.dataset).forEach((key) => {
                                 dataset[key] = dom.dataset[key];
@@ -249,11 +256,7 @@ class RteEditor extends LitElement {
                     ],
                     toDOM(node) {
                         const { href, title } = node.attrs;
-                        return [
-                            'a',
-                            { href, title, rel: 'noopener noreferrer' },
-                            0,
-                        ];
+                        return ['a', { href, title }, 0];
                     },
                 },
             },
@@ -614,18 +617,10 @@ class RteEditor extends LitElement {
         `;
     }
 
-    get #ostEditorold() {
-        return html`
-            <sp-underlay ?open="${this.showOfferSelectorTool}">
-                <sp-dialog size="l"> ${this.#ostElement} </sp-dialog>
-            </sp-underlay>
-        `;
-    }
-
     get #ostEditor() {
         return html`
         <sp-overlay type="modal" ?open=${this.showOfferSelectorTool}>
-            <sp-dialog-wrapper dismissable underlay>
+            <sp-dialog-wrapper id="ost" dismissable underlay>
                  ${this.#ostElement}
             </sp-dialog-wrapper>
         </overlay-trigger>
@@ -633,8 +628,54 @@ class RteEditor extends LitElement {
         `;
     }
 
+    get currentOfferElement() {
+        const { state } = this.editorView;
+        const { selection } = state;
+        const { node } = selection;
+        // Check if we have a node selection and if it's one of our special nodes
+        if (
+            node &&
+            (node.type.name === 'inlinePrice' ||
+                node.type.name === 'checkoutLink')
+        ) {
+            // Get the DOM node directly from the view
+            return this.editorView.nodeDOM(selection.from);
+        }
+
+        return null;
+    }
     async openOfferSelectorTool(e) {
-        this.#ostElement = openOfferSelectorTool();
+        this.#ostElement = openOfferSelectorTool(this.currentOfferElement);
+        this.#ostElement.addEventListener('use', ({ detail: offerElement }) => {
+            const { state, dispatch } = this.editorView;
+            const { selection } = state;
+            const { node } = selection;
+            let tr = state.tr;
+
+            // Collect dataset attributes
+            const dataset = {};
+            Object.keys(offerElement.dataset).forEach((key) => {
+                dataset[key] = offerElement.dataset[key];
+            });
+
+            // Create new node with dataset attributes
+            const newNode = state.schema.nodes.inlinePrice.create({ dataset });
+
+            if (
+                node &&
+                (node.type.name === 'inlinePrice' ||
+                    node.type.name === 'checkoutLink')
+            ) {
+                // Replace existing node
+                tr.replaceWith(selection.from, selection.from + 1, newNode);
+            } else {
+                // Insert at current cursor position
+                tr.insert(selection.from, newNode);
+            }
+
+            dispatch(tr);
+            this.showOfferSelectorTool = false;
+        });
         this.showOfferSelectorTool = true;
     }
 

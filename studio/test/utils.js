@@ -1,3 +1,8 @@
+window.toggleTheme = () => {
+    const theme = document.querySelector('sp-theme');
+    theme.color = theme.color === 'dark' ? 'light' : 'dark';
+};
+
 export const getTemplateContent = (template) => {
     const templateEl = document.getElementById(template);
     // @ts-ignore

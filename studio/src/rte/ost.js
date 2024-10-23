@@ -86,14 +86,41 @@ export const createMarkup = (offerSelectorId, type, offer, options, promo) => {
         const inlinePrice = document.createElement('span', {
             is: 'inline-price',
         });
+
+        if (options.displayPerUnit)
+            inlinePrice.setAttribute(
+                'data-display-per-unit',
+                options.displayPerUnit ?? 'false',
+            );
+
+        if (options.displayRecurrence)
+            inlinePrice.removeAttribute('data-display-recurrence'); // by default.
+        else inlinePrice.setAttribute('data-display-recurrence', false);
+
+        if (options.displayTax)
+            inlinePrice.setAttribute('data-display-tax', true);
+        else inlinePrice.removeAttribute('data-display-tax');
+
+        if (offer.isPerpetual) inlinePrice.setAttribute('data-perpetual', true);
+        else inlinePrice.removeAttribute('data-perpetual');
+
+        if (promo) inlinePrice.setAttribute('data-promotion-code', promo);
+        else inlinePrice.removeAttribute('data-promotion-code');
+
+        if (options.forceTaxExclusive)
+            inlinePrice.setAttribute('data-tax-exclusive', true);
+        else inlinePrice.removeAttribute('data-tax-exclusive');
+
         inlinePrice.setAttribute(
-            'data-display-per-unit',
-            options.displayPerUnit ?? 'false',
+            'data-display-old-price',
+            options.displayOldPrice ?? 'false',
         );
+
         inlinePrice.setAttribute(
             'data-quantity',
             offer.ordering.max_quantity ?? '1',
         );
+
         inlinePrice.setAttribute('data-template', type);
         inlinePrice.setAttribute('data-wcs-osi', offerSelectorId);
         inlinePrice.innerHTML = '&nbsp;';
@@ -109,10 +136,7 @@ export function onSelect(offerSelectorId, type, offer, options, promoOverride) {
         options,
         promoOverride,
     );
-
-    console.log(`Use Link: ${link.outerHTML}`);
-
-    closeOstDialog();
+    ostRoot.dispatchEvent(new CustomEvent('use', { detail: link }));
 }
 
 export function getOffferSelectorTool() {
@@ -125,8 +149,8 @@ export function getOffferSelectorTool() {
     `;
 }
 
-export function openOfferSelectorTool(element) {
-    const ostRoot = document.createElement('div');
+export function openOfferSelectorTool(clickedOffer) {
+    ostRoot ??= document.createElement('div');
     let searchOfferSelectorId;
     const aosAccessToken =
         localStorage.getItem('masAccessToken') ?? window.adobeid.authorize();
@@ -134,8 +158,8 @@ export function openOfferSelectorTool(element) {
     const defaultPlaceholderOptions = {
         ...ostDefaults.defaultPlaceholderOptions,
     };
-    if (element) {
-        searchOfferSelectorId = element.getAttribute('data-wcs-osi');
+    if (clickedOffer) {
+        searchOfferSelectorId = clickedOffer.getAttribute('data-wcs-osi');
         Object.assign(defaultPlaceholderOptions, clickedOffer.dataset);
     }
     window.ost.openOfferSelectorTool({
@@ -149,4 +173,42 @@ export function openOfferSelectorTool(element) {
         onSelect,
     });
     return ostRoot;
+}
+
+export function watchReactSpectrumPopovers() {
+    // Config for both observers
+    const config = {
+        attributes: false,
+        childList: true,
+        subtree: true,
+    };
+
+    // Create mutation observer
+    const mutationObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            const nodes = Array.from(mutation.addedNodes);
+            for (const node of nodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node;
+                    if (element.classList.contains('JuTe6q_spectrum')) {
+                        const popoverElement = element.querySelector(
+                            '.cH0MeW_spectrum-Popover',
+                        );
+                        if (!popoverElement) return;
+                        popoverElement.setAttribute('popover', 'manual');
+                        popoverElement.showPopover();
+                        return;
+                    }
+                }
+            }
+        }
+    });
+
+    // Start observing with mutation observer
+    mutationObserver.observe(document.body, config);
+
+    // Return cleanup function
+    return () => {
+        mutationObserver.disconnect();
+    };
 }

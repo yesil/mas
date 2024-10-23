@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Porsemirror RTE Editor custom element</title>
+        <title>Prosemirror RTE Editor custom element</title>
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
@@ -12,15 +12,23 @@
                 grid-template-columns: 1fr 1fr;
                 height: 90vh;
             }
+
             sp-theme {
                 display: contents;
             }
+
             rte-editor {
                 max-height: 500px;
+            }
+
+            #ost {
+                width: 80vw;
+                height: 80vh;
             }
         </style>
         <!-- OST -->
         <script src="../../ost/index.js"></script>
+        <link rel="stylesheet" href="../../ost/index.css" />
     </head>
     <body>
         <script type="module">
@@ -33,6 +41,7 @@
             import '@adobecom/milo/libs/deps/mas/mas.js';
             import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
             import { withWcs } from '@adobecom/milo/libs/features/mas/mocks/wcs.js';
+            import { openOfferSelectorTool } from '../../src/ost.js';
 
             import {
                 createFromTemplate,
@@ -100,6 +109,10 @@
 
                     const firstParagraph = () =>
                         rte.shadowRoot.querySelector('.ProseMirror p');
+
+                    it('should allow to remove a libk', () => {
+                        throw new Error('Not implemented');
+                    });
 
                     it('should open the link editor on link click and support update', async function () {
                         rte = await createFromTemplate('rte', this.test.title);
@@ -180,15 +193,30 @@
                             '.ProseMirror a[is="checkout-link"]',
                         );
 
-                    it.only('should open OST on link click and support update', async function () {
+                    it.only('should open a price in OST on link click and support update', async function () {
                         rte = await createFromTemplate('ost1', this.test.title);
+                        const price = firstPrice();
+                        await price.onceSettled();
+                        await simulateClick(price, 30, 10);
+                    });
+
+                    it.skip('should open OST', async function () {
+                        const dialog = await createFromTemplate(
+                            'ost2',
+                            this.test.title,
+                        );
+                        dialog.showModal();
+                        const disposer = watchReactSpectrumPopovers();
+                        openOfferSelectorTool({});
+                        disposer();
                     });
                 });
             });
         </script>
         <mas-commerce-service></mas-commerce-service>
+        <button onclick="toggleTheme()">Toggle theme</button>
         <main>
-            <sp-theme color="light" scale="medium"></sp-theme>
+            <sp-theme color="light" scale="medium"> </sp-theme>
         </main>
         <template id="rte">
             <rte-editor>
@@ -228,8 +256,13 @@
         </template>
         <template id="ost1">
             <rte-editor inline-price ost>
-                <span is="inline-price" data-wcs-osi="abm"></span>
+                <span is="inline-price" data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"></span>
             </rte-editor>
+        </template>
+        <template id="ost2">
+            <dialog>
+                <div id="ost"></div>
+            </dialog>
         </template>
     </body>
 </html>
