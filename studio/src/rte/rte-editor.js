@@ -22,13 +22,16 @@ class RteEditor extends LitElement {
             gap: 8px;
             flex-direction: column;
             font-size: var(--spectrum-font-size-200);
+            background-color: var(--spectrum-global-color-gray-200);
+            padding: 4px;
         }
 
         :host > div {
-            outline: 1px dashed #ccc;
-            padding: 8px;
+            padding: 0 8px;
             min-height: 48px;
             flex: 1;
+            color: var(--spectrum-global-color-gray-800);
+            background-color: var(--spectrum-global-color-gray-50);
         }
     `;
 
@@ -277,6 +280,7 @@ class RteEditor extends LitElement {
                     'Mod-i': toggleMark(editorSchema.marks.em),
                     'Mod-k': () => (this.showLinkEditor = true),
                     'Mod-u': toggleMark(editorSchema.marks.underline),
+                    'Mod-s': toggleMark(editorSchema.marks.strikethrough),
                     'Mod-z': undo,
                     'Mod-y': redo,
                     'Shift-Mod-z': redo,

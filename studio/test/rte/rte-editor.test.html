@@ -36,7 +36,7 @@
                 createFromTemplate,
                 delay,
                 simulateClick,
-                simulateSelection,
+                selectWordsInTextNode,
             } from '../utils.js';
 
             runTests(async () => {
@@ -121,9 +121,13 @@
 
                     it('should open the link editor on selection and support update', async function () {
                         rte = await createFromTemplate('rte', this.test.title);
-                        await simulateSelection(firstParagraph(), 160, 250);
-                        await openLinkEditor();
+                        await selectWordsInTextNode(
+                            firstParagraph().firstChild,
+                            'links',
+                        );
                         await delay(100);
+                        await openLinkEditor();
+                        await rte.linkEditorElement.updateComplete;
                         expect(rte.linkEditorElement.text).to.equal('links');
                         rte.linkEditorElement.url = 'https://www.adobe.com';
                         rte.linkEditorElement.title = 'Adobe homepage';
