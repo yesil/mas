@@ -5,18 +5,17 @@ import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history, undo, redo } from 'prosemirror-history';
-import { openOfferSelectorTool, watchReactSpectrumPopovers } from './ost.js';
-
-watchReactSpectrumPopovers();
+import {
+    openOfferSelectorTool,
+    attributeFilter,
+    closeOfferSelectorTool,
+} from './ost.js';
 
 class RteEditor extends LitElement {
     static properties = {
         readOnly: { type: Boolean, attribute: 'readonly' },
-        inlinePrice: { type: Boolean, attribute: 'inline-price' },
-        checkoutLink: { type: Boolean, attribute: 'checkout-link' },
         ost: { type: Boolean, attribute: 'ost' },
         showLinkEditor: { type: Boolean, state: true },
-        showOfferSelectorTool: { type: Boolean, state: true },
     };
 
     static styles = css`
@@ -54,27 +53,16 @@ class RteEditor extends LitElement {
             z-index: 1;
             background: var(--spectrum-gray-100);
         }
-
-        #ost > div {
-            height: 80vh;
-            width: 80vw;
-            max-width: 1440px;
-        }
     `;
-
     #editorSchema;
-    #ostRoot;
-    #ostElement = nothing;
 
     constructor() {
         super();
         this.readOnly = false;
         this.editorView = null;
-        this.inlinePrice = false;
-        this.checkoutLink = false;
         this.ost = false;
         this.showLinkEditor = false;
-        this.showOfferSelectorTool = false;
+        this.ostEventListener = this.ostEventListener.bind(this);
     }
 
     initEditorSchema() {
@@ -121,24 +109,36 @@ class RteEditor extends LitElement {
             },
         };
 
-        if (this.inlinePrice) {
+        if (this.ost) {
             nodes.inlinePrice = {
                 group: 'inline',
                 inline: true,
                 atom: true,
                 attrs: {
-                    dataset: { default: {} },
+                    is: { default: null },
+                    class: { default: null },
+                    'data-display-old-price': { default: null },
+                    'data-display-per-unit': { default: null },
+                    'data-display-recurrence': { default: null },
+                    'data-display-tax': { default: null },
+                    'data-perpetual': { default: null },
+                    'data-promotion-code': { default: null },
+                    'data-tax-exclusive': { default: null },
+                    'data-template': { default: null },
+                    'data-wcs-osi': { default: null },
                 },
                 parseDOM: [
                     {
                         tag: 'span[is="inline-price"]',
                         getAttrs(dom) {
                             // Collect all data attributes
-                            const dataset = {};
-                            Object.keys(dom.dataset).forEach((key) => {
-                                dataset[key] = dom.dataset[key];
-                            });
-                            return { dataset };
+                            const attrs = {};
+                            dom.getAttributeNames()
+                                .filter(attributeFilter)
+                                .forEach((key) => {
+                                    attrs[key] = dom.getAttribute(key);
+                                });
+                            return attrs;
                         },
                     },
                 ],
@@ -146,53 +146,71 @@ class RteEditor extends LitElement {
                     const inlinePrice = document.createElement('span', {
                         is: 'inline-price',
                     });
-                    inlinePrice.setAttribute('is', 'inline-price');
-                    Object.entries(node.attrs.dataset || {}).forEach(
-                        ([key, value]) => {
-                            inlinePrice.dataset[key] = value;
-                        },
-                    );
+                    Object.entries(node.attrs || {}).forEach(([key, value]) => {
+                        if (value === null) return;
+                        inlinePrice.setAttribute(key, value);
+                    });
                     return inlinePrice;
                 },
             };
-        }
-
-        if (this.checkoutLink) {
             nodes.checkoutLink = {
                 group: 'inline',
-                content: 'inline+',
+                content: 'text*',
                 inline: true,
                 atom: true,
                 attrs: {
-                    dataset: { default: {} },
+                    is: { default: null },
+                    class: { default: null },
+                    'data-checkout-workflow': { default: null },
+                    'data-checkout-workflow-step': { default: null },
+                    'data-extra-options': { default: null },
+                    'data-perpetual': { default: null },
+                    'data-promotion-code': { default: null },
+                    'data-wcs-osi': { default: null },
+                    title: { default: null },
+                    text: { default: null },
                 },
                 parseDOM: [
                     {
                         tag: 'a[is="checkout-link"]',
                         getAttrs(dom) {
-                            const dataset = {};
-                            Object.keys(dom.dataset).forEach((key) => {
-                                dataset[key] = dom.dataset[key];
-                            });
-                            return { dataset };
+                            // Collect all data attributes
+                            const attrs = {};
+                            attrs.title = dom.getAttribute('title');
+                            attrs.text = dom.innerText;
+                            dom.getAttributeNames()
+                                .filter(attributeFilter)
+                                .forEach((key) => {
+                                    attrs[key] = dom.getAttribute(key);
+                                });
+                            return attrs;
                         },
                     },
                 ],
                 toDOM(node) {
-                    const { text = '' } = node.content?.content?.[0];
                     const checkoutLink = document.createElement('a', {
                         is: 'checkout-link',
                     });
+                    const { title, text } = node.attrs;
+                    if (title) {
+                        checkoutLink.setAttribute('title', title);
+                        delete node.attrs['title'];
+                    }
+                    if (text) {
+                        checkoutLink.innerText = text;
+                        delete node.attrs['text'];
+                    }
+
+                    // Prevent default link behavior
                     checkoutLink.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                     });
-                    checkoutLink.innerText = text;
-                    Object.entries(node.attrs.dataset || {}).forEach(
-                        ([key, value]) => {
-                            checkoutLink.dataset[key] = value;
-                        },
-                    );
+                    // Set attributes from node
+                    Object.entries(node.attrs || {}).forEach(([key, value]) => {
+                        if (value === null) return;
+                        checkoutLink.setAttribute(key, value);
+                    });
                     return checkoutLink;
                 },
             };
@@ -266,18 +284,14 @@ class RteEditor extends LitElement {
     firstUpdated() {
         this.initEditorSchema();
         this.initializeEditor();
-        this.value = this.innerHTML;
-
-        // Create a link element to reference external CSS
-        const link = document.createElement('link');
-        link.setAttribute('rel', 'stylesheet');
-        link.setAttribute('href', '/ost/index.css');
-        this.shadowRoot.appendChild(link);
+        this.value = this.innerHTML.trim();
+        this.innerHTML = '';
     }
 
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener('keydown', this.#handleEscKey);
+        document.addEventListener('use', this.ostEventListener);
     }
 
     disconnectedCallback() {
@@ -286,6 +300,39 @@ class RteEditor extends LitElement {
         if (this.editorView) {
             this.editorView.destroy();
         }
+        this.removeEventListener('use', this.ostEventListener);
+    }
+
+    ostEventListener({ detail: atributes }) {
+        if (!atributes) return;
+        const { state, dispatch } = this.editorView;
+        const { selection } = state;
+        const { node } = selection;
+        let tr = state.tr;
+
+        // Determine node type based on element type
+        const nodeType =
+            atributes.is === 'inline-price'
+                ? state.schema.nodes.inlinePrice
+                : state.schema.nodes.checkoutLink;
+
+        // Create new node with dataset attributes
+        const newNode = nodeType.create(atributes);
+
+        if (
+            node &&
+            (node.type.name === 'inlinePrice' ||
+                node.type.name === 'checkoutLink')
+        ) {
+            // Replace existing node
+            tr.replaceWith(selection.from, selection.from + 1, newNode);
+        } else {
+            // Insert at current cursor position
+            tr.insert(selection.from, newNode);
+        }
+
+        dispatch(tr);
+        closeOfferSelectorTool();
     }
 
     #handleEscKey(event) {
@@ -617,17 +664,6 @@ class RteEditor extends LitElement {
         `;
     }
 
-    get #ostEditor() {
-        return html`
-        <sp-overlay type="modal" ?open=${this.showOfferSelectorTool}>
-            <sp-dialog-wrapper id="ost" dismissable underlay>
-                 ${this.#ostElement}
-            </sp-dialog-wrapper>
-        </overlay-trigger>
-        </sp-overlay>
-        `;
-    }
-
     get currentOfferElement() {
         const { state } = this.editorView;
         const { selection } = state;
@@ -645,37 +681,7 @@ class RteEditor extends LitElement {
         return null;
     }
     async openOfferSelectorTool(e) {
-        this.#ostElement = openOfferSelectorTool(this.currentOfferElement);
-        this.#ostElement.addEventListener('use', ({ detail: offerElement }) => {
-            const { state, dispatch } = this.editorView;
-            const { selection } = state;
-            const { node } = selection;
-            let tr = state.tr;
-
-            // Collect dataset attributes
-            const dataset = {};
-            Object.keys(offerElement.dataset).forEach((key) => {
-                dataset[key] = offerElement.dataset[key];
-            });
-
-            // Create new node with dataset attributes
-            const newNode = state.schema.nodes.inlinePrice.create({ dataset });
-
-            if (
-                node &&
-                (node.type.name === 'inlinePrice' ||
-                    node.type.name === 'checkoutLink')
-            ) {
-                // Replace existing node
-                tr.replaceWith(selection.from, selection.from + 1, newNode);
-            } else {
-                // Insert at current cursor position
-                tr.insert(selection.from, newNode);
-            }
-
-            dispatch(tr);
-            this.showOfferSelectorTool = false;
-        });
+        openOfferSelectorTool(this.currentOfferElement);
         this.showOfferSelectorTool = true;
     }
 
@@ -716,7 +722,7 @@ class RteEditor extends LitElement {
                 </sp-action-button>
                 ${this.#linkEditorButton} ${this.offerSelectorToolButton}
             </sp-action-group>
-            ${this.#linkEditor} ${this.#ostEditor}
+            ${this.#linkEditor}
         `;
     }
 }

@@ -61,22 +61,6 @@
                         expect(rte.shadowRoot).exist;
                     });
 
-                    it('should support inline-price', async function () {
-                        const rte = await createFromTemplate(
-                            'rte-text-price-only',
-                            this.test.title,
-                        );
-                        expect(rte.shadowRoot).exist;
-                    });
-
-                    it('should support checkout-link', async function () {
-                        const rte = await createFromTemplate(
-                            'rte-link-checkout-only',
-                            this.test.title,
-                        );
-                        expect(rte.shadowRoot).exist;
-                    });
-
                     it('should support OST', async function () {
                         const rte = await createFromTemplate(
                             'rte-all',
@@ -193,11 +177,18 @@
                             '.ProseMirror a[is="checkout-link"]',
                         );
 
-                    it.only('should open a price in OST on link click and support update', async function () {
+                    it('should open a price in OST and support update', async function () {
                         rte = await createFromTemplate('ost1', this.test.title);
                         const price = firstPrice();
                         await price.onceSettled();
                         await simulateClick(price, 30, 10);
+                    });
+
+                    it.only('should open a checkout link in OST and support update', async function () {
+                        rte = await createFromTemplate('ost2', this.test.title);
+                        const checkoutLink = firstCheckoutLink();
+                        await checkoutLink.onceSettled();
+                        await simulateClick(checkoutLink, 30, 10);
                     });
 
                     it.skip('should open OST', async function () {
@@ -230,24 +221,8 @@
                 <!--co properties will be ignored -->
             </rte-editor>
         </template>
-        <template id="rte-text-price-only">
-            <rte-editor inline-price>
-                <p>Text, links and prices</p>
-                <a href="https://www.adobe.com">Adobe</a>
-                <span is="inline-price" data-wcs-osi="abm"></span>
-                <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
-            </rte-editor>
-        </template>
-        <template id="rte-link-checkout-only">
-            <rte-editor checkout-link>
-                <p>Text, links and checkout links</p>
-                <a href="https://www.adobe.com">Adobe</a>
-                <span is="inline-price" data-wcs-osi="abm"></span>
-                <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
-            </rte-editor>
-        </template>
         <template id="rte-all">
-            <rte-editor inline-price checkout-link ost>
+            <rte-editor ost>
                 <p>Text, links, prices, checkout links and OST</p>
                 <a href="https://www.adobe.com">Adobe</a>
                 <span is="inline-price" data-wcs-osi="abm"></span>
@@ -255,8 +230,19 @@
             </rte-editor>
         </template>
         <template id="ost1">
-            <rte-editor inline-price ost>
-                <span is="inline-price" data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"></span>
+            <rte-editor ost>
+                <span
+                    is="inline-price"
+                    data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                ></span>
+            </rte-editor>
+        </template>
+        <template id="ost2">
+            <rte-editor ost>
+                <a
+                    is="checkout-link"
+                    data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                >Buy now</a>
             </rte-editor>
         </template>
         <template id="ost2">

@@ -1,11 +1,13 @@
 import { html } from 'lit';
 
 let ostRoot;
+let closeFunction;
 
 const ctaTexts = {
     'buy-now': 'Buy now',
     'free-trial': 'Free trial',
     'start-free-trial': 'Start free trial',
+    'save-now': 'Save now',
     'get-started': 'Get started',
     'choose-a-plan': 'Choose a plan',
     'learn-more': 'Learn more',
@@ -15,10 +17,7 @@ const ctaTexts = {
     'take-the-quiz': 'Take the quiz',
     'see-more': 'See more',
     'upgrade-now': 'Upgrade now',
-    'save-now': 'Save now',
 };
-
-const noPlaceholderCardVariants = ['ccd-action', 'ah'];
 
 export const ostDefaults = {
     aosApiKey: 'wcms-commerce-ims-user-prod',
@@ -31,7 +30,7 @@ export const ostDefaults = {
     searchOfferSelectorId: null,
     defaultPlaceholderOptions: {
         displayRecurrence: true,
-        displayPerUnit: true,
+        displayPerUnit: false,
         displayTax: false,
         displayOldPrice: false,
         forceTaxExclusive: true,
@@ -49,94 +48,118 @@ export const ostDefaults = {
 
         getSelectedText(searchParameters) {
             const ctaLabel = searchParameters.get('text');
-            return !!ctaLabel &&
-                this.ctaTexts.find((label) => label.id === ctaLabel)
-                ? ctaLabel
-                : this.getDefaultText();
+            const selectedText = this.ctaTexts.find(({ id, name }) =>
+                [id, name].includes(ctaLabel),
+            );
+            if (selectedText) return selectedText.id;
+            return ctaLabel || this.getDefaultText();
         },
     },
 };
 
-export const createMarkup = (offerSelectorId, type, offer, options, promo) => {
-    const isCta = !!type?.startsWith('checkout');
+// Function to get the difference between two objects
+function getObjectDifference(values, defaults) {
+    const difference = {};
 
-    if (isCta) {
-        const cta = document.createElement('a', { is: 'checkout-link' });
-        cta.setAttribute('data-checkout-workflow', options.workflow);
-        cta.setAttribute(
-            'data-checkout-workflow-step',
-            options.workflowStep ?? 'segmentation',
-        );
-        cta.setAttribute('data-promotion-code', promo ?? '');
-        cta.setAttribute('data-quantity', '1');
-        cta.setAttribute('data-wcs-osi', offerSelectorId);
-
-        cta.href = '#';
-
-        const span = document.createElement('span');
-        let ctaText = options.ctaText ?? 'buy-now';
-        if (noPlaceholderCardVariants.includes(currentVariant)) {
-            ctaText = ctaTexts[ctaText];
+    // Add properties from values that are different from defaults
+    for (const key in values) {
+        // If the key doesn't exist in defaults, or if the value is different
+        if (!(key in defaults) || values[key] !== defaults[key]) {
+            difference[key] = values[key];
         }
-        span.textContent = ctaText;
-        cta.appendChild(span);
-
-        return cta;
-    } else {
-        const inlinePrice = document.createElement('span', {
-            is: 'inline-price',
-        });
-
-        if (options.displayPerUnit)
-            inlinePrice.setAttribute(
-                'data-display-per-unit',
-                options.displayPerUnit ?? 'false',
-            );
-
-        if (options.displayRecurrence)
-            inlinePrice.removeAttribute('data-display-recurrence'); // by default.
-        else inlinePrice.setAttribute('data-display-recurrence', false);
-
-        if (options.displayTax)
-            inlinePrice.setAttribute('data-display-tax', true);
-        else inlinePrice.removeAttribute('data-display-tax');
-
-        if (offer.isPerpetual) inlinePrice.setAttribute('data-perpetual', true);
-        else inlinePrice.removeAttribute('data-perpetual');
-
-        if (promo) inlinePrice.setAttribute('data-promotion-code', promo);
-        else inlinePrice.removeAttribute('data-promotion-code');
-
-        if (options.forceTaxExclusive)
-            inlinePrice.setAttribute('data-tax-exclusive', true);
-        else inlinePrice.removeAttribute('data-tax-exclusive');
-
-        inlinePrice.setAttribute(
-            'data-display-old-price',
-            options.displayOldPrice ?? 'false',
-        );
-
-        inlinePrice.setAttribute(
-            'data-quantity',
-            offer.ordering.max_quantity ?? '1',
-        );
-
-        inlinePrice.setAttribute('data-template', type);
-        inlinePrice.setAttribute('data-wcs-osi', offerSelectorId);
-        inlinePrice.innerHTML = '&nbsp;';
-        return inlinePrice;
     }
+
+    return difference;
+}
+
+export const attributeFilter = (key) => /^(data-|is|class)/.test(key);
+
+const OST_TYPE_MAPPING = {
+    price: null,
+    priceStrikethrough: 'strikethrough',
+    priceAnnual: 'annual',
+    priceOptical: 'optical',
+    checkoutUrl: null,
+};
+
+const OST_IS_MAPPING = {
+    price: 'inline-price',
+    priceStrikethrough: 'inline-price',
+    priceAnnual: 'inline-price',
+    priceOptical: 'inline-price',
+    checkoutUrl: 'checkout-link',
+};
+
+const OST_OPTION_ATTRIBUTE_MAPPING = {
+    displayOldPrice: 'data-display-old-price',
+    displayPerUnit: 'data-display-per-unit',
+    displayRecurrence: 'data-display-recurrence',
+    displayTax: 'data-display-tax',
+    forceTaxExclusive: 'data-tax-exclusive',
+    isPerpetual: 'data-perpetual',
+    wcsOsi: 'data-wcs-osi',
+    workflow: 'data-checkout-workflow',
+    workflowStep: 'data-checkout-workflow-step',
+};
+
+export const OST_OPTION_ATTRIBUTE_MAPPING_REVERSE = Object.fromEntries(
+    Object.entries(OST_OPTION_ATTRIBUTE_MAPPING).map(([key, value]) => [
+        value,
+        key,
+    ]),
+);
+
+const OST_OPTION_DEFAULTS = {
+    displayOldPrice: false,
+    displayPerUnit: false,
+    displayRecurrence: true,
+    displayTax: false,
+    forceTaxExclusive: false,
+    isPerpetual: false,
+    workflow: 'UCv3',
+    workflowStep: 'email',
+};
+
+const OST_VALUE_MAPPING = {
+    true: true,
+    false: false,
 };
 
 export function onSelect(offerSelectorId, type, offer, options, promoOverride) {
-    const link = createMarkup(
-        offerSelectorId,
-        type,
-        offer,
-        options,
-        promoOverride,
+    const changes = getObjectDifference(options, OST_OPTION_DEFAULTS);
+
+    const attributes = { 'data-wcs-osi': offerSelectorId };
+
+    const template = OST_TYPE_MAPPING[type] ?? type;
+    if (template) {
+        attributes['data-template'] = template;
+    }
+    const is = OST_IS_MAPPING[type];
+    if (is) {
+        attributes.is = is;
+    }
+
+    const ctaText = ctaTexts[options.ctaText]; // no placeholder key support.
+    if (ctaText) {
+        attributes['text'] = ctaText;
+    }
+
+    if (promoOverride) {
+        attributes['data-promotion-code'] = promoOverride;
+    }
+    for (const [key, value] of Object.entries(changes)) {
+        const attribute = OST_OPTION_ATTRIBUTE_MAPPING[key];
+        if (attribute) {
+            attributes[attribute] = value;
+        }
+    }
+
+    ostRoot.dispatchEvent(
+        new CustomEvent('use', {
+            detail: attributes,
+            bubbles: true,
+        }),
     );
-    ostRoot.dispatchEvent(new CustomEvent('use', { detail: link }));
 }
 
 export function getOffferSelectorTool() {
@@ -149,20 +172,49 @@ export function getOffferSelectorTool() {
     `;
 }
 
-export function openOfferSelectorTool(clickedOffer) {
-    ostRoot ??= document.createElement('div');
+export function openOfferSelectorTool(offerElement) {
+    if (!ostRoot) {
+        ostRoot = document.createElement('div');
+        document.body.appendChild(ostRoot);
+    }
     let searchOfferSelectorId;
     const aosAccessToken =
         localStorage.getItem('masAccessToken') ?? window.adobeid.authorize();
     const searchParameters = new URLSearchParams();
+
     const defaultPlaceholderOptions = {
         ...ostDefaults.defaultPlaceholderOptions,
     };
-    if (clickedOffer) {
-        searchOfferSelectorId = clickedOffer.getAttribute('data-wcs-osi');
-        Object.assign(defaultPlaceholderOptions, clickedOffer.dataset);
+    const offerSelectorPlaceholderOptions = {};
+    if (offerElement) {
+        searchParameters.append(
+            'type',
+            offerElement.isCheckoutLink ? 'checkout' : 'price',
+        );
+        if (offerElement.isCheckoutLink) {
+            searchParameters.append('text', offerElement.innerText);
+        }
+        searchOfferSelectorId = offerElement.getAttribute('data-wcs-osi');
+
+        // Set search parameters
+        offerElement.getAttributeNames().forEach((key) => {
+            const newKey = OST_OPTION_ATTRIBUTE_MAPPING_REVERSE[key];
+            if (newKey) {
+                let newValue = offerElement.getAttribute(key);
+                newValue = OST_VALUE_MAPPING[newValue] ?? newValue;
+                offerSelectorPlaceholderOptions[newKey] = newValue;
+            }
+        });
+
+        ['promotionCode', 'checkoutType', 'workflowStep', 'country'].forEach(
+            (key) => {
+                const value = offerSelectorPlaceholderOptions[key];
+                if (value) searchParameters.append(key, value);
+            },
+        );
     }
-    window.ost.openOfferSelectorTool({
+    ostRoot.style.display = 'block';
+    closeFunction = window.ost.openOfferSelectorTool({
         ...ostDefaults,
         rootElement: ostRoot,
         zIndex: 20,
@@ -170,45 +222,12 @@ export function openOfferSelectorTool(clickedOffer) {
         searchParameters,
         searchOfferSelectorId,
         defaultPlaceholderOptions,
+        offerSelectorPlaceholderOptions,
+        dialog: true,
         onSelect,
     });
-    return ostRoot;
 }
 
-export function watchReactSpectrumPopovers() {
-    // Config for both observers
-    const config = {
-        attributes: false,
-        childList: true,
-        subtree: true,
-    };
-
-    // Create mutation observer
-    const mutationObserver = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            const nodes = Array.from(mutation.addedNodes);
-            for (const node of nodes) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const element = node;
-                    if (element.classList.contains('JuTe6q_spectrum')) {
-                        const popoverElement = element.querySelector(
-                            '.cH0MeW_spectrum-Popover',
-                        );
-                        if (!popoverElement) return;
-                        popoverElement.setAttribute('popover', 'manual');
-                        popoverElement.showPopover();
-                        return;
-                    }
-                }
-            }
-        }
-    });
-
-    // Start observing with mutation observer
-    mutationObserver.observe(document.body, config);
-
-    // Return cleanup function
-    return () => {
-        mutationObserver.disconnect();
-    };
+export function closeOfferSelectorTool() {
+    closeFunction();
 }
