@@ -51,6 +51,8 @@
             } from '../utils.js';
 
             runTests(async () => {
+                await customElements.whenDefined('inline-price');
+                await customElements.whenDefined('checkout-link');
                 await mockFetch(withWcs);
                 describe('RTE Editor', () => {
                     it('should render with default attributes', async function () {
@@ -222,7 +224,7 @@
             </rte-editor>
         </template>
         <template id="rte-all">
-            <rte-editor ost>
+            <rte-editor>
                 <p>Text, links, prices, checkout links and OST</p>
                 <a href="https://www.adobe.com">Adobe</a>
                 <span is="inline-price" data-wcs-osi="abm"></span>
@@ -230,7 +232,7 @@
             </rte-editor>
         </template>
         <template id="ost1">
-            <rte-editor ost>
+            <rte-editor>
                 <span
                     is="inline-price"
                     data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
@@ -238,12 +240,55 @@
             </rte-editor>
         </template>
         <template id="ost2">
-            <rte-editor ost>
-                <a
-                    is="checkout-link"
-                    data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
-                >Buy now</a>
-            </rte-editor>
+            <div>
+                <rte-editor>
+                    <a
+                        is="checkout-link"
+                        title="Buy now link"
+                        data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                        >Buy now</a
+                    >
+                    <hr />
+                    <a
+                        is="checkout-link"
+                        title="Buy now with extra params link"
+                        data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                        data-extra-options='{"promoid":"1234"}'
+                        >Buy now with extra params</a
+                    >
+                    <hr />
+                    <a href="https://www.adobe.com" title="adobe.com homepage"
+                        >Adobe</a
+                    >
+                    <span
+                        is="inline-price"
+                        data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                    ></span>
+                </rte-editor>
+                <br />
+                <rte-editor>
+                    <checkout-link
+                        title="Buy now link"
+                        data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                        >Buy now</checkout-link
+                    >
+                    <hr />
+                    <checkout-link class="outline"
+                        title="Buy now with extra params link"
+                        data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                        data-extra-options='{"promoid":"1234"}'
+                        >Buy now with extra params</checkout-link
+                    >
+                    <hr />
+                    <a href="https://www.adobe.com" title="adobe.com homepage"
+                        >Adobe</a
+                    >
+                    <hr />
+                    <inline-price
+                        data-wcs-osi="A1xn6EL4pK93bWjM8flffQpfEL-bnvtoQKQAvkx574M"
+                    ></inline-price>
+                </rte-editor>
+            </div>
         </template>
         <template id="ost2">
             <dialog>

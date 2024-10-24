@@ -69,9 +69,27 @@ export class RteLinkEditor extends LitElement {
         `;
     }
 
+    get #buttonStyles() {
+        if (this.checkoutParameters === undefined) return nothing;
+        return html`
+            <sp-field-label for="linkStyle">Style</sp-field-label>
+            <sp-button-group id="linkStyle">
+                <sp-button>Accent</sp-button>
+                <sp-button treatment="outline" variant="primary"
+                    >Outline</sp-button
+                >
+                <sp-button variant="secondary" quiet>Quiet</sp-button>
+                <sp-link href="#">Link</sp-link>
+                <sp-link href="#" variant="secondary">Link</sp-link>
+            </sp-button-group>
+        `;
+    }
+
     get #editor() {
+        const type =
+            this.checkoutParameters === undefined ? 'Link' : 'Checkout Link';
         return html`<sp-dialog size="l" @close=${this.#handleClose}>
-            <h2 slot="heading">Insert/Edit Link</h2>
+            <h2 slot="heading">Insert/Edit ${type}</h2>
             ${this.#linkUrlField} ${this.#checkoutParametersField}
             <sp-field-label for="linkText">Link Text</sp-field-label>
             <sp-textfield
@@ -102,6 +120,7 @@ export class RteLinkEditor extends LitElement {
                     <sp-menu-item value="_top">Top Frame</sp-menu-item>
                 </sp-menu>
             </sp-picker>
+            ${this.#buttonStyles}
             <sp-button
                 slot="button"
                 variant="secondary"

@@ -14,7 +14,6 @@ import {
 class RteEditor extends LitElement {
     static properties = {
         readOnly: { type: Boolean, attribute: 'readonly' },
-        ost: { type: Boolean, attribute: 'ost' },
         showLinkEditor: { type: Boolean, state: true },
     };
 
@@ -36,84 +35,81 @@ class RteEditor extends LitElement {
             background-color: var(--spectrum-global-color-gray-50);
         }
 
-        span[is='inline-price'] {
+        checkout-link {
+            height: 32px;
+            padding: 0 14px;
+            display: inline-flex;
+            align-content: center;
+            border-radius: 16px;
+            background-color: var(--spectrum-global-color-blue-500);
+            color: var(--spectrum-global-color-gray-50);
+        }
+
+        checkout-link.outline {
+            background-color: initial;
+            border: 2px solid var(--spectrum-global-color-gray-900);
+            color: var(--spectrum-global-color-gray-900);
+        }
+
+        .ProseMirror inline-price,
+        .ProseMirror checkout-link {
             cursor: default;
             user-select: all;
+            display: inline-block;
+            vertical-align: baseline;
+            white-space: nowrap;
+            margin: 0 1px;
         }
 
-        sp-underlay:not([open]) + sp-dialog {
-            display: none;
-        }
-
-        sp-underlay + sp-dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-            background: var(--spectrum-gray-100);
+        inline-price.ProseMirror-selectednode,
+        checkout-link.ProseMirror-selectednode {
+            outline: 2px solid var(--spectrum-global-color-blue-500);
         }
     `;
+
     #editorSchema;
+    #editorView;
+    #boundHandlers;
 
     constructor() {
         super();
         this.readOnly = false;
-        this.editorView = null;
-        this.ost = false;
         this.showLinkEditor = false;
-        this.ostEventListener = this.ostEventListener.bind(this);
+        this.#boundHandlers = {
+            escKey: this.#handleEscKey.bind(this),
+            ostEvent: this.#handleOstEvent.bind(this),
+            linkSave: this.#handleLinkSave.bind(this),
+        };
     }
 
-    initEditorSchema() {
-        const nodes = {
-            text: {
-                group: 'inline',
-            },
-            span: {
-                group: 'inline',
-                inline: true,
-                content: 'inline*',
-                attrs: {
-                    class: { default: null },
-                    style: { default: null },
-                },
-                parseDOM: [
-                    {
-                        tag: 'span:not([is])',
-                        getAttrs(dom) {
-                            return {
-                                class: dom.getAttribute('class'),
-                                style: dom.getAttribute('style'),
-                            };
-                        },
-                    },
-                ],
-                toDOM(node) {
-                    const attrs = {};
-                    if (node.attrs.class) attrs.class = node.attrs.class;
-                    if (node.attrs.style) attrs.style = node.attrs.style;
-                    return ['span', attrs, 0];
-                },
-            },
-            paragraph: {
-                content: 'inline*',
-                group: 'block',
-                parseDOM: [{ tag: 'p' }],
-                toDOM() {
-                    return ['p', 0];
-                },
-            },
-            doc: {
-                content: 'block+',
-            },
-        };
+    firstUpdated() {
+        this.#initEditorSchema();
+        this.#initializeEditor();
+        this.value = this.innerHTML.trim();
+        this.innerHTML = '';
+    }
 
-        if (this.ost) {
-            nodes.inlinePrice = {
+    connectedCallback() {
+        super.connectedCallback();
+        this.addEventListener('keydown', this.#boundHandlers.escKey);
+        document.addEventListener('use', this.#boundHandlers.ostEvent);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.removeEventListener('keydown', this.#boundHandlers.escKey);
+        document.removeEventListener('use', this.#boundHandlers.ostEvent);
+        this.#editorView?.destroy();
+    }
+
+    #initEditorSchema() {
+        const nodes = {
+            text: { group: 'inline' },
+            inlinePrice: {
                 group: 'inline',
                 inline: true,
                 atom: true,
+                inclusive: false,
                 attrs: {
                     is: { default: null },
                     class: { default: null },
@@ -129,33 +125,16 @@ class RteEditor extends LitElement {
                 },
                 parseDOM: [
                     {
-                        tag: 'span[is="inline-price"]',
-                        getAttrs(dom) {
-                            // Collect all data attributes
-                            const attrs = {};
-                            dom.getAttributeNames()
-                                .filter(attributeFilter)
-                                .forEach((key) => {
-                                    attrs[key] = dom.getAttribute(key);
-                                });
-                            return attrs;
-                        },
+                        tag: 'span[is="inline-price"],inline-price',
+                        getAttrs: this.#collectDataAttributes,
                     },
                 ],
-                toDOM(node) {
-                    const inlinePrice = document.createElement('span', {
-                        is: 'inline-price',
-                    });
-                    Object.entries(node.attrs || {}).forEach(([key, value]) => {
-                        if (value === null) return;
-                        inlinePrice.setAttribute(key, value);
-                    });
-                    return inlinePrice;
-                },
-            };
-            nodes.checkoutLink = {
+                toDOM: this.#createInlinePriceElement,
+            },
+            checkoutLink: {
                 group: 'inline',
                 content: 'text*',
+                inclusive: false,
                 inline: true,
                 atom: true,
                 attrs: {
@@ -172,193 +151,141 @@ class RteEditor extends LitElement {
                 },
                 parseDOM: [
                     {
-                        tag: 'a[is="checkout-link"]',
-                        getAttrs(dom) {
-                            // Collect all data attributes
-                            const attrs = {};
-                            attrs.title = dom.getAttribute('title');
-                            attrs.text = dom.innerText;
-                            dom.getAttributeNames()
-                                .filter(attributeFilter)
-                                .forEach((key) => {
-                                    attrs[key] = dom.getAttribute(key);
-                                });
-                            return attrs;
-                        },
+                        tag: 'a[is="checkout-link"],checkout-link',
+                        getAttrs: (dom) => ({
+                            ...this.#collectDataAttributes(dom),
+                            title: dom.getAttribute('title'),
+                            text: dom.innerText,
+                        }),
                     },
                 ],
-                toDOM(node) {
-                    const checkoutLink = document.createElement('a', {
-                        is: 'checkout-link',
-                    });
-                    const { title, text } = node.attrs;
-                    if (title) {
-                        checkoutLink.setAttribute('title', title);
-                        delete node.attrs['title'];
-                    }
-                    if (text) {
-                        checkoutLink.innerText = text;
-                        delete node.attrs['text'];
-                    }
-
-                    // Prevent default link behavior
-                    checkoutLink.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    });
-                    // Set attributes from node
-                    Object.entries(node.attrs || {}).forEach(([key, value]) => {
-                        if (value === null) return;
-                        checkoutLink.setAttribute(key, value);
-                    });
-                    return checkoutLink;
-                },
-            };
-        }
-
-        this.#editorSchema = new Schema({
-            nodes,
-            marks: {
-                strong: {
-                    parseDOM: [
-                        { tag: 'strong' },
-                        { tag: 'b' },
-                        {
-                            style: 'font-weight',
-                            getAttrs: (value) =>
-                                value === 'bold' || value === '700',
-                        },
-                    ],
-                    toDOM() {
-                        return ['strong', 0];
-                    },
-                },
-                em: {
-                    parseDOM: [
-                        { tag: 'i' },
-                        { tag: 'em' },
-                        { style: 'font-style=italic' },
-                    ],
-                    toDOM() {
-                        return ['em', 0];
-                    },
-                },
-                strikethrough: {
-                    parseDOM: [{ tag: 's' }],
-                    toDOM() {
-                        return ['s', 0];
-                    },
-                },
-                underline: {
-                    parseDOM: [{ tag: 'u' }],
-                    toDOM() {
-                        return ['u', 0];
-                    },
-                },
-                link: {
-                    attrs: {
-                        href: { default: '' },
-                        title: { default: null },
-                    },
-                    inclusive: false,
-                    parseDOM: [
-                        {
-                            tag: 'a[href]',
-                            getAttrs(dom) {
-                                return {
-                                    href: dom.getAttribute('href'),
-                                    title: dom.getAttribute('title'),
-                                };
-                            },
-                        },
-                    ],
-                    toDOM(node) {
-                        const { href, title } = node.attrs;
-                        return ['a', { href, title }, 0];
-                    },
-                },
+                toDOM: this.#createCheckoutLinkElement,
             },
+            paragraph: {
+                content: 'inline*',
+                group: 'block',
+                parseDOM: [{ tag: 'p' }],
+                toDOM: () => ['p', 0],
+            },
+            doc: {
+                content: 'block+',
+            },
+        };
+
+        const marks = {
+            strong: {
+                parseDOM: [{ tag: 'strong' }, { tag: 'b' }],
+                toDOM: () => ['strong', 0],
+            },
+            em: {
+                parseDOM: [
+                    { tag: 'i' },
+                    { tag: 'em' },
+                    { style: 'font-style=italic' },
+                ],
+                toDOM: () => ['em', 0],
+            },
+            strikethrough: {
+                parseDOM: [{ tag: 's' }],
+                toDOM: () => ['s', 0],
+            },
+            underline: {
+                parseDOM: [{ tag: 'u' }],
+                toDOM: () => ['u', 0],
+            },
+            link: {
+                attrs: {
+                    href: { default: '' },
+                    title: { default: null },
+                },
+                inclusive: false,
+                parseDOM: [
+                    {
+                        tag: 'a[href]',
+                        getAttrs: (dom) => ({
+                            href: dom.getAttribute('href'),
+                            title: dom.getAttribute('title'),
+                        }),
+                    },
+                ],
+                toDOM: (node) => ['a', node.attrs, 0],
+            },
+        };
+
+        this.#editorSchema = new Schema({ nodes, marks });
+    }
+
+    #collectDataAttributes(dom) {
+        const attrs = {};
+        dom.getAttributeNames()
+            .filter(attributeFilter)
+            .forEach((key) => {
+                attrs[key] = dom.getAttribute(key);
+            });
+        return attrs;
+    }
+
+    #createInlinePriceElement(node) {
+        const element = document.createElement('inline-price', {
+            is: 'inline-price',
+        });
+        Object.entries(node.attrs || {}).forEach(([key, value]) => {
+            if (value !== null) {
+                element.setAttribute(key, value);
+            }
+        });
+        return element;
+    }
+
+    #createCheckoutLinkElement(node) {
+        const element = document.createElement('checkout-link', {
+            is: 'checkout-link',
+        });
+        const { title, text, ...attrs } = node.attrs;
+
+        if (title) element.setAttribute('title', title);
+        if (text) element.innerText = text;
+
+        element.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        Object.entries(attrs || {}).forEach(([key, value]) => {
+            if (value !== null) {
+                element.setAttribute(key, value);
+            }
+        });
+        return element;
+    }
+
+    #initializeEditor() {
+        const container = document.createElement('div');
+        this.shadowRoot.appendChild(container);
+
+        this.#editorView = new EditorView(container, {
+            state: this.#createEditorState(),
+            editable: () => !this.readOnly,
+            dispatchTransaction: this.#handleTransaction.bind(this),
         });
     }
 
-    firstUpdated() {
-        this.initEditorSchema();
-        this.initializeEditor();
-        this.value = this.innerHTML.trim();
-        this.innerHTML = '';
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.addEventListener('keydown', this.#handleEscKey);
-        document.addEventListener('use', this.ostEventListener);
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.removeEventListener('keydown', this.#handleEscKey);
-        if (this.editorView) {
-            this.editorView.destroy();
-        }
-        this.removeEventListener('use', this.ostEventListener);
-    }
-
-    ostEventListener({ detail: atributes }) {
-        if (!atributes) return;
-        const { state, dispatch } = this.editorView;
-        const { selection } = state;
-        const { node } = selection;
-        let tr = state.tr;
-
-        // Determine node type based on element type
-        const nodeType =
-            atributes.is === 'inline-price'
-                ? state.schema.nodes.inlinePrice
-                : state.schema.nodes.checkoutLink;
-
-        // Create new node with dataset attributes
-        const newNode = nodeType.create(atributes);
-
-        if (
-            node &&
-            (node.type.name === 'inlinePrice' ||
-                node.type.name === 'checkoutLink')
-        ) {
-            // Replace existing node
-            tr.replaceWith(selection.from, selection.from + 1, newNode);
-        } else {
-            // Insert at current cursor position
-            tr.insert(selection.from, newNode);
-        }
-
-        dispatch(tr);
-        closeOfferSelectorTool();
-    }
-
-    #handleEscKey(event) {
-        if (event.key === 'Escape') {
-            this.showLinkEditor = false;
-            this.showOfferSelectorTool = false;
-        }
-    }
-
-    createEditorState() {
-        const editorSchema = this.#editorSchema;
-        const doc = editorSchema.node('doc', null, [
-            editorSchema.node('paragraph', null, []),
+    #createEditorState() {
+        const doc = this.#editorSchema.node('doc', null, [
+            this.#editorSchema.node('paragraph', null, []),
         ]);
 
         return EditorState.create({
-            schema: this.editorSchema,
+            schema: this.#editorSchema,
             doc,
             plugins: [
                 history(),
                 keymap({
-                    'Mod-b': toggleMark(editorSchema.marks.strong),
-                    'Mod-i': toggleMark(editorSchema.marks.em),
+                    'Mod-b': toggleMark(this.#editorSchema.marks.strong),
+                    'Mod-i': toggleMark(this.#editorSchema.marks.em),
                     'Mod-k': () => (this.showLinkEditor = true),
-                    'Mod-u': toggleMark(editorSchema.marks.underline),
-                    'Mod-s': toggleMark(editorSchema.marks.strikethrough),
+                    'Mod-u': toggleMark(this.#editorSchema.marks.underline),
+                    'Mod-s': toggleMark(this.#editorSchema.marks.strikethrough),
                     'Mod-z': undo,
                     'Mod-y': redo,
                     'Shift-Mod-z': redo,
@@ -368,105 +295,153 @@ class RteEditor extends LitElement {
         });
     }
 
+    #handleTransaction(transaction) {
+        const newState = this.#editorView.state.apply(transaction);
+        this.#editorView.updateState(newState);
+        const content = this.#serializeContent();
+        this.dispatchEvent(
+            new CustomEvent('change', {
+                detail: { content },
+                bubbles: true,
+                composed: true,
+            }),
+        );
+    }
+
     set value(html) {
         if (!html) {
             html = '<p></p>';
         }
 
-        if (this.editorView) {
+        if (this.#editorView) {
             try {
-                // Parse the new HTML content
+                const container = document.createElement('div');
+                container.innerHTML = html.trim();
                 const doc = DOMParser.fromSchema(this.#editorSchema).parse(
-                    this.createFragmentFromHTML(html),
+                    container,
                 );
-
-                // Create a new transaction to replace the entire document content
-                const tr = this.editorView.state.tr.replaceWith(
+                const tr = this.#editorView.state.tr.replaceWith(
                     0,
-                    this.editorView.state.doc.content.size,
+                    this.#editorView.state.doc.content.size,
                     doc.content,
                 );
-
-                // Dispatch the transaction to update the editor
-                this.editorView.dispatch(tr);
-            } catch (e) {
-                console.error(e);
+                this.#editorView.dispatch(tr);
+            } catch (error) {
+                console.error('Error setting editor value:', error);
             }
         }
         this.requestUpdate();
     }
 
-    initializeEditor() {
-        this.editorView = new EditorView(this.shadowRoot, {
-            state: this.createEditorState(),
-            editable: () => !this.readOnly,
-            dispatchTransaction: (transaction) => {
-                const newState = this.editorView.state.apply(transaction);
-                this.editorView.updateState(newState);
-
-                const content = this.serializeContent();
-                this.dispatchEvent(
-                    new CustomEvent('change', {
-                        detail: { content },
-                        bubbles: true,
-                        composed: true,
-                    }),
-                );
-            },
-        });
-    }
-
-    createFragmentFromHTML(html) {
-        const template = document.createElement('template');
-        template.innerHTML = html.trim() || '<p></p>';
-        return template.content;
-    }
-
-    serializeContent() {
-        if (!this.editorView || !this.editorView.state) return '';
+    #serializeContent() {
+        if (!this.#editorView?.state) return '';
 
         const fragment = DOMSerializer.fromSchema(
             this.#editorSchema,
-        ).serializeFragment(this.editorView.state.doc.content);
-        const tmp = document.createElement('div');
-        tmp.appendChild(fragment);
-        return tmp.innerHTML;
+        ).serializeFragment(this.#editorView.state.doc.content);
+
+        const container = document.createElement('div');
+        container.appendChild(fragment);
+        return container.innerHTML;
+    }
+
+    #handleEscKey(event) {
+        if (event.key === 'Escape') {
+            this.showLinkEditor = false;
+            closeOfferSelectorTool();
+        }
+    }
+
+    #handleOstEvent({ detail: attributes }) {
+        if (!attributes) return;
+
+        const { state, dispatch } = this.#editorView;
+        const { selection } = state;
+        const nodeType =
+            attributes.is === 'inline-price'
+                ? state.schema.nodes.inlinePrice
+                : state.schema.nodes.checkoutLink;
+
+        let content = null;
+        if (attributes.is === 'checkout-link' && attributes.text) {
+            content = state.schema.text(attributes.text);
+            delete attributes.text;
+        }
+
+        const node = nodeType.create(attributes, content);
+        const tr = selection.empty
+            ? state.tr.insert(selection.from, node)
+            : state.tr.replaceWith(selection.from, selection.to, node);
+
+        dispatch(tr);
+        closeOfferSelectorTool();
     }
 
     handleToolbarAction(markType) {
         return () => {
-            const { state, dispatch } = this.editorView;
+            const { state, dispatch } = this.#editorView;
             toggleMark(this.#editorSchema.marks[markType])(state, dispatch);
         };
     }
 
     #getLinkAttrs() {
-        const { state } = this.editorView;
+        const { state } = this.#editorView;
         const { selection } = state;
         const markType = this.#editorSchema.marks.link;
 
-        // If there's a selection, use that instead of cursor position
-        if (!selection.empty) {
-            const { from, to } = selection;
-            // Get the first link mark in the selection if it exists
-            const marks = state.doc.rangeHasMark(from, to, markType);
-            const linkMark = marks
-                ? state.doc
-                      .resolve(from)
-                      .marks()
-                      .find((mark) => mark.type === markType)
-                : null;
-
-            return {
-                url: linkMark ? linkMark.attrs.href : '',
-                title: linkMark ? linkMark.attrs.title : '',
-                text: state.doc.textBetween(from, to),
-            };
+        if (!selection.empty && selection.node?.type.name === 'checkoutLink') {
+            return this.#getCheckoutLinkAttrs(selection.node);
         }
 
-        // If no selection, fall back to cursor position behavior
-        const $pos = selection.$head;
-        const marks = $pos.marks();
+        if (!selection.empty) {
+            return this.#getSelectionLinkAttrs(selection, markType);
+        }
+
+        return this.#getCursorLinkAttrs(selection, markType);
+    }
+
+    #getCheckoutLinkAttrs(node) {
+        let extraOptions = {};
+        try {
+            extraOptions = new URLSearchParams(
+                node.attrs['data-extra-options']
+                    ? JSON.parse(node.attrs['data-extra-options'])
+                    : {},
+            ).toString();
+        } catch (error) {
+            console.warn('Failed to parse extra options:', error);
+        }
+
+        return {
+            url: '',
+            title: node.attrs.title || '',
+            text: node.attrs.text || node.textContent || '',
+            isCheckoutLink: true,
+            checkoutParameters: extraOptions,
+        };
+    }
+
+    #getSelectionLinkAttrs(selection, markType) {
+        const { from, to } = selection;
+        const marks = this.#editorView.state.doc.rangeHasMark(
+            from,
+            to,
+            markType,
+        );
+        const linkMark = marks
+            ? selection.$from.marks().find((mark) => mark.type === markType)
+            : null;
+
+        return {
+            url: linkMark?.attrs.href || '',
+            title: linkMark?.attrs.title || '',
+            text: this.#editorView.state.doc.textBetween(from, to),
+            isCheckoutLink: false,
+        };
+    }
+
+    #getCursorLinkAttrs(selection, markType) {
+        const marks = selection.$head.marks();
         const linkMark = marks.find((mark) => mark.type === markType);
 
         if (!linkMark) {
@@ -474,153 +449,178 @@ class RteEditor extends LitElement {
                 url: '',
                 title: '',
                 text: '',
+                isCheckoutLink: false,
             };
         }
 
-        // Find the full node that contains this mark when at cursor
-        let startPos = $pos.pos;
-        let endPos = $pos.pos;
-
-        // Search backwards to find start of link
-        let searchPos = $pos.pos;
-        while (searchPos > 0) {
-            const marks = state.doc.rangeHasMark(
-                searchPos - 1,
-                searchPos,
-                markType,
-            );
-            if (!marks) break;
-            startPos = searchPos - 1;
-            searchPos--;
-        }
-
-        // Search forwards to find end of link
-        searchPos = $pos.pos;
-        while (searchPos < state.doc.content.size) {
-            const marks = state.doc.rangeHasMark(
-                searchPos,
-                searchPos + 1,
-                markType,
-            );
-            if (!marks) break;
-            endPos = searchPos + 1;
-            searchPos++;
-        }
+        const { startPos, endPos } = this.#findLinkBoundaries(
+            selection,
+            markType,
+        );
 
         return {
             url: linkMark.attrs.href || '',
             title: linkMark.attrs.title || '',
-            text: state.doc.textBetween(startPos, endPos),
+            text: this.#editorView.state.doc.textBetween(startPos, endPos),
+            isCheckoutLink: false,
         };
     }
 
-    #handleLinkSave(e) {
-        const { url, text, title } = e.detail;
-        const { state, dispatch } = this.editorView;
-        const { selection } = state;
-        const markType = this.#editorSchema.marks.link;
+    #findLinkBoundaries(selection, markType) {
+        let startPos = selection.$head.pos;
+        let endPos = selection.$head.pos;
+        const state = this.#editorView.state;
+
+        let pos = selection.$head.pos;
+        while (pos > 0 && state.doc.rangeHasMark(pos - 1, pos, markType)) {
+            startPos = --pos;
+        }
+
+        pos = selection.$head.pos;
+        while (
+            pos < state.doc.content.size &&
+            state.doc.rangeHasMark(pos, pos + 1, markType)
+        ) {
+            endPos = ++pos;
+        }
+
+        return { startPos, endPos };
+    }
+
+    #handleLinkSave(event) {
+        const { url, text, title, isCheckoutLink, checkoutParameters } =
+            event.detail;
+        const { state, dispatch } = this.#editorView;
         let tr = state.tr;
 
-        if (!selection.empty) {
-            // Handle selection case
-            const { from, to } = selection;
-
-            // First remove any existing link marks in the selection
-            if (state.doc.rangeHasMark(from, to, markType)) {
-                tr.removeMark(from, to, markType);
-            }
-
-            // Update the text if it changed
-            if (text && text !== state.doc.textBetween(from, to)) {
-                tr.replaceWith(from, to, state.schema.text(text));
-            }
-
-            // Add the new link mark
-            const mark = markType.create({ href: url, title });
-            tr.addMark(from, text ? from + text.length : to, mark);
+        if (isCheckoutLink) {
+            tr = this.#handleCheckoutLinkSave(
+                tr,
+                text,
+                title,
+                checkoutParameters,
+            );
         } else {
-            // Handle cursor position case
-            const $pos = selection.$head;
-            const marks = $pos.marks();
-            const linkMark = marks.find((mark) => mark.type === markType);
-
-            if (linkMark) {
-                // Find the full extent of the existing link
-                let startPos = $pos.pos;
-                let endPos = $pos.pos;
-
-                // Search backwards to find start of link
-                let searchPos = $pos.pos;
-                while (searchPos > 0) {
-                    const marks = state.doc.rangeHasMark(
-                        searchPos - 1,
-                        searchPos,
-                        markType,
-                    );
-                    if (!marks) break;
-                    startPos = searchPos - 1;
-                    searchPos--;
-                }
-
-                // Search forwards to find end of link
-                searchPos = $pos.pos;
-                while (searchPos < state.doc.content.size) {
-                    const marks = state.doc.rangeHasMark(
-                        searchPos,
-                        searchPos + 1,
-                        markType,
-                    );
-                    if (!marks) break;
-                    endPos = searchPos + 1;
-                    searchPos++;
-                }
-
-                // Remove the old link mark
-                tr.removeMark(startPos, endPos, markType);
-
-                // Update the text if it changed
-                if (text && text !== state.doc.textBetween(startPos, endPos)) {
-                    tr.replaceWith(startPos, endPos, state.schema.text(text));
-                }
-
-                // Add the new link mark
-                const mark = markType.create({ href: url, title });
-                tr.addMark(
-                    startPos,
-                    text ? startPos + text.length : endPos,
-                    mark,
-                );
-            } else {
-                // No existing link at cursor, create new one at cursor position
-                if (text) {
-                    const pos = selection.$head.pos;
-                    tr.replaceWith(pos, pos, state.schema.text(text));
-                    const mark = markType.create({ href: url, title });
-                    tr.addMark(pos, pos + text.length, mark);
-                }
-            }
+            tr = this.#handleRegularLinkSave(tr, url, text, title);
         }
 
         dispatch(tr);
         this.showLinkEditor = false;
     }
 
+    #handleCheckoutLinkSave(tr, text, title, parameters) {
+        const { selection } = this.#editorView.state;
+        const node = this.#editorSchema.nodes.checkoutLink.create({
+            is: 'checkout-link',
+            title,
+            text,
+            'data-checkout-workflow': parameters?.workflow || '',
+            'data-checkout-workflow-step': parameters?.workflowStep || '',
+            'data-extra-options': parameters?.extraOptions || '',
+            'data-perpetual': parameters?.perpetual || '',
+            'data-promotion-code': parameters?.promotionCode || '',
+            'data-wcs-osi': parameters?.wcsOsi || '',
+        });
+
+        return tr.replaceWith(selection.from, selection.to, node);
+    }
+
+    #handleRegularLinkSave(tr, url, text, title) {
+        const { selection } = this.#editorView.state;
+        const markType = this.#editorSchema.marks.link;
+        const mark = markType.create({ href: url, title });
+
+        if (!selection.empty) {
+            tr = this.#handleSelectionLinkSave(
+                tr,
+                selection,
+                markType,
+                text,
+                mark,
+            );
+        } else {
+            tr = this.#handleCursorLinkSave(
+                tr,
+                selection,
+                markType,
+                text,
+                mark,
+            );
+        }
+
+        return tr;
+    }
+
+    #handleSelectionLinkSave(tr, selection, markType, text, mark) {
+        tr = tr.removeMark(selection.from, selection.to, markType);
+
+        if (
+            text &&
+            text !==
+                this.#editorView.state.doc.textBetween(
+                    selection.from,
+                    selection.to,
+                )
+        ) {
+            tr = tr.replaceWith(
+                selection.from,
+                selection.to,
+                this.#editorSchema.text(text),
+            );
+        }
+
+        return tr.addMark(
+            selection.from,
+            text ? selection.from + text.length : selection.to,
+            mark,
+        );
+    }
+
+    #handleCursorLinkSave(tr, selection, markType, text, mark) {
+        const { startPos, endPos } = this.#findLinkBoundaries(
+            selection,
+            markType,
+        );
+
+        tr = tr.removeMark(startPos, endPos, markType);
+
+        if (text) {
+            if (
+                text !==
+                this.#editorView.state.doc.textBetween(startPos, endPos)
+            ) {
+                tr = tr.replaceWith(
+                    startPos,
+                    endPos,
+                    this.#editorSchema.text(text),
+                );
+            }
+            tr = tr.addMark(startPos, startPos + text.length, mark);
+        }
+
+        return tr;
+    }
+
     async openLinkEditor() {
-        const { url, text, title, checkoutParameters } = this.#getLinkAttrs();
+        const attrs = this.#getLinkAttrs();
         this.showLinkEditor = true;
         await this.updateComplete;
-        Object.assign(this.linkEditorElement, {
-            url,
-            text,
-            title,
-            checkoutParameters,
-        });
+        Object.assign(this.shadowRoot.querySelector('rte-link-editor'), attrs);
     }
 
-    get linkEditorButtonElement() {
-        return this.shadowRoot.querySelector('#linkEditorButton');
+    #getCurrentOfferElement() {
+        const { selection } = this.#editorView.state;
+        let node = this.#editorView
+            .domAtPos(selection.from)
+            .node.querySelector?.('inline-price,checkout-link');
+        return node;
     }
 
+    handleOpenOfferSelector() {
+        openOfferSelectorTool(this.#getCurrentOfferElement());
+    }
+
+    // Template getters
     get #linkEditorButton() {
         return html`
             <sp-action-button
@@ -634,23 +634,17 @@ class RteEditor extends LitElement {
         `;
     }
 
-    get offerSelectorToolButton() {
-        if (!this.ost) return nothing;
+    get #offerSelectorButton() {
         return html`
-        <sp-divider size="s" vertical></sp-divider>
-        <sp-action-button
-                    emphasized
-                    @click=${this.openOfferSelectorTool}
-                    title="Offer Selector Tool"
-                >
-                    <sp-icon-offer slot="icon"></sp-icon-offer>
-                </sp-action-button>
-            </sp-action-group>
-            `;
-    }
-
-    get linkEditorElement() {
-        return this.shadowRoot.querySelector('rte-link-editor');
+            <sp-divider size="s" vertical></sp-divider>
+            <sp-action-button
+                emphasized
+                @click=${this.handleOpenOfferSelector}
+                title="Offer Selector Tool"
+            >
+                <sp-icon-shopping-cart slot="icon"></sp-icon-shopping-cart>
+            </sp-action-button>
+        `;
     }
 
     get #linkEditor() {
@@ -659,70 +653,53 @@ class RteEditor extends LitElement {
             <rte-link-editor
                 dialog
                 @close="${() => (this.showLinkEditor = false)}"
-                @save="${this.#handleLinkSave}"
+                @save="${this.#boundHandlers.linkSave}"
             ></rte-link-editor>
         `;
     }
 
-    get currentOfferElement() {
-        const { state } = this.editorView;
-        const { selection } = state;
-        const { node } = selection;
-        // Check if we have a node selection and if it's one of our special nodes
-        if (
-            node &&
-            (node.type.name === 'inlinePrice' ||
-                node.type.name === 'checkoutLink')
-        ) {
-            // Get the DOM node directly from the view
-            return this.editorView.nodeDOM(selection.from);
-        }
-
-        return null;
-    }
-    async openOfferSelectorTool(e) {
-        openOfferSelectorTool(this.currentOfferElement);
-        this.showOfferSelectorTool = true;
-    }
-
     render() {
         return html`
-            <sp-action-group size="m" aria-lable="RTE toolbar actions">
-                <sp-action-button
-                    emphasized
-                    @click=${this.handleToolbarAction('strong')}
-                    title="Bold (Ctrl+B)"
-                >
-                    <sp-icon-text-bold slot="icon"></sp-icon-text-bold>
-                </sp-action-button>
-                <sp-action-button
-                    emphasized
-                    @click=${this.handleToolbarAction('em')}
-                    title="Italic (Ctrl+I)"
-                >
-                    <sp-icon-text-italic slot="icon"></sp-icon-text-italic>
-                </sp-action-button>
-                <sp-action-button
-                    emphasized
-                    @click=${this.handleToolbarAction('strikethrough')}
-                    title="Strikethrough (Ctrl+Shift+S)"
-                >
-                    <sp-icon-text-strikethrough
-                        slot="icon"
-                    ></sp-icon-text-strikethrough>
-                </sp-action-button>
-                <sp-action-button
-                    emphasized
-                    @click=${this.handleToolbarAction('underline')}
-                    title="Underline (Ctrl+U)"
-                >
-                    <sp-icon-text-underline
-                        slot="icon"
-                    ></sp-icon-text-underline>
-                </sp-action-button>
-                ${this.#linkEditorButton} ${this.offerSelectorToolButton}
+            <sp-action-group size="m" aria-label="RTE toolbar actions">
+                ${this.#renderFormatButtons()} ${this.#linkEditorButton}
+                ${this.#offerSelectorButton}
             </sp-action-group>
             ${this.#linkEditor}
+        `;
+    }
+
+    #renderFormatButtons() {
+        return html`
+            <sp-action-button
+                emphasized
+                @click=${this.handleToolbarAction('strong')}
+                title="Bold (Ctrl+B)"
+            >
+                <sp-icon-text-bold slot="icon"></sp-icon-text-bold>
+            </sp-action-button>
+            <sp-action-button
+                emphasized
+                @click=${this.handleToolbarAction('em')}
+                title="Italic (Ctrl+I)"
+            >
+                <sp-icon-text-italic slot="icon"></sp-icon-text-italic>
+            </sp-action-button>
+            <sp-action-button
+                emphasized
+                @click=${this.handleToolbarAction('strikethrough')}
+                title="Strikethrough (Ctrl+Shift+S)"
+            >
+                <sp-icon-text-strikethrough
+                    slot="icon"
+                ></sp-icon-text-strikethrough>
+            </sp-action-button>
+            <sp-action-button
+                emphasized
+                @click=${this.handleToolbarAction('underline')}
+                title="Underline (Ctrl+U)"
+            >
+                <sp-icon-text-underline slot="icon"></sp-icon-text-underline>
+            </sp-action-button>
         `;
     }
 }
