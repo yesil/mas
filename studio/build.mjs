@@ -17,15 +17,3 @@ await build({
     entryPoints: ['src/swc.js'],
     outfile: 'libs/swc.js',
 });
-
-await build({
-    ...defaults,
-    entryPoints: ['src/aem/index.js'],
-    outfile: 'libs/aem.js',
-});
-
-await build({
-    ...defaults,
-    entryPoints: ['src/studio.js'],
-    outfile: 'libs/studio.js',
-});
