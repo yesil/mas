@@ -1,9 +1,6 @@
 import { html, LitElement, nothing } from 'lit';
 import { EVENT_SUBMIT } from './events.js';
-import {
-    deeplink,
-    pushState,
-} from '@adobecom/milo/libs/features/mas/web-components/src/deeplink.js';
+import { deeplink, pushState } from './deeplink.js';
 import './editors/merch-card-editor.js';
 import './rte/rte-editor.js';
 import './rte/rte-link-editor.js';
@@ -15,6 +12,11 @@ import { getOffferSelectorTool, openOfferSelectorTool } from './ost.js';
 
 const EVENT_LOAD_START = 'load-start';
 const EVENT_LOAD_END = 'load-end';
+const BUCKET_TO_ENV = {
+    e155390: 'qa',
+    e59471: 'stage',
+    e59433: 'prod',
+};
 
 class MasStudio extends LitElement {
     static properties = {
@@ -30,6 +32,7 @@ class MasStudio extends LitElement {
 
     constructor() {
         super();
+        this.bucket = 'e59433';
         this.newFragment = null;
         this.root = '/content/dam/mas';
         this.variant = 'all';
@@ -131,6 +134,10 @@ class MasStudio extends LitElement {
 
     get fragment() {
         return this.source?.fragment;
+    }
+
+    get env() {
+        return BUCKET_TO_ENV[this.bucket] || BUCKET_TO_ENV.e59433;
     }
 
     createRenderRoot() {
@@ -322,7 +329,7 @@ class MasStudio extends LitElement {
 
     render() {
         return html`
-            <mas-top-nav></mas-top-nav>
+            <mas-top-nav env="${this.env}"></mas-top-nav>
             <side-nav></side-nav>
             <mas-filter-toolbar></mas-filter-toolbar>
             ${this.showFilterPanel
