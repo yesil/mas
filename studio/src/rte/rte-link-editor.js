@@ -1,5 +1,5 @@
 import { LitElement, css, html, nothing } from 'lit';
-import { classMap } from 'lit-html/directives/class-map.js';
+import { classMap } from 'lit/directives/class-map.js';
 
 export class RteLinkEditor extends LitElement {
     static properties = {
