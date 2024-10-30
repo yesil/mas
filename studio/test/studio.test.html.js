@@ -13,8 +13,6 @@ import '../src/studio.js';
 
 import { getTemplateContent } from './utils.js';
 
-import '@tinymce/tinymce-webcomponent';
-
 runTests(async () => {
     describe('M@S Studio', () => {
         beforeEach(() => {
