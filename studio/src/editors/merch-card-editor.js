@@ -80,22 +80,22 @@ class MerchCardEditor extends LitElement {
             ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor data-field="prices" @blur="${this.updateFragment}"
-                    >${unsafeHTML(form.prices.values[0])}</rte-editor
+                <rte-field data-field="prices" @blur="${this.updateFragment}"
+                    >${unsafeHTML(form.prices.values[0])}</rte-field
                 >
             </sp-field-group>
             <sp-field-label for="horizontal"> Description </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor
+                <rte-field
                     data-field="description"
                     @blur="${this.updateFragment}"
-                    >${unsafeHTML(form.description.values[0])}</rte-editor
+                    >${unsafeHTML(form.description.values[0])}</rte-field
                 >
             </sp-field-group>
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-editor data-field="ctas" @blur="${this.updateFragment}"
-                    >${unsafeHTML(form.ctas.values[0])}</rte-editor
+                <rte-field data-field="ctas" @blur="${this.updateFragment}"
+                    >${unsafeHTML(form.ctas.values[0])}</rte-field
                 >
             </sp-field-group>`;
     }

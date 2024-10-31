@@ -72,7 +72,7 @@ sp-status-light {
     left: 6px;
 }
 
-rte-editor {
+rte-field {
     width: 100%;
     border: 1px solid var(--spectrum-global-color-gray-500);
     border-radius: var(--spectrum-corner-radius-100);
@@ -130,6 +130,6 @@ content-navigation[in-selection] render-view merch-card .overlay {
 }
 
 merch-card-editor mas-multifield,
-rte-editor {
+rte-field {
     margin-inline-end: 16px;
 }
