@@ -5,7 +5,6 @@ import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
 import { schema } from 'prosemirror-schema-basic';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
-import { addListNodes } from 'prosemirror-schema-list';
 import { history, undo, redo } from 'prosemirror-history';
 import {
     openOfferSelectorTool,
@@ -171,7 +170,11 @@ class RteField extends LitElement {
     }
 
     #initEditorSchema() {
-        const nodes = schema.spec.nodes.append({
+        const nodes = {};
+        schema.spec.nodes.forEach((key) => {
+            nodes[key] = { ...schema.spec.nodes.get(key) };
+        });
+        Object.assign(nodes, {
             inlinePrice: {
                 group: 'inline',
                 inline: true,
@@ -254,11 +257,12 @@ class RteField extends LitElement {
 
         if (this.inline) {
             delete nodes.paragraph;
-            nodes.get('doc').content = 'inline+';
+            delete nodes.hard_break;
+            nodes.doc.content = 'inline+';
         }
 
         this.#editorSchema = new Schema({
-            nodes: addListNodes(nodes, 'paragraph block*', 'block'),
+            nodes,
             marks,
         });
     }

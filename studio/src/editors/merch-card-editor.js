@@ -80,7 +80,10 @@ class MerchCardEditor extends LitElement {
             ></sp-textfield>
             <sp-field-label for="horizontal"> Prices </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-field data-field="prices" @blur="${this.updateFragment}"
+                <rte-field
+                    inline
+                    data-field="prices"
+                    @blur="${this.updateFragment}"
                     >${unsafeHTML(form.prices.values[0])}</rte-field
                 >
             </sp-field-group>
@@ -94,7 +97,10 @@ class MerchCardEditor extends LitElement {
             </sp-field-group>
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
-                <rte-field data-field="ctas" @blur="${this.updateFragment}"
+                <rte-field
+                    inline
+                    data-field="ctas"
+                    @blur="${this.updateFragment}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-field
                 >
             </sp-field-group>`;
