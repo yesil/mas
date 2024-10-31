@@ -2,7 +2,7 @@ import { html, LitElement, nothing } from 'lit';
 import { EVENT_SUBMIT } from './events.js';
 import { deeplink, pushState } from './deeplink.js';
 import './editors/merch-card-editor.js';
-import './rte/rte-editor.js';
+import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
 import './mas-filter-panel.js';

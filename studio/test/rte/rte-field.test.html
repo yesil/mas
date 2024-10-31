@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Prosemirror RTE Editor custom element</title>
+        <title>Prosemirror RTE field custom element</title>
         <meta name="nofollow-links" content="on" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
@@ -17,7 +17,7 @@
                 display: contents;
             }
 
-            rte-editor {
+            rte-field {
                 max-height: 500px;
             }
 
@@ -36,7 +36,7 @@
             import { expect } from '@esm-bundle/chai';
 
             import '../../src/swc.js';
-            import '../../src/rte/rte-editor.js';
+            import '../../src/rte/rte-field.js';
             import '../../src/rte/rte-link-editor.js';
             import '@adobecom/milo/libs/deps/mas/mas.js';
             import { mockFetch } from '@adobecom/milo/libs/features/mas/mocks/fetch.js';
@@ -52,7 +52,7 @@
 
             runTests(async () => {
                 await mockFetch(withWcs);
-                describe('RTE Editor', () => {
+                describe('RTE Field', () => {
                     it('should render with default attributes', async function () {
                         const rte = await createFromTemplate(
                             'rte',
@@ -63,7 +63,7 @@
                 });
 
                 // Theses are not very stable in headless chrome. Enable them for localing.
-                describe('RTE Editor: link features', () => {
+                describe('RTE Field: link features', () => {
                     let rte;
                     const clickSave = () => {
                         const saveButton =
@@ -164,7 +164,7 @@
                 });
 
                 // Theses are not very stable in headless chrome. Enable them for localing.
-                describe('RTE Editor: OST features', () => {
+                describe('RTE Field: OST features', () => {
                     let rte;
 
                     const openOST = async function () {
@@ -230,19 +230,19 @@
             <sp-theme color="light" scale="medium"> </sp-theme>
         </main>
         <template id="rte">
-            <rte-editor>
+            <rte-field>
                 <p>Text only</p>
-            </rte-editor>
+            </rte-field>
         </template>
         <template id="rte-link">
-            <rte-editor>
+            <rte-field>
                 <a href="https://www.adobe.com" title="adobe.com homepage"
                     >Adobe</a
                 >
-            </rte-editor>
+            </rte-field>
         </template>
         <template id="rte-all">
-            <rte-editor>
+            <rte-field>
                 <span is="inline-price" data-wcs-osi="abm"></span
                 ><a class="accent" is="checkout-link" data-wcs-osi="abm"
                     >Buy now</a
@@ -263,10 +263,10 @@
                 ><a class="secondary-link" is="checkout-link" data-wcs-osi="abm"
                     >Buy now</a
                 >
-            </rte-editor>
+            </rte-field>
         </template>
         <template id="rte-tinymce">
-            <rte-editor>
+            <rte-field>
                 <div
                     data-mce-bogus="all"
                     class="mce-offscreen-selection"
@@ -324,7 +324,7 @@
                         >Buy now</a
                     >
                 </p>
-            </rte-editor>
+            </rte-field>
         </template>
     </body>
 </html>

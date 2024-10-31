@@ -18,7 +18,7 @@ import prosemirrorStyles from './prosemirror.css.js';
 const CUSTOM_ELEMENT_CHECKOUT_LINK = 'checkout-link';
 const CUSTOM_ELEMENT_INLINE_PRICE = 'inline-price';
 
-class RteEditor extends LitElement {
+class RteField extends LitElement {
     static properties = {
         inline: { type: Boolean, attribute: 'inline' },
         linkSelected: { type: Boolean, state: true },
@@ -866,4 +866,4 @@ class RteEditor extends LitElement {
     }
 }
 
-customElements.define('rte-editor', RteEditor);
+customElements.define('rte-field', RteField);
