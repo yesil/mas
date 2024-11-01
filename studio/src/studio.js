@@ -70,7 +70,6 @@ class MasStudio extends LitElement {
                 this.closeFragmentEditor();
                 this.source.clearSelection();
                 this.contentNavigation.toggleSelectionMode(false);
-                document.activeElement.blur();
             }
         });
 
@@ -421,6 +420,7 @@ class MasStudio extends LitElement {
     }
 
     updateFragment({ detail: e }) {
+        if (!this.fragment) return;
         const fieldName = e.target.dataset.field;
         let value = e.target.value || e.detail?.value;
         value = e.target.multiline ? value?.split(',') : [value ?? ''];

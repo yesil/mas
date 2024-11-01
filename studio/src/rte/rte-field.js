@@ -103,7 +103,7 @@ class RteField extends LitElement {
 
                 a.secondary-outline {
                     background-color: initial;
-                    border: 2px solid var(--spectrum-global-color-gray-200);
+                    border: 2px solid var(--spectrum-global-color-gray-300);
                     color: var(--spectrum-global-color-gray-900);
                 }
 
@@ -173,21 +173,23 @@ class RteField extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        document.addEventListener('keydown', this.#boundHandlers.escKey);
+        document.addEventListener('keydown', this.#boundHandlers.escKey, {
+            capture: true,
+        });
         document.addEventListener('use', this.#boundHandlers.ostEvent);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        document.removeEventListener('keydown', this.#boundHandlers.escKey);
+        document.removeEventListener('keydown', this.#boundHandlers.escKey, {
+            capture: true,
+        });
         document.removeEventListener('use', this.#boundHandlers.ostEvent);
         this.editorView?.destroy();
     }
 
     #initEditorSchema() {
-        let nodes = schema.spec.nodes;
-
-        nodes = nodes.addToStart('inlinePrice', {
+        let nodes = schema.spec.nodes.addToStart('inlinePrice', {
             group: 'inline',
             inline: true,
             atom: true,
@@ -251,15 +253,24 @@ class RteField extends LitElement {
                 },
             });
 
+        if (this.inline) {
+            nodes = nodes.update('doc', { content: 'inline*' });
+        }
+
         this.#editorSchema = new Schema({ nodes, marks });
 
         this.#serializer = DOMSerializer.fromSchema(this.#editorSchema);
     }
 
     #createEditorState() {
-        const doc = this.#editorSchema.node('doc', null, [
-            this.#editorSchema.node('paragraph', null, []),
-        ]);
+        let doc;
+        if (this.inline) {
+            doc = this.#editorSchema.node('doc', null, []);
+        } else {
+            doc = this.#editorSchema.node('doc', null, [
+                this.#editorSchema.node('paragraph', null, []),
+            ]);
+        }
 
         const plugins = [
             history(),
@@ -494,10 +505,18 @@ class RteField extends LitElement {
     }
 
     #handleEscKey(event) {
+        if (!this.showLinkEditor) return;
+        // Handle ESC key at the RteField level
         if (event.key === 'Escape') {
-            this.showLinkEditor = false;
-            this.showOfferSelector = false;
-            closeOfferSelectorTool();
+            event.stopPropagation(); // Stop propagation here
+            if (this.showLinkEditor) {
+                this.showLinkEditor = false;
+                this.requestUpdate();
+            }
+            if (this.showOfferSelector) {
+                this.showOfferSelector = false;
+                closeOfferSelectorTool();
+            }
         }
     }
 
