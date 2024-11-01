@@ -5,4 +5,3 @@ export * from 'prosemirror-keymap';
 export * from 'prosemirror-schema-basic';
 export * from 'prosemirror-commands';
 export * from 'prosemirror-history';
-export * from 'orderedmap';
