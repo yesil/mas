@@ -83,6 +83,7 @@ class MerchCardEditor extends LitElement {
                 <rte-field
                     inline
                     data-field="prices"
+                    default-link-style="primary-outline"
                     @blur="${this.updateFragment}"
                     >${unsafeHTML(form.prices.values[0])}</rte-field
                 >
@@ -90,7 +91,9 @@ class MerchCardEditor extends LitElement {
             <sp-field-label for="horizontal"> Description </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-field
+                    link
                     data-field="description"
+                    default-link-style="secondary-link"
                     @blur="${this.updateFragment}"
                     >${unsafeHTML(form.description.values[0])}</rte-field
                 >
@@ -98,8 +101,10 @@ class MerchCardEditor extends LitElement {
             <sp-field-label for="horizontal"> Footer </sp-field-label>
             <sp-field-group horizontal id="horizontal">
                 <rte-field
+                    link
                     inline
                     data-field="ctas"
+                    default-link-style="primary-outline"
                     @blur="${this.updateFragment}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-field
                 >

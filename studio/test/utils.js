@@ -1,3 +1,5 @@
+import { TextSelection } from 'prosemirror-state';
+
 window.toggleTheme = () => {
     const theme = document.querySelector('sp-theme');
     theme.color = theme.color === 'dark' ? 'light' : 'dark';
@@ -81,30 +83,34 @@ export async function simulateClick(element, offsetX, offsetY) {
     await delay(500);
 }
 
-export function selectWordsInTextNode(textNode, words) {
-    const text = textNode.nodeValue;
-    // Create regex pattern for all words with word boundaries
+export function selectWordsInTextNode(view, words) {
+    const { state } = view;
+    const { doc } = state;
     const regex = new RegExp(words, 'gi');
+    let foundSelection = false;
 
-    const ranges = [];
-    let match;
+    // Function to process text nodes
+    doc.descendants((node, pos) => {
+        if (foundSelection || node.type.name !== 'text') return;
 
-    // Find all occurrences of any word
-    while ((match = regex.exec(text)) !== null) {
-        const range = document.createRange();
-        range.setStart(textNode, match.index);
-        range.setEnd(textNode, match.index + match[0].length);
-        ranges.push(range);
-    }
+        const text = node.text;
+        let match;
 
-    if (ranges.length > 0) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
+        // Find all occurrences of any word
+        while ((match = regex.exec(text)) !== null) {
+            // Create a ProseMirror selection
+            const from = pos + match.index;
+            const to = from + match[0].length;
 
-        // Add all ranges to the selection
-        ranges.forEach((range) => selection.addRange(range));
-        return true;
-    }
+            // Create and dispatch the transaction with the new selection
+            const selection = TextSelection.create(doc, from, to);
+            const tr = state.tr.setSelection(selection);
 
-    return false;
+            view.dispatch(tr);
+            foundSelection = true;
+            break; // Stop after first match - remove if you want to handle multiple selections
+        }
+    });
+
+    return foundSelection;
 }

@@ -3,8 +3,9 @@ import { classMap } from 'lit/directives/class-map.js';
 
 export class RteLinkEditor extends LitElement {
     static properties = {
+        open: { type: Boolean },
         dialog: { type: Boolean },
-        url: { type: String },
+        href: { type: String },
         text: { type: String },
         title: { type: String },
         target: { type: String },
@@ -69,12 +70,13 @@ export class RteLinkEditor extends LitElement {
     constructor() {
         super();
         this.dialog = false;
-        this.url = '';
+        this.href = '';
         this.text = '';
         this.title = '';
         this.checkoutParameters = undefined;
         this.variant = 'accent';
         this.target = '_self';
+        this.open = true;
     }
 
     get #checkoutParametersField() {
@@ -94,26 +96,25 @@ export class RteLinkEditor extends LitElement {
         return this.shadowRoot.querySelector('#checkoutParameters');
     }
 
-    get #linkUrlField() {
+    get #linkHrefField() {
         if (this.checkoutParameters !== undefined) return nothing;
         return html`
-            <sp-field-label for="linkUrl">Link URL</sp-field-label>
+            <sp-field-label for="linkHref">Link URL</sp-field-label>
             <sp-textfield
-                id="linkUrl"
+                id="linkHref"
                 placeholder="https://"
-                .value=${this.url}
-                @input=${(e) => (this.url = e.target.value)}
-                @change=${() => (this.text = this.text || this.url)}
+                .value=${this.href}
+                @input=${(e) => (this.href = e.target.value)}
+                @change=${() => (this.text = this.text || this.href)}
             ></sp-textfield>
         `;
     }
 
-    get linkUrlElement() {
-        return this.shadowRoot.querySelector('#linkUrl');
+    get linkHrefElement() {
+        return this.shadowRoot.querySelector('#linkHref');
     }
 
     get #linkVariants() {
-        if (this.checkoutParameters === undefined) return nothing;
         return html`
             <sp-field-label for="linkVariant">Variant</sp-field-label>
             <sp-button-group id="linkVariant">
@@ -194,7 +195,7 @@ export class RteLinkEditor extends LitElement {
             this.checkoutParameters === undefined ? 'Link' : 'Checkout Link';
         return html`<sp-dialog close=${this.#handleClose}>
             <h2 slot="heading">Insert/Edit ${type}</h2>
-            ${this.#linkUrlField} ${this.#checkoutParametersField}
+            ${this.#linkHrefField} ${this.#checkoutParametersField}
             <sp-field-label for="linkText">Link Text</sp-field-label>
             <sp-textfield
                 id="linkText"
@@ -226,6 +227,7 @@ export class RteLinkEditor extends LitElement {
             </sp-picker>
             ${this.#linkVariants}
             <sp-button
+                id="cancelButton"
                 slot="button"
                 variant="secondary"
                 treatment="outline"
@@ -245,7 +247,7 @@ export class RteLinkEditor extends LitElement {
 
     get #asDialog() {
         return html`
-            <sp-underlay open></sp-underlay>
+            <sp-underlay ?open=${this.open}></sp-underlay>
             ${this.#editor}
         `;
     }
@@ -258,15 +260,15 @@ export class RteLinkEditor extends LitElement {
     #handleSave(e) {
         e.preventDefault();
         const data = {
-            url: this.url,
+            href: this.href,
             text: this.text,
             title: this.title,
             target: this.target,
+            variant: this.variant,
         };
         if (this.checkoutParameters !== undefined) {
-            delete data.url;
+            delete data.href;
             Object.assign(data, {
-                variant: this.variant,
                 checkoutParameters: this.checkoutParameters,
             });
         }
@@ -283,7 +285,7 @@ export class RteLinkEditor extends LitElement {
     #handleClose() {
         this.open = false;
         this.dispatchEvent(
-            new CustomEvent('close', { bubbles: true, composed: true }),
+            new CustomEvent('close', { bubbles: false, composed: true }),
         );
     }
 }

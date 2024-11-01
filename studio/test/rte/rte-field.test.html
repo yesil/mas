@@ -91,10 +91,7 @@
                             'rte-link',
                             this.test.title,
                         );
-                        await selectWordsInTextNode(
-                            firstLink().firstChild,
-                            'Adobe',
-                        );
+                        rte.selectLink(1);
                         await delay(100);
                         rte.unlinkEditorButtonElement.click();
                         await delay(100);
@@ -106,17 +103,25 @@
                             'rte-link',
                             this.test.title,
                         );
-                        await simulateClick(firstLink(), 20, 10);
+                        rte.selectLink(1);
+                        await delay(100);
                         await openLinkEditor();
-                        const { url, text, title, target, checkoutParameters } =
-                            rte.linkEditorElement;
-                        expect(url).to.equal('https://www.adobe.com');
+                        const {
+                            href,
+                            text,
+                            title,
+                            target,
+                            checkoutParameters,
+                        } = rte.linkEditorElement;
+                        expect(href).to.equal('https://www.adobe.com');
                         expect(text).to.equal('Adobe');
                         expect(title).to.equal('adobe.com homepage');
                         expect(target).to.equal('_self');
-                        rte.linkEditorElement.url = 'https://www.adobe.com/max';
+                        rte.linkEditorElement.href =
+                            'https://www.adobe.com/max';
                         rte.linkEditorElement.text = 'ebodA';
                         rte.linkEditorElement.requestUpdate();
+                        await rte.linkEditorElement.updateComplete;
                         clickSave();
                         await delay(100);
                         const a = firstLink();
@@ -126,18 +131,16 @@
 
                     it('should open the link editor on selection and support update', async function () {
                         rte = await createFromTemplate('rte', this.test.title);
-                        await selectWordsInTextNode(
-                            firstParagraph().firstChild,
-                            'only',
-                        );
+                        await selectWordsInTextNode(rte.editorView, 'only');
                         await delay(100);
                         await openLinkEditor();
                         await rte.linkEditorElement.updateComplete;
                         expect(rte.linkEditorElement.text).to.equal('only');
-                        rte.linkEditorElement.url = 'https://www.adobe.com';
+                        rte.linkEditorElement.href = 'https://www.adobe.com';
                         rte.linkEditorElement.text = 'and links';
                         rte.linkEditorElement.title = 'Adobe homepage';
                         rte.linkEditorElement.requestUpdate();
+                        await rte.linkEditorElement.updateComplete;
                         clickSave();
                         await delay(100);
                         const a = firstLink();
@@ -149,7 +152,7 @@
                     it('should open the link editor and support inserting link', async function () {
                         rte = await createFromTemplate('rte', this.test.title);
                         await openLinkEditor();
-                        rte.linkEditorElement.url = 'https://www.adobe.com';
+                        rte.linkEditorElement.href = 'https://www.adobe.com';
                         rte.linkEditorElement.text = 'Adobe';
                         rte.linkEditorElement.title = 'Adobe homepage';
                         rte.linkEditorElement.requestUpdate();
@@ -194,7 +197,7 @@
                         );
                         await delay(100);
                         expect(rte.value).to.equal(
-                            '<span is="inline-price" data-wcs-osi="abm"></span><a is="checkout-link" class="accent" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="primary-outline" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="secondary" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="secondary-outline" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="primary-link" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="secondary-link" data-wcs-osi="abm">Buy now</a>',
+                            '<p><span is="inline-price" data-wcs-osi="abm"></span><a is="checkout-link" class="accent" href="" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="primary-outline" href="" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="secondary" href="" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="secondary-outline" href="" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="primary-link" href="" data-wcs-osi="abm">Buy now</a><a is="checkout-link" class="secondary-link" href="" data-wcs-osi="abm">Buy now</a></p>',
                         );
 
                         rte.offerSelectorToolButtonElement.click();
@@ -213,7 +216,14 @@
                         );
                         await delay(100);
                         expect(rte.value).to.equal(
-                            '<p>&nbsp;<a is="checkout-link" class="accent" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Mutn1LYoGojkrcMdCLO7LQlx1FyTHw27ETsfLv0h8DQ">Get Offer</a>&nbsp;</p><p><a is="checkout-link" class="accent" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Mutn1LYoGojkrcMdCLO7LQlx1FyTHw27ETsfLv0h8DQ">Buy now</a></p><p><a is="checkout-link" class="accent" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Mutn1LYoGojkrcMdCLO7LQlx1FyTHw27ETsfLv0h8DQ">Buy now</a></p><p><a is="checkout-link" class="accent" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Hnk2P6L5wYhnpZLFYTW5upuk2Y3AJXlso8VGWQ0l2TI">Buy now</a></p>',
+                            '<p>&nbsp;<a is="checkout-link" href="" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Mutn1LYoGojkrcMdCLO7LQlx1FyTHw27ETsfLv0h8DQ">Get Offer</a>&nbsp;</p><p><a is="checkout-link" href="" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Mutn1LYoGojkrcMdCLO7LQlx1FyTHw27ETsfLv0h8DQ">Buy now</a></p><p><a is="checkout-link" href="" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Mutn1LYoGojkrcMdCLO7LQlx1FyTHw27ETsfLv0h8DQ">Buy now</a></p><p><a is="checkout-link" href="" data-checkout-workflow="UCv3" data-checkout-workflow-step="email" data-promotion-code="" data-wcs-osi="Hnk2P6L5wYhnpZLFYTW5upuk2Y3AJXlso8VGWQ0l2TI">Buy now</a></p>',
+                        );
+                    });
+
+                    it.skip('dev', async function () {
+                        const rte = await createFromTemplate(
+                            'rte-dev',
+                            this.test.title,
                         );
                     });
                 });
@@ -230,19 +240,19 @@
             <sp-theme color="light" scale="medium"> </sp-theme>
         </main>
         <template id="rte">
-            <rte-field>
+            <rte-field link>
                 <p>Text only</p>
             </rte-field>
         </template>
         <template id="rte-link">
-            <rte-field>
-                <a href="https://www.adobe.com" title="adobe.com homepage"
+            <rte-field link
+                ><a href="https://www.adobe.com" title="adobe.com homepage"
                     >Adobe</a
                 >
             </rte-field>
         </template>
         <template id="rte-all">
-            <rte-field inline>
+            <rte-field link inline>
                 <span is="inline-price" data-wcs-osi="abm"></span
                 ><a class="accent" is="checkout-link" data-wcs-osi="abm"
                     >Buy now</a
@@ -266,7 +276,7 @@
             </rte-field>
         </template>
         <template id="rte-tinymce">
-            <rte-field>
+            <rte-field link defaut-link-style="primary-outline">
                 <div
                     data-mce-bogus="all"
                     class="mce-offscreen-selection"
@@ -328,14 +338,19 @@
         </template>
         <template id="rte-dev">
             <div>
-                <rte-field inline>
-                    <a class="accent" is="checkout-link" data-wcs-osi="abm"
-                        >Buy now</a
-                    >
+                <rte-field link>
+                    <a href="https://www.adobe.com">Buy now</a> yes evet oui
                 </rte-field>
-                <rte-field
+                <br />
+                <rte-field link inline>
+                    <a is="checkout-link" data-wcs-osi="abm">Buy now</a>
+                </rte-field>
+                <br />
+                <rte-field inline
                     ><p><span is="inline-price" data-wcs-osi="abm"></span></p
                 ></rte-field>
+                <br />
+                <rte-field>some text</rte-field>
             </div>
         </template>
     </body>
