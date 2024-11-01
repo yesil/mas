@@ -23,6 +23,8 @@ const isNodeCheckoutLink = (node) => {
     return node.type.name === 'link' && node.attrs['data-wcs-osi'] !== null;
 };
 
+let ostRteFieldSource;
+
 class RteField extends LitElement {
     static properties = {
         hasFocus: { type: Boolean, state: true },
@@ -32,7 +34,6 @@ class RteField extends LitElement {
         priceSelected: { type: Boolean, state: true },
         readOnly: { type: Boolean, attribute: 'readonly' },
         showLinkEditor: { type: Boolean, state: true },
-        showOfferSelector: { type: Boolean, state: true },
         defaultLinkStyle: { type: String, attribute: 'default-link-style' },
     };
 
@@ -67,7 +68,6 @@ class RteField extends LitElement {
                     box-sizing: border-box;
                     display: inline-flex;
                     align-content: center;
-                    border-radius: 16px;
                 }
 
                 a.accent,
@@ -77,6 +77,7 @@ class RteField extends LitElement {
                     height: 32px;
                     text-decoration: none;
                     padding: 0 14px;
+                    border-radius: 16px;
                 }
 
                 a.primary-link,
@@ -154,7 +155,6 @@ class RteField extends LitElement {
         this.isLinkSelected = false;
         this.priceSelected = false;
         this.showLinkEditor = false;
-        this.showOfferSelector = false;
         this.inline = false;
         this.link = false;
         this.#boundHandlers = {
@@ -513,15 +513,12 @@ class RteField extends LitElement {
                 this.showLinkEditor = false;
                 this.requestUpdate();
             }
-            if (this.showOfferSelector) {
-                this.showOfferSelector = false;
-                closeOfferSelectorTool();
-            }
+            closeOfferSelectorTool();
         }
     }
 
     #handleOstEvent({ detail: attributes }) {
-        if (!this.showOfferSelector || !attributes) return;
+        if (ostRteFieldSource !== this) return;
 
         const { state, dispatch } = this.editorView;
         const { selection } = state;
@@ -575,6 +572,7 @@ class RteField extends LitElement {
     }
 
     handleOpenOfferSelector() {
+        ostRteFieldSource = this;
         this.showOfferSelector = true;
         openOfferSelectorTool(this.#getCurrentOfferElement());
     }
