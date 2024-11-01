@@ -543,7 +543,9 @@ class RteField extends LitElement {
 
     #updateSelection(state) {
         const { selection } = state;
-        this.isLinkSelected = selection.node?.type.name === 'link';
+        this.isLinkSelected =
+            selection.node?.type.name === 'link' &&
+            !selection.node.attrs['data-wcs-osi'];
     }
 
     async openLinkEditor() {
@@ -640,7 +642,6 @@ class RteField extends LitElement {
         this.hasFocus = false;
         this.isLinkSelected = false;
         this.requestUpdate();
-        return false;
     }
 
     #handleFocus() {
