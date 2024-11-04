@@ -176,9 +176,10 @@ class AemFragments extends LitElement {
                 bubbles: true,
             }),
         );
-        const fragment = await this.#aem.sites.cf.fragments.getById(
+        const fragmentData = await this.#aem.sites.cf.fragments.getById(
             this.searchText,
         );
+        const fragment = new Fragment(fragmentData, this);
         this.#searchResult = [fragment];
         this.#loading = false;
         await this.addToCache([fragment]);
