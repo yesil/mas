@@ -98,12 +98,12 @@
                         linkEditor.shadowRoot
                             .getElementById('saveButton')
                             .click();
-
                         expect(await listener).to.deep.equal({
-                            url: 'https://www.adobe.com',
+                            href: 'https://www.adobe.com',
                             text: 'link text',
                             title: 'test title',
                             target: '_blank',
+                            variant: 'accent',
                         });
                     });
 
@@ -177,7 +177,7 @@
 
         <template id="values">
             <rte-link-editor
-                url="https://www.adobe.com"
+                href="https://www.adobe.com"
                 text="link text"
                 title="test title"
                 target="_blank"
@@ -190,7 +190,7 @@
 
         <template id="checkoutFilled">
             <rte-link-editor
-                url="https://www.adobe.com"
+                href="https://www.adobe.com"
                 text="link text"
                 title="test title"
                 target="_blank"
