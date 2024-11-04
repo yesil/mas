@@ -169,7 +169,7 @@ export function getOffferSelectorTool() {
             <sp-dialog-wrapper dismissable underlay>
                 <div id="ost"></div>
             </sp-dialog-wrapper>
-        </overlay-trigger>
+        </sp-overlay>
     `;
 }
 

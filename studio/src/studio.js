@@ -8,8 +8,6 @@ import './mas-top-nav.js';
 import './mas-filter-panel.js';
 import './mas-filter-toolbar.js';
 
-import { getOffferSelectorTool, openOfferSelectorTool } from './ost.js';
-
 const EVENT_LOAD_START = 'load-start';
 const EVENT_LOAD_END = 'load-end';
 const BUCKET_TO_ENV = {
@@ -266,7 +264,6 @@ class MasStudio extends LitElement {
                       ${this.fragmentEditorToolbar}
                       <merch-card-editor
                           .fragment=${this.fragment}
-                          @ost-open="${this.openOfferSelectorTool}"
                           @refresh-fragment="${this.refreshFragment}"
                           @update-fragment="${this.updateFragment}"
                       >
@@ -335,7 +332,7 @@ class MasStudio extends LitElement {
                 ? html`<mas-filter-panel></mas-filter-panel>`
                 : nothing}
             ${this.content} ${this.fragmentEditor} ${this.selectFragmentDialog}
-            ${this.toast} ${this.loadingIndicator} ${getOffferSelectorTool()}
+            ${this.toast} ${this.loadingIndicator}}
         `;
     }
 
@@ -548,10 +545,6 @@ class MasStudio extends LitElement {
         } catch (e) {
             this.showToast('Failed to copy code to clipboard', 'negative');
         }
-    }
-
-    openOfferSelectorTool(e) {
-        openOfferSelectorTool(e, e.target, this.fragment?.variant);
     }
 }
 
