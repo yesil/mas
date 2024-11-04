@@ -176,7 +176,7 @@ class MasMultifield extends LitElement {
     }
 
     render() {
-        if (!this.#template) return nothing;
+        if (!this.#template || !this.value) return nothing;
         return html`
             <div @change="${this.handleChange}">
                 ${this.value.map((field, index) =>
