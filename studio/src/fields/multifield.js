@@ -19,7 +19,6 @@ class MasMultifield extends LitElement {
         super();
         this.draggingIndex = -1;
         this.min = 0;
-        this.initValue();
     }
 
     initValue() {
@@ -32,10 +31,6 @@ class MasMultifield extends LitElement {
 
     firstUpdated() {
         this.initValue();
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
         this.initFieldTemplate();
     }
 

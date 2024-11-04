@@ -146,7 +146,7 @@ class RteField extends LitElement {
     #boundHandlers;
     #editorSchema;
     editorView;
-    value = '';
+    value = null;
     #serializer;
 
     constructor() {
@@ -402,8 +402,11 @@ class RteField extends LitElement {
 
             if (newState.doc) {
                 const value = this.#serializeContent(newState);
+                // skip change event during initialization
+                const isFirstChange = this.value === null;
                 if (value !== this.value) {
                     this.value = value;
+                    if (isFirstChange) return;
                     this.dispatchEvent(
                         new CustomEvent('change', {
                             bubbles: true,
