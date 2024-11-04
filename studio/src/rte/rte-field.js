@@ -163,6 +163,7 @@ class RteField extends LitElement {
             linkSave: this.#handleLinkSave.bind(this),
             blur: this.#handleBlur.bind(this),
             focus: this.#handleFocus.bind(this),
+            dblclick: this.#handleDoubleClick.bind(this),
         };
     }
 
@@ -348,6 +349,7 @@ class RteField extends LitElement {
             handleDOMEvents: {
                 blur: this.#boundHandlers.blur,
                 focus: this.#boundHandlers.focus,
+                dblclick: this.#boundHandlers.dblclick,
             },
         });
 
@@ -663,6 +665,34 @@ class RteField extends LitElement {
 
     #handleFocus() {
         this.hasFocus = true;
+        return false;
+    }
+
+    #handleDoubleClick(view, event) {
+        const pos = view.posAtDOM(event.target, 0);
+        const node = view.state.doc.nodeAt(pos);
+
+        if (
+            [
+                CUSTOM_ELEMENT_INLINE_PRICE,
+                CUSTOM_ELEMENT_CHECKOUT_LINK,
+            ].includes(node.attrs.is)
+        ) {
+            // Select the node
+            const resolvedPos = view.state.doc.resolve(pos);
+            const selection = NodeSelection.create(
+                view.state.doc,
+                resolvedPos.pos,
+            );
+            const tr = view.state.tr.setSelection(selection);
+            view.dispatch(tr);
+
+            // Open the Offer Selector Tool
+            ostRteFieldSource = this;
+            this.showOfferSelector = true;
+            this.handleOpenOfferSelector();
+            return true;
+        }
         return false;
     }
 

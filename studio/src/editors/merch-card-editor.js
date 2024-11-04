@@ -84,7 +84,7 @@ class MerchCardEditor extends LitElement {
                     inline
                     data-field="prices"
                     default-link-style="primary-outline"
-                    @blur="${this.updateFragment}"
+                    @change="${this.updateFragment}"
                     >${unsafeHTML(form.prices.values[0])}</rte-field
                 >
             </sp-field-group>
@@ -94,7 +94,7 @@ class MerchCardEditor extends LitElement {
                     link
                     data-field="description"
                     default-link-style="secondary-link"
-                    @blur="${this.updateFragment}"
+                    @change="${this.updateFragment}"
                     >${unsafeHTML(form.description.values[0])}</rte-field
                 >
             </sp-field-group>
@@ -105,7 +105,7 @@ class MerchCardEditor extends LitElement {
                     inline
                     data-field="ctas"
                     default-link-style="primary-outline"
-                    @blur="${this.updateFragment}"
+                    @change="${this.updateFragment}"
                     >${unsafeHTML(form.ctas.values[0])}</rte-field
                 >
             </sp-field-group>`;
