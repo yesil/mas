@@ -164,6 +164,7 @@ class RteField extends LitElement {
             blur: this.#handleBlur.bind(this),
             focus: this.#handleFocus.bind(this),
             dblclick: this.#handleDoubleClick.bind(this),
+            slotChange: this.#handleSlotChange.bind(this),
         };
     }
 
@@ -174,6 +175,7 @@ class RteField extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
+        this.addEventListener('slotchange', this.#boundHandlers.slotChange);
         document.addEventListener('keydown', this.#boundHandlers.escKey, {
             capture: true,
         });
@@ -182,11 +184,19 @@ class RteField extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback();
+        this.removeEventListener('slotchange', this.#boundHandlers.slotChange);
         document.removeEventListener('keydown', this.#boundHandlers.escKey, {
             capture: true,
         });
         document.removeEventListener('use', this.#boundHandlers.ostEvent);
         this.editorView?.destroy();
+    }
+
+    #handleSlotChange(event) {
+        if (event.target === this) {
+            this.editorView?.destroy();
+            this.#initializeEditor();
+        }
     }
 
     #initEditorSchema() {
@@ -442,7 +452,7 @@ class RteField extends LitElement {
         const { selection } = state;
 
         const checkoutParameters = isNodeCheckoutLink(selection.node)
-            ? selection.node.attrs['data-extra-options'] || ''
+            ? selection.node.attrs['data-extra-options'] || null
             : undefined;
 
         if (selection.node?.type.name === 'link') {
@@ -487,7 +497,7 @@ class RteField extends LitElement {
             title,
             target: target || '_self',
             class: variant || 'primary-outline',
-            'data-extra-options': checkoutParameters || '',
+            'data-extra-options': checkoutParameters || null,
         };
 
         let tr = state.tr;
@@ -578,16 +588,10 @@ class RteField extends LitElement {
         Object.assign(this.linkEditorElement, { ...attrs, open: true });
     }
 
-    handleOpenOfferSelector() {
+    handleOpenOfferSelector(event, element) {
         ostRteFieldSource = this;
         this.showOfferSelector = true;
-        openOfferSelectorTool(this.#getCurrentOfferElement());
-    }
-
-    #getCurrentOfferElement() {
-        const { selection } = this.editorView.state;
-        const dom = this.editorView.nodeDOM(selection.from);
-        return dom?.isInlinePrice || dom?.isCheckoutLink ? dom : undefined;
+        openOfferSelectorTool(element);
     }
 
     get #linkEditorButton() {
@@ -675,7 +679,15 @@ class RteField extends LitElement {
 
     #handleDoubleClick(view, event) {
         const pos = view.posAtDOM(event.target, 0);
-        const node = view.state.doc.nodeAt(pos);
+        let node = view.state.doc.nodeAt(pos);
+
+        // If the node is text type, try to get its parent
+        if (node && node.type.name === 'text') {
+            const $pos = view.state.doc.resolve(pos);
+            if ($pos.parent) {
+                node = $pos.parent;
+            }
+        }
 
         if (
             [
@@ -683,19 +695,12 @@ class RteField extends LitElement {
                 CUSTOM_ELEMENT_CHECKOUT_LINK,
             ].includes(node.attrs.is)
         ) {
-            // Select the node
-            const resolvedPos = view.state.doc.resolve(pos);
-            const selection = NodeSelection.create(
-                view.state.doc,
-                resolvedPos.pos,
-            );
-            const tr = view.state.tr.setSelection(selection);
-            view.dispatch(tr);
-
-            // Open the Offer Selector Tool
+            const dom = view.docView.children.find(
+                (child) => child.node === node,
+            )?.dom;
             ostRteFieldSource = this;
             this.showOfferSelector = true;
-            this.handleOpenOfferSelector();
+            this.handleOpenOfferSelector(null, dom);
             return true;
         }
         return false;
