@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, css } from 'lit';
-import { EditorState, NodeSelection, TextSelection } from 'prosemirror-state';
+import { EditorState, NodeSelection } from 'prosemirror-state';
 import { Schema, DOMParser, DOMSerializer } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
