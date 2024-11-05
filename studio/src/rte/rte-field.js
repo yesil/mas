@@ -164,7 +164,6 @@ class RteField extends LitElement {
             blur: this.#handleBlur.bind(this),
             focus: this.#handleFocus.bind(this),
             dblclick: this.#handleDoubleClick.bind(this),
-            slotChange: this.#handleSlotChange.bind(this),
         };
     }
 
@@ -175,7 +174,6 @@ class RteField extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        this.addEventListener('slotchange', this.#boundHandlers.slotChange);
         document.addEventListener('keydown', this.#boundHandlers.escKey, {
             capture: true,
         });
@@ -184,19 +182,11 @@ class RteField extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.removeEventListener('slotchange', this.#boundHandlers.slotChange);
         document.removeEventListener('keydown', this.#boundHandlers.escKey, {
             capture: true,
         });
         document.removeEventListener('use', this.#boundHandlers.ostEvent);
         this.editorView?.destroy();
-    }
-
-    #handleSlotChange(event) {
-        if (event.target === this) {
-            this.editorView?.destroy();
-            this.#initializeEditor();
-        }
     }
 
     #initEditorSchema() {

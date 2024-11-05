@@ -404,6 +404,9 @@ class MasStudio extends LitElement {
     }
 
     async handleOpenFragment(e) {
+        this.showEditorPanel = false;
+        this.requestUpdate();
+        await this.updateComplete;
         const { x, fragment } = e.detail;
         await this.adjustEditorPosition(x);
         this.showEditorPanel = true;
