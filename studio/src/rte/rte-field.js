@@ -163,7 +163,7 @@ class RteField extends LitElement {
             linkSave: this.#handleLinkSave.bind(this),
             blur: this.#handleBlur.bind(this),
             focus: this.#handleFocus.bind(this),
-            dblclick: this.#handleDoubleClick.bind(this),
+            doubleClickOn: this.#handleDoubleClickOn.bind(this),
         };
     }
 
@@ -351,8 +351,8 @@ class RteField extends LitElement {
             handleDOMEvents: {
                 blur: this.#boundHandlers.blur,
                 focus: this.#boundHandlers.focus,
-                dblclick: this.#boundHandlers.dblclick,
             },
+            handleDoubleClickOn: this.#boundHandlers.doubleClickOn,
         });
 
         try {
@@ -667,33 +667,11 @@ class RteField extends LitElement {
         return false;
     }
 
-    #handleDoubleClick(view, event) {
-        const pos = view.posAtDOM(event.target, 0);
-        let node = view.state.doc.nodeAt(pos);
-
-        // If the node is text type, try to get its parent
-        if (node && node.type.name === 'text') {
-            const $pos = view.state.doc.resolve(pos);
-            if ($pos.parent) {
-                node = $pos.parent;
-            }
-        }
-
-        if (
-            [
-                CUSTOM_ELEMENT_INLINE_PRICE,
-                CUSTOM_ELEMENT_CHECKOUT_LINK,
-            ].includes(node.attrs.is)
-        ) {
-            const dom = view.docView.children.find(
-                (child) => child.node === node,
-            )?.dom;
-            ostRteFieldSource = this;
-            this.showOfferSelector = true;
-            this.handleOpenOfferSelector(null, dom);
-            return true;
-        }
-        return false;
+    #handleDoubleClickOn(view, pos, node, nodePos, event) {
+        const dom = event.target.closest('[data-wcs-osi]');
+        ostRteFieldSource = this;
+        this.showOfferSelector = true;
+        this.handleOpenOfferSelector(null, dom);
     }
 
     get linkEditor() {
