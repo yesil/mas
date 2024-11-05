@@ -300,7 +300,7 @@ class RteField extends LitElement {
         for (const name of dom.getAttributeNames()) {
             if (attributeFilter(name)) {
                 const value = dom.getAttribute(name);
-                if (!value) return;
+                if (!value) continue;
                 attrs[name] = value;
             }
         }
