@@ -332,7 +332,7 @@ class MasStudio extends LitElement {
                 ? html`<mas-filter-panel></mas-filter-panel>`
                 : nothing}
             ${this.content} ${this.fragmentEditor} ${this.selectFragmentDialog}
-            ${this.toast} ${this.loadingIndicator}}
+            ${this.toast} ${this.loadingIndicator}
         `;
     }
 
