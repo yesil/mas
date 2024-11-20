@@ -87,7 +87,7 @@ class EditorPanel extends LitElement {
 
     async discardChanges() {
         const fragment = this.fragment;
-        this.fragment.discardChanges();
+        fragment.discardChanges();
         this.fragment = null; // this is needed to force a re-render
         this.requestUpdate();
         await this.updateComplete;
@@ -311,6 +311,7 @@ class EditorPanel extends LitElement {
     }
 
     render() {
+        if (!this.fragment) return nothing;
         return html`${this.fragmentEditor} ${this.selectFragmentDialog}`;
     }
 }
