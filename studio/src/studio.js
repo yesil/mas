@@ -291,6 +291,7 @@ class MasStudio extends LitElement {
     }
 
     async closeFragmentEditor() {
+        this.source?.fragment?.discardChanges();
         await this.source?.setFragment(null);
         this.showEditorPanel = false;
     }
