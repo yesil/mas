@@ -242,7 +242,8 @@ class AemFragments extends LitElement {
 
     get fragments() {
         return (
-            (this.searchText ? this.#searchResult : this.#currentFragments) ?? []
+            (this.searchText ? this.#searchResult : this.#currentFragments) ??
+            []
         );
     }
 

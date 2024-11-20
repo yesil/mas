@@ -1,5 +1,11 @@
-import { EVENT_CHANGE } from '../events.js';
+import { EVENT_FRAGMENT_CHANGE } from '../events.js';
+import { debounce } from '../utils/debounce.js';
 
+const notifyDebounced = debounce(function () {
+    document.dispatchEvent(
+        new CustomEvent(EVENT_FRAGMENT_CHANGE, { detail: this }),
+    );
+}, 300);
 export class Fragment {
     path = '';
     hasChanges = false;
@@ -11,12 +17,18 @@ export class Fragment {
 
     /**
      * @param {*} AEM Fragment JSON object
-     * @param {*} eventTarget DOM element to dispatch events from
      */
-    constructor(
-        { id, etag, model, path, title, description, status, modified, fields },
-        eventTarget,
-    ) {
+    constructor({
+        id,
+        etag,
+        model,
+        path,
+        title,
+        description,
+        status,
+        modified,
+        fields,
+    }) {
         this.id = id;
         this.model = model;
         this.etag = etag;
@@ -27,8 +39,10 @@ export class Fragment {
         this.status = status;
         this.modified = modified;
         this.fields = fields;
-        this.eventTarget = eventTarget; /** can be null and set after on save */
+        this.updateOriginal(false);
     }
+
+    #notify = notifyDebounced;
 
     get variant() {
         return this.fields.find((field) => field.name === 'variant')
@@ -44,45 +58,49 @@ export class Fragment {
         return this.status === 'PUBLISHED' ? 'positive' : 'info';
     }
 
-    refreshFrom(fragmentData) {
-        Object.assign(this, fragmentData);
-        this.hasChanges = false;
-        this.notify();
+    updateOriginal(notify = true) {
+        this.original = null; // clear draft
+        this.original = JSON.parse(JSON.stringify(this));
+        if (notify) this.#notify();
     }
 
-    notify() {
-        this.eventTarget.dispatchEvent(
-            new CustomEvent(EVENT_CHANGE, { detail: this }),
-        );
+    refreshFrom(fragmentData, notify = false) {
+        Object.assign(this, fragmentData);
+        this.hasChanges = false;
+        this.updateOriginal(notify);
+    }
+
+    discardChanges() {
+        this.refreshFrom(this.original, true);
     }
 
     toggleSelection(value) {
         if (value !== undefined) this.selected = value;
         else this.selected = !this.selected;
-        this.notify();
+        this.#notify();
     }
 
     updateFieldInternal(fieldName, value) {
         this[fieldName] = value ?? '';
         this.hasChanges = true;
-        this.notify();
+        this.#notify();
+    }
+
+    getField(fieldName) {
+        return this.fields.find((field) => field.name === fieldName);
     }
 
     updateField(fieldName, value) {
         let change = false;
-        this.fields
-            .filter((field) => field.name === fieldName)
-            .forEach((field) => {
-                if (
-                    field.values.length === value.length &&
-                    field.values.every((v, index) => v === value[index])
-                )
-                    return;
-                field.values = value;
-                this.hasChanges = true;
-                change = true;
-            });
-        this.notify();
-        return change;
+        const field = this.getField(fieldName);
+        if (
+            field.values.length === value.length &&
+            field.values.every((v, index) => v === value[index])
+        )
+            return;
+        field.values = value;
+        this.hasChanges = true;
+        change = true;
+        this.#notify();
     }
 }

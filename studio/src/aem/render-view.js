@@ -1,6 +1,6 @@
 import { html, LitElement, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { EVENT_CHANGE, EVENT_LOAD } from '../events.js';
+import { EVENT_CHANGE, EVENT_FRAGMENT_CHANGE, EVENT_LOAD } from '../events.js';
 
 const MODE = 'render';
 
@@ -16,6 +16,7 @@ class RenderView extends LitElement {
         super();
         this.forceUpdate = this.forceUpdate.bind(this);
         this.tooltipTimeout = null;
+        this.handleFragmentChange = this.handleFragmentChange.bind(this);
     }
 
     createRenderRoot() {
@@ -36,13 +37,29 @@ class RenderView extends LitElement {
             EVENT_CHANGE,
             this.forceUpdate,
         );
+        document.addEventListener(EVENT_FRAGMENT_CHANGE, this.handleFragmentChange);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        document.removeEventListener(
+            EVENT_FRAGMENT_CHANGE,
+            this.handleFragmentChange,
+        );
+    }
+
+    handleFragmentChange(e) {
+        const aemFragment = this.querySelector(
+            `aem-fragment[fragment="${e.detail.id}"]`,
+        );
+        aemFragment.refresh(false);
     }
 
     async forceUpdate(e) {
         this.requestUpdate();
     }
 
-    renderItem(fragment) {
+    renderMerchCard(fragment) {
         const selected =
             this.parentElement.source.selectedFragments.includes(fragment);
         return html`<overlay-trigger placement="top"
@@ -115,7 +132,7 @@ class RenderView extends LitElement {
             (fragment) => {
                 switch (fragment.model.path) {
                     case models.merchCard.path:
-                        return this.renderItem(fragment);
+                        return this.renderMerchCard(fragment);
                     default:
                         return nothing;
                 }

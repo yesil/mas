@@ -130,3 +130,10 @@ export function applyChanges(view, pos, attrs) {
     tr.setNodeMarkup(pos, null, attrs);
     dispatch(tr);
 }
+
+export function triggerInput(element, value) {
+    element.value = value;
+    element.dispatchEvent(
+        new Event('input', { bubbles: true, composed: true }),
+    );
+}

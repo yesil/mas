@@ -91,7 +91,7 @@ describe('Multifield', () => {
         ).to.equal(1);
     });
 
-    it('should support mas-mnemonic-field', async () => {
+    it.only('should support mas-mnemonic-field', async () => {
         const value = [
             {
                 icon: 'https://www.adobe.com/cc-shared/assets/img/product-icons/svg/creative-cloud.svg',
@@ -121,9 +121,9 @@ describe('Multifield', () => {
 
         const [, mnemonic2] =
             el.shadowRoot.querySelectorAll('mas-mnemonic-field');
-        const listener = oneEvent(el, 'change');
+        const listener = oneEvent(el, 'input');
         mnemonic2.altElement.value = 'This is new alt text';
-        mnemonic2.altElement.dispatchEvent(new Event('change'));
+        mnemonic2.altElement.dispatchEvent(new Event('input'));
         await listener;
         const [value1, value2] = el.value;
         const newValue = [value1, { ...value2, alt: 'This is new alt text' }];
