@@ -27,6 +27,7 @@ export class Fragment {
         description,
         status,
         modified,
+        tags,
         fields,
     }) {
         this.id = id;
@@ -38,6 +39,7 @@ export class Fragment {
         this.description = description;
         this.status = status;
         this.modified = modified;
+        this.tags = tags;
         this.fields = fields;
         this.updateOriginal(false);
     }

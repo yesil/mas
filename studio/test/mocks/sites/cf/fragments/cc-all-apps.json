@@ -160,7 +160,7 @@
             "type": "tag",
             "multiple": true,
             "locked": false,
-            "values": []
+            "values": ["mas:product/cc/creativecloud"]
         }
     ],
     "variations": [],

@@ -87,6 +87,7 @@ merch-card:not(.has-tooltip) ~ sp-tooltip {
 
 merch-card:hover {
     background-color: var(--spectrum-background-base-color);
+    box-shadow: 0 2px 6px 6px rgb(0 0 0 / 10%);
 }
 
 content-navigation[in-selection] render-view merch-card .overlay {

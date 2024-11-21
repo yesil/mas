@@ -33,6 +33,7 @@
 
             import '../src/swc.js';
             import '../src/rte/rte-field.js';
+            import '../src/aem/aem-tag-picker-field.js';
             import '../src/editors/merch-card-editor.js';
             import '../src/editor-panel.js';
             import { EVENT_FRAGMENT_CHANGE } from '../src/events.js';
@@ -46,9 +47,17 @@
 
             runTests(async () => {
                 const spTheme = document.querySelector('sp-theme');
-                const fragmentData = await fetch(
+                const originalFetch = window.fetch;
+                const fragmentData = await originalFetch(
                     '/test/mocks/sites/cf/fragments/cc-all-apps.json',
                 ).then((res) => res.json());
+                window.fetch = async function (args) {
+                    const { pathname } = new URL(args);
+                    if (/querybuilder.json/.test(pathname)) {
+                        return originalFetch('/test/aem/tags.json');
+                    }
+                    return originalFetch(...arguments);
+                };
 
                 describe('editor-panel custom element', () => {
                     let fragment;
