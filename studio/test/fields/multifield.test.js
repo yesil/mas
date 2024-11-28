@@ -91,7 +91,7 @@ describe('Multifield', () => {
         ).to.equal(1);
     });
 
-    it.only('should support mas-mnemonic-field', async () => {
+    it('should support mas-mnemonic-field', async () => {
         const value = [
             {
                 icon: 'https://www.adobe.com/cc-shared/assets/img/product-icons/svg/creative-cloud.svg',
