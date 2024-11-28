@@ -1,11 +1,15 @@
 import { EVENT_FRAGMENT_CHANGE } from '../events.js';
 import { debounce } from '../utils/debounce.js';
 
-const notifyDebounced = debounce(function () {
+function notifyChanges(details = {}) {
     document.dispatchEvent(
-        new CustomEvent(EVENT_FRAGMENT_CHANGE, { detail: this }),
+        new CustomEvent(EVENT_FRAGMENT_CHANGE, {
+            detail: { fragment: this, ...details },
+        }),
     );
-}, 300);
+}
+
+const notifyChangesDebounced = debounce(notifyChanges, 300);
 export class Fragment {
     path = '';
     hasChanges = false;
@@ -44,7 +48,8 @@ export class Fragment {
         this.updateOriginal(false);
     }
 
-    #notify = notifyDebounced;
+    #notify = notifyChanges;
+    #notifySlow = notifyChangesDebounced;
 
     get variant() {
         return this.fields.find((field) => field.name === 'variant')
@@ -63,7 +68,7 @@ export class Fragment {
     updateOriginal(notify = true) {
         this.original = null; // clear draft
         this.original = JSON.parse(JSON.stringify(this));
-        if (notify) this.#notify();
+        if (notify) this.#notify(notify);
     }
 
     refreshFrom(fragmentData, notify = false) {
@@ -79,13 +84,13 @@ export class Fragment {
     toggleSelection(value) {
         if (value !== undefined) this.selected = value;
         else this.selected = !this.selected;
-        this.#notify();
+        this.#notify({ selection: true });
     }
 
     updateFieldInternal(fieldName, value) {
         this[fieldName] = value ?? '';
         this.hasChanges = true;
-        this.#notify();
+        this.#notifySlow();
     }
 
     getField(fieldName) {
@@ -103,6 +108,6 @@ export class Fragment {
         field.values = value;
         this.hasChanges = true;
         change = true;
-        this.#notify();
+        this.#notifySlow();
     }
 }

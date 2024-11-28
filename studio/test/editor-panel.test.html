@@ -86,11 +86,16 @@
                         ).to.deep.equal(['test title']);
                         await oneEvent(document, EVENT_FRAGMENT_CHANGE);
                         expect(discardButton.disabled).to.be.false;
+                        const discardEvent = oneEvent(
+                            document,
+                            EVENT_FRAGMENT_CHANGE,
+                        );
                         discardButton.click();
-                        await oneEvent(document, EVENT_FRAGMENT_CHANGE);
+                        await discardEvent;
                         expect(
                             fragment.getField('cardTitle').values,
                         ).to.deep.equal([]);
+                        await delay(100);
                         expect(getCardTitleField().value).to.equal('');
                     });
                 });
