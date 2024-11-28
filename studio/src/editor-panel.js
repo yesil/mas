@@ -64,7 +64,7 @@ class EditorPanel extends LitElement {
     }
 
     handleFragmentChange(e) {
-        if (e.detail === this.fragment) {
+        if (e.detail?.fragment === this.fragment) {
             this.requestUpdate();
         }
     }
