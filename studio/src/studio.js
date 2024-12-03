@@ -5,6 +5,9 @@ import './editors/merch-card-editor.js';
 import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
+import { contentIcon } from './img/content-icon.js';
+import { promosIcon } from './img/promos-icon.js';
+import { ostIcon } from './img/ost-icon.js';
 
 const EVENT_LOAD_START = 'load-start';
 const EVENT_LOAD_END = 'load-end';
@@ -101,9 +104,13 @@ class MasStudio extends LitElement {
         if (
             changedProperties.has('searchText') ||
             changedProperties.has('path') ||
-            changedProperties.has('variant')
+            changedProperties.has('variant') ||
+            changedProperties.has('showSplash')
         ) {
-            this.source?.searchFragments();
+            // Force search or reload when splash screen is toggled off
+            if (!this.showSplash && this.source) {
+                this.source.searchFragments();
+            }
         }
     }
 
@@ -333,7 +340,8 @@ class MasStudio extends LitElement {
     }
 
     goToContent() {
-        this.showSplash = false; // Hide splash screen and show main content
+        this.showSplash = false;
+        this.requestUpdate();
     }
 
     renderSplashScreen() {
@@ -343,98 +351,77 @@ class MasStudio extends LitElement {
                 <div class="quick-actions">
                     <h2>Quick Actions</h2>
                     <div class="actions-grid">
-                        <sp-card class="quick-action-card">
-                            <img
-                                slot="cover-photo"
-                                src="img/content-icon.png"
-                                alt="Go to Content"
-                            />
+                        <sp-card
+                            class="quick-action-card"
+                            @click=${this.goToContent}
+                        >
+                            <div class="card-icon">${contentIcon}</div>
                             <div slot="heading">Go to Content</div>
                         </sp-card>
-                        <sp-card class="quick-action-card">
-                            <img
-                                slot="cover-photo"
-                                src="img/promos-icon.png"
-                                alt="View Promotions"
-                            />
+                        <sp-card
+                            class="quick-action-card"
+                            @click=${this.viewPromotions}
+                        >
+                            <div class="card-icon">${promosIcon}</div>
                             <div slot="heading">View Promotions</div>
                         </sp-card>
-                        <sp-card class="quick-action-card">
-                            <img
-                                slot="cover-photo"
-                                src="img/ost-icon.png"
-                                alt="Open Offer Selector Tool"
-                            />
+                        <sp-card
+                            class="quick-action-card"
+                            @click=${this.viewPromotions}
+                        >
+                            <div class="card-icon">${ostIcon}</div>
                             <div slot="heading">Open Offer Selector Tool</div>
                         </sp-card>
                     </div>
                 </div>
                 <div class="recently-updated">
                     <h2>Recently Updated</h2>
-                    <div class="cards-grid">
-                        <sp-card class="recent-card">
-                            <div slot="heading">AI Assistant for Acrobat</div>
-                            <div slot="subheading">£4.98/mo</div>
-                            <div slot="content">
-                                Ask your documents questions for quick answers
-                                and one-click summaries. Works with Acrobat Pro,
-                                Acrobat Standard, and Acrobat Reader.
-                            </div>
-                            <div class="status published">Published</div>
-                        </sp-card>
-                        <sp-card class="recent-card">
-                            <div slot="heading">AI Assistant for Acrobat</div>
-                            <div slot="subheading">£4.98/mo</div>
-                            <div slot="content">
-                                Ask your documents questions for quick answers
-                                and one-click summaries. Works with Acrobat Pro,
-                                Acrobat Standard, and Acrobat Reader.
-                            </div>
-                            <div class="status error">Error</div>
-                        </sp-card>
-                        <sp-card class="recent-card">
-                            <div slot="heading">AI Assistant for Acrobat</div>
-                            <div slot="subheading">£4.98/mo</div>
-                            <div slot="content">
-                                Ask your documents questions for quick answers
-                                and one-click summaries. Works with Acrobat Pro,
-                                Acrobat Standard, and Acrobat Reader.
-                            </div>
-                            <div class="status error">Error</div>
-                        </sp-card>
-                        <sp-card class="recent-card">
-                            <div slot="heading">AI Assistant for Acrobat</div>
-                            <div slot="subheading">£4.98/mo</div>
-                            <div slot="content">
-                                Ask your documents questions for quick answers
-                                and one-click summaries. Works with Acrobat Pro,
-                                Acrobat Standard, and Acrobat Reader.
-                            </div>
-                            <div class="status draft">Draft</div>
-                        </sp-card>
-                    </div>
                 </div>
-            </div>
-        `;
-    }
-
-    renderMainContent() {
-        return html`
-            <mas-top-nav env="${this.env}"></mas-top-nav>
-            <side-nav></side-nav>
-            <div class="main-content">
-                ${this.content} ${this.fragmentEditor}
-                ${this.selectFragmentDialog} ${this.toast}
-                ${this.loadingIndicator}
             </div>
         `;
     }
 
     render() {
         return html`
-            ${this.showSplash
-                ? this.renderSplashScreen()
-                : this.renderMainContent()}
+            <mas-top-nav env="${this.env}"></mas-top-nav>
+            <div class="studio-content">
+                <side-nav>
+                    <sp-sidenav>
+                        <sp-sidenav-heading
+                            label="Adobe.com"
+                        ></sp-sidenav-heading>
+                        <sp-sidenav-item
+                            label="Home"
+                            value="home"
+                            selected
+                        ></sp-sidenav-item>
+                        <sp-sidenav-item
+                            label="Promotions"
+                            value="promotions"
+                        ></sp-sidenav-item>
+                        <sp-sidenav-item
+                            label="Reporting"
+                            value="reporting"
+                        ></sp-sidenav-item>
+                        <sp-sidenav-divider></sp-sidenav-divider>
+                        <sp-sidenav-item
+                            label="Support"
+                            value="support"
+                        ></sp-sidenav-item>
+                    </sp-sidenav>
+                </side-nav>
+                <div class="content-container">
+                    ${this.showSplash
+                        ? this.renderSplashScreen()
+                        : html`
+                              <div class="content">
+                                  ${this.content} ${this.fragmentEditor}
+                                  ${this.selectFragmentDialog} ${this.toast}
+                                  ${this.loadingIndicator}
+                              </div>
+                          `}
+                </div>
+            </div>
         `;
     }
 
