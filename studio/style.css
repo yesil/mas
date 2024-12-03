@@ -140,3 +140,138 @@ merch-card-editor mas-multifield,
 rte-field {
     margin-inline-end: 16px;
 }
+
+/* Splash container styling */
+#splash-container {
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #fdf6ee 0%, #ffffff 100%);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styling */
+#splash-container h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.quick-actions {
+    padding: 24px;
+    background: linear-gradient(180deg, #fff9f0 0%, #ffffff 100%);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 32px;
+    max-width: 500px;
+}
+
+.quick-actions h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+    font-weight: bold;
+}
+
+.actions-grid {
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.quick-action-card img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.quick-action-card div[slot="heading"] {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+
+/* Recently updated cards */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.recent-card {
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.recent-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.recent-card div[slot="heading"] {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.recent-card div[slot="subheading"] {
+    font-size: 14px;
+    color: #555;
+    margin: 4px 0;
+}
+
+.recent-card div[slot="content"] {
+    font-size: 14px;
+    color: #666;
+    margin: 8px 0;
+}
+
+/* Status badge styling */
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    width: fit-content;
+}
+
+.status.published {
+    background: #e6ffe6;
+    color: #00a000;
+}
+
+.status.error {
+    background: #ffe6e6;
+    color: #a00000;
+}
+
+.status.draft {
+    background: #e6f2ff;
+    color: #0056a0;
+}

@@ -23,6 +23,7 @@ class MasStudio extends LitElement {
         variant: { type: String, state: true },
         newFragment: { type: Object, state: true },
         showEditorPanel: { type: Boolean, state: true },
+        showSplash: { type: Boolean, state: true },
     };
 
     constructor() {
@@ -33,6 +34,7 @@ class MasStudio extends LitElement {
         this.searchText = '';
         this.path = '';
         this.showEditorPanel = false;
+        this.showSplash = true;
     }
 
     connectedCallback() {
@@ -330,12 +332,109 @@ class MasStudio extends LitElement {
         return html` <sp-table-cell>${item.variant}</sp-table-cell>`;
     }
 
-    render() {
+    goToContent() {
+        this.showSplash = false; // Hide splash screen and show main content
+    }
+
+    renderSplashScreen() {
+        return html`
+            <div id="splash-container">
+                <h1>Welcome, Nick</h1>
+                <div class="quick-actions">
+                    <h2>Quick Actions</h2>
+                    <div class="actions-grid">
+                        <sp-card class="quick-action-card">
+                            <img
+                                slot="cover-photo"
+                                src="img/content-icon.png"
+                                alt="Go to Content"
+                            />
+                            <div slot="heading">Go to Content</div>
+                        </sp-card>
+                        <sp-card class="quick-action-card">
+                            <img
+                                slot="cover-photo"
+                                src="img/promos-icon.png"
+                                alt="View Promotions"
+                            />
+                            <div slot="heading">View Promotions</div>
+                        </sp-card>
+                        <sp-card class="quick-action-card">
+                            <img
+                                slot="cover-photo"
+                                src="img/ost-icon.png"
+                                alt="Open Offer Selector Tool"
+                            />
+                            <div slot="heading">Open Offer Selector Tool</div>
+                        </sp-card>
+                    </div>
+                </div>
+                <div class="recently-updated">
+                    <h2>Recently Updated</h2>
+                    <div class="cards-grid">
+                        <sp-card class="recent-card">
+                            <div slot="heading">AI Assistant for Acrobat</div>
+                            <div slot="subheading">£4.98/mo</div>
+                            <div slot="content">
+                                Ask your documents questions for quick answers
+                                and one-click summaries. Works with Acrobat Pro,
+                                Acrobat Standard, and Acrobat Reader.
+                            </div>
+                            <div class="status published">Published</div>
+                        </sp-card>
+                        <sp-card class="recent-card">
+                            <div slot="heading">AI Assistant for Acrobat</div>
+                            <div slot="subheading">£4.98/mo</div>
+                            <div slot="content">
+                                Ask your documents questions for quick answers
+                                and one-click summaries. Works with Acrobat Pro,
+                                Acrobat Standard, and Acrobat Reader.
+                            </div>
+                            <div class="status error">Error</div>
+                        </sp-card>
+                        <sp-card class="recent-card">
+                            <div slot="heading">AI Assistant for Acrobat</div>
+                            <div slot="subheading">£4.98/mo</div>
+                            <div slot="content">
+                                Ask your documents questions for quick answers
+                                and one-click summaries. Works with Acrobat Pro,
+                                Acrobat Standard, and Acrobat Reader.
+                            </div>
+                            <div class="status error">Error</div>
+                        </sp-card>
+                        <sp-card class="recent-card">
+                            <div slot="heading">AI Assistant for Acrobat</div>
+                            <div slot="subheading">£4.98/mo</div>
+                            <div slot="content">
+                                Ask your documents questions for quick answers
+                                and one-click summaries. Works with Acrobat Pro,
+                                Acrobat Standard, and Acrobat Reader.
+                            </div>
+                            <div class="status draft">Draft</div>
+                        </sp-card>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderMainContent() {
         return html`
             <mas-top-nav env="${this.env}"></mas-top-nav>
             <side-nav></side-nav>
-            ${this.content} ${this.fragmentEditor} ${this.selectFragmentDialog}
-            ${this.toast} ${this.loadingIndicator}
+            <div class="main-content">
+                ${this.content} ${this.fragmentEditor}
+                ${this.selectFragmentDialog} ${this.toast}
+                ${this.loadingIndicator}
+            </div>
+        `;
+    }
+
+    render() {
+        return html`
+            ${this.showSplash
+                ? this.renderSplashScreen()
+                : this.renderMainContent()}
         `;
     }
 
