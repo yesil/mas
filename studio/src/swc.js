@@ -28,6 +28,7 @@ import '@spectrum-web-components/icons-workflow/icons/sp-icon-drag-handle.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-duplicate.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-file-txt.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-filter-add.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-folder.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-help-outline.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-label.js';

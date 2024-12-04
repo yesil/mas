@@ -20,8 +20,9 @@ class ContentNavigation extends LitElement {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                height: 48px;
                 padding: 16px;
+                gap: 10px;
+                flex-wrap: wrap;
             }
 
             .divider {
@@ -35,6 +36,17 @@ class ContentNavigation extends LitElement {
 
             sp-action-bar[open] {
                 display: flex;
+            }
+
+            #toolbar-actions {
+                display: flex;
+                gap: 10px;
+                justify-self: end;
+                margin: 0 0 0 auto;
+
+                & sp-button {
+                    white-space: nowrap;
+                }
             }
         `;
     }
@@ -293,17 +305,16 @@ class ContentNavigation extends LitElement {
         return html`<mas-filter-toolbar
                 searchText=${this.source.searchText}
             ></mas-filter-toolbar>
-            <sp-action-group emphasized>
-                <slot name="toolbar-actions"></slot>
-                <sp-action-button
-                    emphasized
+            <div id="toolbar-actions">
+                <sp-button
+                    variant="accent"
                     style=${inNoSelectionStyle}
                     disabled
                 >
-                    <sp-icon-new-item slot="icon"></sp-icon-new-item>
+                    <sp-icon-add slot="icon"></sp-icon-add>
                     Create New Card
-                </sp-action-button>
-                <sp-action-button
+                </sp-button>
+                <sp-button
                     style=${inNoSelectionStyle}
                     @click=${this.toggleSelectionMode}
                 >
@@ -311,17 +322,17 @@ class ContentNavigation extends LitElement {
                         slot="icon"
                     ></sp-icon-selection-checked>
                     Select
-                </sp-action-button>
+                </sp-button>
                 <sp-action-menu
                     style=${inNoSelectionStyle}
                     selects="single"
+                    placement="bottom"
                     value="${this.mode}"
-                    placement="left-end"
                     @change=${this.handleRenderModeChange}
                 >
                     ${this.renderActions}
                 </sp-action-menu>
-            </sp-action-group>`;
+            </div>`;
     }
 
     handleRenderModeChange(e) {
