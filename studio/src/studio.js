@@ -5,6 +5,7 @@ import './editors/merch-card-editor.js';
 import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
+import './mas-surface-picker.js';
 import { contentIcon } from './img/content-icon.js';
 import { promosIcon } from './img/promos-icon.js';
 import { ostIcon } from './img/ost-icon.js';
@@ -387,28 +388,31 @@ class MasStudio extends LitElement {
             <mas-top-nav env="${this.env}"></mas-top-nav>
             <div class="studio-content">
                 <side-nav>
+                    <div class="dropdown-container">
+                        <mas-surface-picker
+                            @picker-change=${this.handleSurfaceChange}
+                        ></mas-surface-picker>
+                    </div>
                     <sp-sidenav>
-                        <sp-sidenav-heading
-                            label="Adobe.com"
-                        ></sp-sidenav-heading>
-                        <sp-sidenav-item
-                            label="Home"
-                            value="home"
-                            selected
-                        ></sp-sidenav-item>
-                        <sp-sidenav-item
-                            label="Promotions"
-                            value="promotions"
-                        ></sp-sidenav-item>
-                        <sp-sidenav-item
-                            label="Reporting"
-                            value="reporting"
-                        ></sp-sidenav-item>
+                        <sp-sidenav-item label="Home" value="home" selected>
+                            <sp-icon-home slot="icon"></sp-icon-home>
+                        </sp-sidenav-item>
+
+                        <sp-sidenav-item label="Promotions" value="promotions">
+                            <sp-icon-campaign slot="icon"></sp-icon-campaign>
+                        </sp-sidenav-item>
+
+                        <sp-sidenav-item label="Reporting" value="reporting">
+                            <sp-icon-graph-bar-vertical
+                                slot="icon"
+                            ></sp-icon-graph-bar-vertical>
+                        </sp-sidenav-item>
+
                         <sp-sidenav-divider></sp-sidenav-divider>
-                        <sp-sidenav-item
-                            label="Support"
-                            value="support"
-                        ></sp-sidenav-item>
+
+                        <sp-sidenav-item label="Support" value="support">
+                            <sp-icon-help slot="icon"></sp-icon-help>
+                        </sp-sidenav-item>
                     </sp-sidenav>
                 </side-nav>
                 <div class="content-container">
@@ -428,6 +432,14 @@ class MasStudio extends LitElement {
 
     get toast() {
         return html`<sp-toast timeout="6000" popover></sp-toast>`;
+    }
+
+    handleSurfaceChange(event) {
+        const selectedValue = event.detail.value;
+        console.log('Selected value from surface picker:', selectedValue);
+
+        this.bucket = selectedValue;
+        this.requestUpdate();
     }
 
     get loadingIndicator() {
