@@ -74,7 +74,6 @@ side-nav sp-sidenav-item:hover {
 
 .content-container {
     grid-column: 2 / 3;
-    background-color: var(--spectrum-white);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -268,24 +267,25 @@ rte-field {
     text-align: center;
     transition: transform 0.2s;
     cursor: pointer;
+    border: none;
 }
 
 .quick-action-card:hover {
     transform: translateY(-4px);
 }
 
-.quick-action-card .card-icon {
+.quick-action-card div[slot='cover-photo'] {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 177px;
     height: 90px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     border-radius: 8px;
     background-color: #f8f8f8;
 }
 
-.quick-action-card .card-icon svg {
+.quick-action-card div[slot='cover-photo'] svg {
     width: 36px;
     height: 36px;
     object-fit: contain;

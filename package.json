@@ -29,7 +29,6 @@
         "@spectrum-web-components/breadcrumbs": "^0.47.2",
         "@spectrum-web-components/button": "^0.47.2",
         "@spectrum-web-components/button-group": "^0.47.2",
-        "@spectrum-web-components/card": "^0.47.2",
         "@spectrum-web-components/checkbox": "^0.47.2",
         "@spectrum-web-components/dialog": "^0.47.2",
         "@spectrum-web-components/divider": "^0.47.2",

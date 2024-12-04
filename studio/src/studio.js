@@ -351,27 +351,28 @@ class MasStudio extends LitElement {
                 <div class="quick-actions">
                     <h2>Quick Actions</h2>
                     <div class="actions-grid">
-                        <sp-card
+                        <div
                             class="quick-action-card"
                             @click=${this.goToContent}
+                            heading="Go to Content"
                         >
-                            <div class="card-icon">${contentIcon}</div>
-                            <div slot="heading">Go to Content</div>
-                        </sp-card>
-                        <sp-card
+                            <div slot="cover-photo">${contentIcon}</div>
+                            <div slot="heading">Go To Content</div>
+                        </div>
+                        <div
                             class="quick-action-card"
                             @click=${this.viewPromotions}
                         >
-                            <div class="card-icon">${promosIcon}</div>
+                            <div slot="cover-photo">${promosIcon}</div>
                             <div slot="heading">View Promotions</div>
-                        </sp-card>
-                        <sp-card
+                        </div>
+                        <div
                             class="quick-action-card"
                             @click=${this.viewPromotions}
                         >
-                            <div class="card-icon">${ostIcon}</div>
+                            <div slot="cover-photo">${ostIcon}</div>
                             <div slot="heading">Open Offer Selector Tool</div>
-                        </sp-card>
+                        </div>
                     </div>
                 </div>
                 <div class="recently-updated">

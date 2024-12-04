@@ -89,4 +89,3 @@ import '@spectrum-web-components/tooltip/sp-tooltip.js';
 import '@spectrum-web-components/top-nav/sp-top-nav-item.js';
 import '@spectrum-web-components/top-nav/sp-top-nav.js';
 import '@spectrum-web-components/underlay/sp-underlay.js';
-import '@spectrum-web-components/card/sp-card.js';
