@@ -85,7 +85,6 @@ side-nav sp-sidenav-item:hover {
 
 .content-container {
     grid-column: 2 / 3;
-    background-color: #f9f9f9;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
