@@ -55,6 +55,7 @@ side-nav sp-sidenav-heading {
     display: flex;
     align-items: center;
     padding: 8px 16px;
+    margin-top: 16px;
 }
 
 side-nav sp-sidenav-item {

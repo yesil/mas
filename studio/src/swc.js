@@ -59,6 +59,7 @@ import '@spectrum-web-components/icons-workflow/icons/sp-icon-home.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-campaign.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-graph-bar-vertical.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-help.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js';
 import '@spectrum-web-components/link/sp-link.js';
 import '@spectrum-web-components/menu/sp-menu-divider.js';
 import '@spectrum-web-components/menu/sp-menu-item.js';
