@@ -102,7 +102,10 @@ export class MasSurfacePicker extends LitElement {
     firstUpdated() {
         const spMenu = this.shadowRoot.querySelector('sp-menu');
         if (spMenu) {
-            spMenu.addEventListener('change', this.handleSelection.bind(this));
+            spMenu.addEventListener(
+                'sp-announce-selected',
+                this.handleSelection.bind(this),
+            );
         }
     }
 
@@ -124,27 +127,25 @@ export class MasSurfacePicker extends LitElement {
 
     closeDropdown() {
         this.open = false;
+
     }
 
     handleSelection(event) {
-        console.log('handleSelection called', event);
-        const selectedItem = event.target.selectedItem;
-        if (selectedItem) {
-            this.value = selectedItem.value;
-            const selectedOption = this.options.find(
-                (option) => option.value === this.value
-            );
-            this.label = selectedOption ? selectedOption.label : '';
-            this.closeDropdown();
-
-            this.dispatchEvent(
-                new CustomEvent('picker-change', {
-                    detail: { value: this.value, label: this.label },
-                    bubbles: true,
-                    composed: true,
-                })
-            );
-        }
+        const spMenu = event.target; // The sp-menu element
+        this.value = spMenu.value; // The selected value
+        const selectedOption = this.options.find(
+            (option) => option.value === this.value
+        );
+        this.label = selectedOption ? selectedOption.label : '';
+        this.closeDropdown();
+        console.log('Selected value:', this.value);
+        this.dispatchEvent(
+            new CustomEvent('picker-change', {
+                detail: { value: this.value, label: this.label },
+                bubbles: true,
+                composed: true,
+            })
+        );
     }
 
     render() {
@@ -187,15 +188,19 @@ export class MasSurfacePicker extends LitElement {
             </div>
             ${this.open
                 ? html`
-                      <sp-popover
-                          @focusout=${this.handleFocusOut}
-                          placement="bottom-start"
-                          open
-                      >
-                          <sp-menu selects="single" role="listbox">
+                      <sp-popover placement="bottom-start" open>
+                          <sp-menu
+                              @change=${this.handleSelection}
+                              selects="single"
+                              role="listbox"
+                          >
                               ${this.options.map(
                                   (option) => html`
-                                      <sp-menu-item .value=${option.value}>
+                                      <sp-menu-item
+                                          .value=${option.value}
+                                          ?selected=${this.value ===
+                                          option.value}
+                                      >
                                           ${option.label}
                                       </sp-menu-item>
                                   `,
