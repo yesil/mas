@@ -249,6 +249,7 @@ rte-field {
     font-weight: bold;
     color: #333;
     margin-bottom: 24px;
+    margin-top: 0;
 }
 
 .quick-actions {
