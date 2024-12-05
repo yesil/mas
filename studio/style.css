@@ -201,7 +201,7 @@ content-navigation {
 }
 
 render-view {
-    margin: 16px;
+    margin: 20px 16px;
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
