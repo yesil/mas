@@ -34,7 +34,6 @@ side-nav {
     grid-column: 1 / 2;
     display: flex;
     flex-direction: column;
-    z-index: 1000;
     overflow-y: auto;
 }
 
@@ -148,7 +147,6 @@ sp-underlay + sp-dialog {
     right: var(--editor-right);
     height: 100vh;
     width: 440px;
-    z-index: 1001;
     background-color: var(--spectrum-white);
     padding: 20px;
     padding-bottom: 75px;

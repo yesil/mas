@@ -372,10 +372,7 @@ class MasStudio extends LitElement {
                             <div slot="cover-photo">${promosIcon}</div>
                             <div slot="heading">View Promotions</div>
                         </div>
-                        <div
-                            class="quick-action-card"
-                            @click=${this.openOst}
-                        >
+                        <div class="quick-action-card" @click=${this.openOst}>
                             <div slot="cover-photo">${ostIcon}</div>
                             <div slot="heading">Open Offer Selector Tool</div>
                         </div>

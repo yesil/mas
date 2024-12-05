@@ -127,14 +127,13 @@ export class MasSurfacePicker extends LitElement {
 
     closeDropdown() {
         this.open = false;
-
     }
 
     handleSelection(event) {
         const spMenu = event.target; // The sp-menu element
         this.value = spMenu.value; // The selected value
         const selectedOption = this.options.find(
-            (option) => option.value === this.value
+            (option) => option.value === this.value,
         );
         this.label = selectedOption ? selectedOption.label : '';
         this.closeDropdown();
@@ -144,7 +143,7 @@ export class MasSurfacePicker extends LitElement {
                 detail: { value: this.value, label: this.label },
                 bubbles: true,
                 composed: true,
-            })
+            }),
         );
     }
 
