@@ -9,10 +9,7 @@ import './mas-surface-picker.js';
 import { contentIcon } from './img/content-icon.js';
 import { promosIcon } from './img/promos-icon.js';
 import { ostIcon } from './img/ost-icon.js';
-import {
-    openOfferSelectorTool,
-    closeOfferSelectorTool,
-} from './rte/ost.js';
+import { openOfferSelectorTool } from './rte/ost.js';
 
 const EVENT_LOAD_START = 'load-start';
 const EVENT_LOAD_END = 'load-end';
