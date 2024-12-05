@@ -9,6 +9,10 @@ import './mas-surface-picker.js';
 import { contentIcon } from './img/content-icon.js';
 import { promosIcon } from './img/promos-icon.js';
 import { ostIcon } from './img/ost-icon.js';
+import {
+    openOfferSelectorTool,
+    closeOfferSelectorTool,
+} from './rte/ost.js';
 
 const EVENT_LOAD_START = 'load-start';
 const EVENT_LOAD_END = 'load-end';
@@ -345,6 +349,10 @@ class MasStudio extends LitElement {
         this.requestUpdate();
     }
 
+    openOst() {
+        openOfferSelectorTool();
+    }
+
     renderSplashScreen() {
         return html`
             <div id="splash-container">
@@ -369,7 +377,7 @@ class MasStudio extends LitElement {
                         </div>
                         <div
                             class="quick-action-card"
-                            @click=${this.viewPromotions}
+                            @click=${this.openOst}
                         >
                             <div slot="cover-photo">${ostIcon}</div>
                             <div slot="heading">Open Offer Selector Tool</div>
