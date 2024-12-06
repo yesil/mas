@@ -150,7 +150,7 @@ sp-underlay + sp-dialog {
 #editor {
     position: fixed;
     bottom: 0;
-    top: var(--mas-nav-height);
+    top: 0;
     left: var(--editor-left);
     right: var(--editor-right);
     height: 100vh;
@@ -171,9 +171,35 @@ sp-underlay + sp-dialog {
 }
 
 sp-status-light {
-    position: absolute;
-    bottom: -6px;
-    left: 6px;
+    min-block-size: initial;
+    padding: 0;
+    --spectrum-statuslight-spacing-top-to-dot: 0;
+    --spectrum-statuslight-spacing-top-to-label: 0;
+    --spectrum-statuslight-spacing-dot-to-label: 0;
+}
+
+.render-card {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 3px 3px 3px;
+    gap: 6px;
+    border: 1px solid transparent;
+    border-radius: var(--consonant-merch-spacing-xs);
+}
+
+.render-card:has(merch-card[variant='ccd-slice']),
+.render-card:has(merch-card[variant='ccd-suggested']) {
+    border-radius: 4px;
+}
+
+.render-card:hover {
+    border-color: var(--ccd-gray-200-light, #e6e6e6);
+}
+
+.render-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding-inline: 6px;
 }
 
 rte-field {

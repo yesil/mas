@@ -333,4 +333,3 @@ class ContentNavigation extends LitElement {
 }
 
 customElements.define('content-navigation', ContentNavigation);
-
