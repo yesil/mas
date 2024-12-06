@@ -86,8 +86,7 @@ merch-card:not(.has-tooltip) ~ sp-tooltip {
 }
 
 merch-card:hover {
-    background-color: var(--spectrum-background-base-color);
-    box-shadow: 0 0 3px 3px rgb(0 0 0 / 10%);
+    background-color: var(--spectrum-neutral-background-color-hover);
 }
 
 merch-card sp-icon-add,
