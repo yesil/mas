@@ -156,12 +156,10 @@ class ContentNavigation extends LitElement {
 
     handleFolderChange(event) {
         const { value, label } = event.detail;
-        console.log(`Folder selected: ${label} (${value})`);
         this.processFolderSelection(value);
     }
 
     processFolderSelection(folderValue) {
-        console.log(`Processing folder: ${folderValue}`);
         this.selectTopFolder(folderValue);
         this.source.path = folderValue;
         pushState({

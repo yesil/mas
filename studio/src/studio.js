@@ -439,7 +439,7 @@ class MasStudio extends LitElement {
                     <div class="content">
                         ${this.content} ${this.fragmentEditor}
                         ${this.selectFragmentDialog} ${this.toast}
-                        ${this.loadingIndicator}
+                        ${!this.showSplash ? this.loadingIndicator : nothing}
                     </div>
                 </div>
             </div>
