@@ -212,7 +212,7 @@ class ContentNavigation extends LitElement {
         if (!this.inSelection) {
             this.source.clearSelection();
         }
-        this.toggleTopFoldersDisabled(this.inSelection);
+        // this.toggleTopFoldersDisabled(this.inSelection);
         this.notify();
     }
 

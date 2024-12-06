@@ -208,6 +208,10 @@ rte-field {
     border-radius: var(--spectrum-corner-radius-100);
 }
 
+merch-card:not([variant]) {
+    display: none;
+}
+
 merch-card {
     cursor: pointer;
     user-select: none;
@@ -275,6 +279,17 @@ content-navigation[in-selection] render-view merch-card .overlay {
 merch-card-editor mas-multifield,
 rte-field {
     margin-inline-end: 16px;
+}
+
+mas-recently-updated[loading] {
+    visibility: hidden;
+}
+
+mas-recently-updated > .container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-inline-start: 0;
 }
 
 #splash-container h1 {

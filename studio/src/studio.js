@@ -5,6 +5,7 @@ import './editors/merch-card-editor.js';
 import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
+import './mas-recently-updated.js';
 import './mas-folder-picker.js';
 import { contentIcon } from './img/content-icon.js';
 import { promosIcon } from './img/promos-icon.js';
@@ -340,6 +341,15 @@ class MasStudio extends LitElement {
         `;
     }
 
+    get recentlyUpdated() {
+        return html`<mas-recently-updated
+            source="aem"
+            base-url="${this.baseUrl}"
+            path="${this.path}"
+        >
+        </mas-recently-updated>`;
+    }
+
     customRenderItem(item) {
         if (!item) return html`<sp-table-cell></sp-table-cell>`;
         return html` <sp-table-cell>${item.variant}</sp-table-cell>`;
@@ -390,9 +400,7 @@ class MasStudio extends LitElement {
                         </div>
                     </div>
                 </div>
-                <div class="recently-updated">
-                    <h2>Recently Updated</h2>
-                </div>
+                <div class="recently-updated">${this.recentlyUpdated}</div>
             </div>
         `;
     }
