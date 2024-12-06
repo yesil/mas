@@ -354,6 +354,11 @@ class MasStudio extends LitElement {
         openOfferSelectorTool();
     }
 
+    handleHomeClick() {
+        this.showSplash = true;
+        this.requestUpdate();
+    }
+
     renderSplashScreen() {
         return html`
             <div
@@ -403,7 +408,12 @@ class MasStudio extends LitElement {
                         ></mas-folder-picker>
                     </div>
                     <sp-sidenav>
-                        <sp-sidenav-item label="Home" value="home" selected>
+                        <sp-sidenav-item
+                            label="Home"
+                            value="home"
+                            @click="${this.handleHomeClick}"
+                            selected
+                        >
                             <sp-icon-home slot="icon"></sp-icon-home>
                         </sp-sidenav-item>
 
