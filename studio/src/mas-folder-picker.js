@@ -1,6 +1,6 @@
 import { html, css, LitElement } from 'lit';
 
-export class MasSurfacePicker extends LitElement {
+export class MasFolderPicker extends LitElement {
     static properties = {
         value: { type: String },
         options: { type: Array },
@@ -10,14 +10,12 @@ export class MasSurfacePicker extends LitElement {
 
     constructor() {
         super();
-        this.options = [
-            { value: 'adobedotcom', label: 'Adobe.com' },
-            { value: 'ccd', label: 'Creative Cloud Desktop' },
-            { value: 'home', label: 'Adobe Home' },
-        ];
-        this.value = this.options[0].value;
-        this.label = this.options[0].label;
+        this.options = [];
+        this.value = '';
+        this.label = '';
         this.open = false;
+
+        this.handleTopFolders = this.handleTopFolders.bind(this);
     }
 
     static styles = css`
@@ -99,6 +97,36 @@ export class MasSurfacePicker extends LitElement {
         }
     `;
 
+    connectedCallback() {
+        super.connectedCallback();
+        document.addEventListener('top-folders-loaded', this.handleTopFolders);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        // Remove the event listener
+        document.removeEventListener(
+            'top-folders-loaded',
+            this.handleTopFolders,
+        );
+    }
+
+    handleTopFolders(event) {
+        const { topFolders } = event.detail;
+
+        this.options = topFolders.map((folder) => ({
+            value: folder.toLowerCase(),
+            label: folder.toUpperCase(),
+        }));
+
+        if (this.options.length > 0) {
+            this.value = this.options[0].value;
+            this.label = this.options[0].label;
+        }
+
+        this.requestUpdate();
+    }
+
     firstUpdated() {
         const spMenu = this.shadowRoot.querySelector('sp-menu');
         if (spMenu) {
@@ -114,7 +142,7 @@ export class MasSurfacePicker extends LitElement {
             const spMenu = this.shadowRoot.querySelector('sp-menu');
             if (spMenu) {
                 spMenu.addEventListener(
-                    'change',
+                    'folder-change',
                     this.handleSelection.bind(this),
                 );
             }
@@ -129,17 +157,20 @@ export class MasSurfacePicker extends LitElement {
         this.open = false;
     }
 
+    get source() {
+        return document.querySelector('aem-fragments');
+    }
+
     handleSelection(event) {
-        const spMenu = event.target; // The sp-menu element
-        this.value = spMenu.value; // The selected value
+        const spMenu = event.target;
+        this.value = spMenu.value;
         const selectedOption = this.options.find(
             (option) => option.value === this.value,
         );
         this.label = selectedOption ? selectedOption.label : '';
         this.closeDropdown();
-        console.log('Selected value:', this.value);
         this.dispatchEvent(
-            new CustomEvent('picker-change', {
+            new CustomEvent('folder-change', {
                 detail: { value: this.value, label: this.label },
                 bubbles: true,
                 composed: true,
@@ -159,7 +190,6 @@ export class MasSurfacePicker extends LitElement {
                 @keydown=${this.handleKeyDown}
             >
                 <span class="button-content">
-                    <!-- SVG Icon -->
                     <svg
                         version="1.1"
                         xmlns="http://www.w3.org/2000/svg"
@@ -176,10 +206,8 @@ export class MasSurfacePicker extends LitElement {
                             d="M19 0h11v26zM11.1 0H0v26zM15 9.6L22.1 26h-4.6l-2.1-5.2h-5.2z"
                         ></path>
                     </svg>
-                    <!-- Selected Label -->
                     <span class="surface-selection">${this.label}</span>
                 </span>
-                <!-- Chevron Icon -->
                 <sp-icon-chevron-down
                     dir="ltr"
                     class="chevron"
@@ -235,4 +263,4 @@ export class MasSurfacePicker extends LitElement {
     }
 }
 
-customElements.define('mas-surface-picker', MasSurfacePicker);
+customElements.define('mas-folder-picker', MasFolderPicker);

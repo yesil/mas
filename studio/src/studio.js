@@ -5,7 +5,7 @@ import './editors/merch-card-editor.js';
 import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
-import './mas-surface-picker.js';
+import './mas-folder-picker.js';
 import { contentIcon } from './img/content-icon.js';
 import { promosIcon } from './img/promos-icon.js';
 import { ostIcon } from './img/ost-icon.js';
@@ -325,7 +325,11 @@ class MasStudio extends LitElement {
                 bucket="${this.bucket}"
                 variant="${this.variant}"
             ></aem-fragments>
-            <content-navigation source="aem" ?disabled=${this.fragment}>
+            <content-navigation
+                class="${this.showSplash ? 'hide' : 'show'}"
+                source="aem"
+                ?disabled=${this.fragment}
+            >
                 <table-view .customRenderItem=${this.customRenderItem}>
                     <sp-table-head-cell slot="headers"
                         >Variant</sp-table-head-cell
@@ -352,7 +356,10 @@ class MasStudio extends LitElement {
 
     renderSplashScreen() {
         return html`
-            <div id="splash-container">
+            <div
+                class="${this.showSplash ? 'show' : 'hide'}"
+                id="splash-container"
+            >
                 <h1>Welcome, Nick</h1>
                 <div class="quick-actions">
                     <h2>Quick Actions</h2>
@@ -391,9 +398,9 @@ class MasStudio extends LitElement {
             <div class="studio-content">
                 <side-nav>
                     <div class="dropdown-container">
-                        <mas-surface-picker
-                            @picker-change=${this.handleSurfaceChange}
-                        ></mas-surface-picker>
+                        <mas-folder-picker
+                            @picker-change=${this.handleFolderChange}
+                        ></mas-folder-picker>
                     </div>
                     <sp-sidenav>
                         <sp-sidenav-item label="Home" value="home" selected>
@@ -401,7 +408,7 @@ class MasStudio extends LitElement {
                         </sp-sidenav-item>
 
                         <sp-sidenav-item label="Promotions" value="promotions">
-                            <sp-icon-campaign slot="icon"></sp-icon-campaign>
+                            <sp-icon-promote slot="icon"></sp-icon-promote>
                         </sp-sidenav-item>
 
                         <sp-sidenav-item label="Reporting" value="reporting">
@@ -418,15 +425,12 @@ class MasStudio extends LitElement {
                     </sp-sidenav>
                 </side-nav>
                 <div class="content-container">
-                    ${this.showSplash
-                        ? this.renderSplashScreen()
-                        : html`
-                              <div class="content">
-                                  ${this.content} ${this.fragmentEditor}
-                                  ${this.selectFragmentDialog} ${this.toast}
-                                  ${this.loadingIndicator}
-                              </div>
-                          `}
+                    ${this.renderSplashScreen()}
+                    <div class="content">
+                        ${this.content} ${this.fragmentEditor}
+                        ${this.selectFragmentDialog} ${this.toast}
+                        ${this.loadingIndicator}
+                    </div>
                 </div>
             </div>
         `;
@@ -436,10 +440,13 @@ class MasStudio extends LitElement {
         return html`<sp-toast timeout="6000" popover></sp-toast>`;
     }
 
-    handleSurfaceChange(event) {
+    handleFolderChange(event) {
         const selectedValue = event.detail.value;
-        console.log('Selected value from surface picker:', selectedValue);
-
+        document.dispatchEvent(
+            new CustomEvent('folder-change', {
+                detail: { value: selectedValue },
+            }),
+        );
         this.bucket = selectedValue;
         this.requestUpdate();
     }

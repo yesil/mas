@@ -22,6 +22,14 @@ mas-studio {
     flex-direction: column;
 }
 
+.show {
+    display: initial;
+}
+
+.hide {
+    display: none;
+}
+
 .studio-content {
     display: grid;
     grid-template-columns: 240px 1fr;

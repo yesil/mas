@@ -82,11 +82,19 @@ class ContentNavigation extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener('toggle-filter-panel', this.toggleFilterPanel);
+        document.addEventListener(
+            'folder-change',
+            this.handleFolderChange.bind(this),
+        );
         this.registerToSource();
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
+        document.removeEventListener(
+            'folder-change',
+            this.handleFolderChange.bind(this),
+        );
         this.unregisterFromSource();
     }
 
@@ -146,38 +154,20 @@ class ContentNavigation extends LitElement {
         });
     }
 
-    handleTopFolderChange(event) {
-        this.selectTopFolder(event.target.value);
+    handleFolderChange(event) {
+        const { value, label } = event.detail;
+        console.log(`Folder selected: ${label} (${value})`);
+        this.processFolderSelection(value);
     }
 
-    get topFolderPicker() {
-        return this.shadowRoot.querySelector('sp-picker');
-    }
-
-    toggleTopFoldersDisabled(disabled) {
-        this.topFolderPicker.disabled = disabled;
-    }
-
-    renderTopFolders() {
-        if (!this.topFolders) return '';
-        const initialValue =
-            this.#initialFolder && this.topFolders.includes(this.#initialFolder)
-                ? this.#initialFolder
-                : 'ccd';
-        return html`<sp-picker
-            @change=${this.handleTopFolderChange}
-            label="TopFolder"
-            class="topFolder"
-            size="m"
-            value="${initialValue}"
-        >
-            ${this.topFolders.map(
-                (folder) =>
-                    html`<sp-menu-item value="${folder}">
-                        ${folder.toUpperCase()}
-                    </sp-menu-item>`,
-            )}
-        </sp-picker>`;
+    processFolderSelection(folderValue) {
+        console.log(`Processing folder: ${folderValue}`);
+        this.selectTopFolder(folderValue);
+        this.source.path = folderValue;
+        pushState({
+            path: this.source.path,
+            query: this.source.searchText,
+        });
     }
 
     updated(changedProperties) {
@@ -186,7 +176,7 @@ class ContentNavigation extends LitElement {
             sessionStorage.setItem(MAS_RENDER_MODE, this.mode);
         }
         this.forceUpdate();
-        this.selectTopFolder(this.topFolderPicker?.value);
+        this.selectTopFolder(this.folderValue);
     }
 
     get currentRenderer() {
@@ -206,7 +196,6 @@ class ContentNavigation extends LitElement {
         if (this.#initFromFragmentId && !this.#initialFolder) return '';
         this.#initFromFragmentId = false;
         return html`<div id="toolbar">
-                ${this.renderTopFolders()}
                 <div class="divider"></div>
                 ${this.actions}
             </div>
@@ -346,3 +335,4 @@ class ContentNavigation extends LitElement {
 }
 
 customElements.define('content-navigation', ContentNavigation);
+
