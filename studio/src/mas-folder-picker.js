@@ -120,11 +120,33 @@ export class MasFolderPicker extends LitElement {
         }));
 
         if (this.options.length > 0) {
-            this.value = this.options[0].value;
-            this.label = this.options[0].label;
-        }
+            const urlParams = new URLSearchParams(window.location.search);
+            const pathParam = urlParams.get('path');
+            let matchedOption = null;
 
-        this.requestUpdate();
+            if (pathParam) {
+                matchedOption = this.options.find(
+                    (option) => option.value === pathParam.toLowerCase(),
+                );
+            }
+            if (matchedOption) {
+                this.value = matchedOption.value;
+                this.label = matchedOption.label;
+            } else {
+                this.value = this.options[0].value;
+                this.label = this.options[0].label;
+            }
+
+            this.dispatchEvent(
+                new CustomEvent('folder-change', {
+                    detail: { value: this.value, label: this.label },
+                    bubbles: true,
+                    composed: true,
+                }),
+            );
+
+            this.requestUpdate();
+        }
     }
 
     firstUpdated() {
