@@ -114,10 +114,18 @@ export class MasFolderPicker extends LitElement {
     handleTopFolders(event) {
         const { topFolders } = event.detail;
 
-        this.options = topFolders.map((folder) => ({
-            value: folder.toLowerCase(),
-            label: folder.toUpperCase(),
-        }));
+        const folderMapping = {
+            acom: 'Adobe.com',
+            nala: 'CCD',
+            'adobe-home': 'Adobe Home',
+        };
+
+        this.options = topFolders
+            .map((folder) => ({
+                value: folder.toLowerCase(),
+                label: folderMapping[folder.toLowerCase()] || null,
+            }))
+            .filter((option) => option.label !== null);
 
         if (this.options.length > 0) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -129,6 +137,7 @@ export class MasFolderPicker extends LitElement {
                     (option) => option.value === pathParam.toLowerCase(),
                 );
             }
+
             if (matchedOption) {
                 this.value = matchedOption.value;
                 this.label = matchedOption.label;
