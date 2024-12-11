@@ -85,10 +85,6 @@ merch-card:not(.has-tooltip) ~ sp-tooltip {
     display: none;
 }
 
-merch-card:hover {
-    background-color: var(--spectrum-neutral-background-color-hover);
-}
-
 merch-card sp-icon-add,
 merch-card sp-icon-remove {
     display: none;
