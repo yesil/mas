@@ -1,5 +1,5 @@
 import { css, html, LitElement, nothing } from 'lit';
-import { EVENT_CHANGE, EVENT_LOAD } from '../events.js';
+import { litObserver } from 'picosm';
 
 const MODE = 'table';
 
@@ -20,12 +20,12 @@ class TableView extends LitElement {
         return {
             rowCount: { type: Number, attribute: 'row-count' },
             customRenderItem: { type: Function },
+            repository: { type: Object, state: true },
         };
     }
 
     constructor() {
         super();
-        this.forceUpdate = this.forceUpdate.bind(this);
         this.itemValue = this.itemValue.bind(this);
         this.renderItem = this.renderItem.bind(this);
     }
@@ -38,22 +38,16 @@ class TableView extends LitElement {
         return this.table?.querySelector('sp-table-body');
     }
 
-    canRender() {
-        return this.parentElement?.mode === MODE && this.parentElement.source;
-    }
-
     render() {
-        // TODO check why table does not clear when fragments are empty
-        if (!this.canRender()) return nothing;
+        if (this.parentElement.mode !== MODE) return nothing;
+        if (this.repository.fragments.length === 0) return nothing;
         return html`
             <sp-table
                 emphasized
                 scroller
                 .itemValue=${this.itemValue}
                 .renderItem=${this.renderItem}
-                selects=${this.parentElement.inSelection
-                    ? 'multiple'
-                    : undefined}
+                selects=${this.repository.inSelection ? 'multiple' : undefined}
                 @change=${this.handleTableSelectionChange}
                 @dblclick="${this.handleDoubleClick}"
             >
@@ -76,10 +70,10 @@ class TableView extends LitElement {
     updated() {
         (async () => {
             if (this.table) {
-                if (!this.parentElement.inSelection) {
+                if (!this.repository.inSelection) {
                     this.table.deselectAllRows();
                 }
-                this.table.items = this.parentElement.source.fragments;
+                this.table.items = this.repository.fragments;
                 this.table.renderVirtualizedItems(); /* hack: force to render when items.lenght = 0 */
             }
         })();
@@ -100,18 +94,12 @@ class TableView extends LitElement {
     }
 
     handleDoubleClick(e) {
-        if (this.parentElement.inSelection) return;
+        if (this.repository.inSelection) return;
         const { value } = e.target.closest('sp-table-row');
         if (!value) return;
-        const fragment = this.parentElement.source.fragments.find(
-            (f) => f.id === value,
-        );
+        const fragment = this.repository.fragments.find((f) => f.id === value);
         if (!fragment) return;
-        this.parentElement.source.selectFragment(
-            e.clientX,
-            e.clientY,
-            fragment,
-        );
+        this.repository.selectFragment(e.clientX, fragment);
     }
 
     connectedCallback() {
@@ -121,31 +109,18 @@ class TableView extends LitElement {
         if (this.rowCount) {
             this.style.setProperty('--table-height', `${this.rowCount * 40}px`);
         }
-
-        this.parentElement.addEventListener(EVENT_CHANGE, this.forceUpdate);
-        this.parentElement.source.addEventListener(
-            EVENT_LOAD,
-            this.forceUpdate,
-        );
-        this.parentElement.source.addEventListener(
-            EVENT_CHANGE,
-            this.forceUpdate,
-        );
-    }
-
-    async forceUpdate() {
-        this.requestUpdate();
     }
 
     handleTableSelectionChange(e) {
-        const { selected } = e.target;
-        this.parentElement.source.fragments.forEach((fragment) => {
-            fragment.toggleSelection(selected.includes(fragment.id));
+        this.repository.fragments.forEach((fragment) => {
+            const selected = e.target.selected.includes(fragment.id);
+            if (
+                (selected && !fragment.selected) ||
+                (!selected && fragment.selected)
+            ) {
+                this.repository.toggleFragmentSelection(fragment);
+            }
         });
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
     }
 
     get actionData() {
@@ -157,4 +132,4 @@ class TableView extends LitElement {
     }
 }
 
-customElements.define('table-view', TableView);
+customElements.define('table-view', litObserver(TableView, ['repository']));

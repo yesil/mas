@@ -36,7 +36,6 @@
             import '../src/aem/aem-tag-picker-field.js';
             import '../src/editors/merch-card-editor.js';
             import '../src/editor-panel.js';
-            import { EVENT_FRAGMENT_CHANGE } from '../src/events.js';
             import { Fragment } from '../src/aem/fragment.js';
 
             import {
@@ -70,7 +69,7 @@
                         fragment = new Fragment(fragmentData);
                         editorPanel = await fixture(
                             html`<editor-panel
-                                .fragment=${fragment}
+                                .fragment="${fragment}"
                             ></editor-panel> `,
                             { parentNode: spTheme },
                         );
@@ -84,14 +83,10 @@
                         expect(
                             fragment.getField('cardTitle').values,
                         ).to.deep.equal(['test title']);
-                        await oneEvent(document, EVENT_FRAGMENT_CHANGE);
+                        await delay(500);
                         expect(discardButton.disabled).to.be.false;
-                        const discardEvent = oneEvent(
-                            document,
-                            EVENT_FRAGMENT_CHANGE,
-                        );
                         discardButton.click();
-                        await discardEvent;
+                        await delay(500);
                         expect(
                             fragment.getField('cardTitle').values,
                         ).to.deep.equal([]);

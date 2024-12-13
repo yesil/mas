@@ -1,10 +1,9 @@
 import { css, html, LitElement, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { EVENT_CHANGE, EVENT_LOAD } from '../events.js';
-import { deeplink, pushState } from '../deeplink.js';
-import { getTopFolder } from './aem-fragments.js';
+import { pushState } from '../deeplink.js';
 import './mas-filter-panel.js';
 import './mas-filter-toolbar.js';
+import { litObserver } from 'picosm';
 
 const MAS_RENDER_MODE = 'mas-render-mode';
 
@@ -40,125 +39,35 @@ class ContentNavigation extends LitElement {
 
     static get properties() {
         return {
-            mode: { type: String, attribute: true, reflect: true },
-            source: { type: Object, attribute: false },
-            topFolders: { type: Array, attribute: false },
-            fragmentFromIdLoaded: { type: Boolean },
-            disabled: { type: Boolean, attribute: true },
-            showFilterPanel: { type: Boolean, state: true },
-            inSelection: {
-                type: Boolean,
-                attribute: 'in-selection',
-                reflect: true,
-            },
+            repository: { type: Object, state: true },
+            mode: { type: String, state: true },
         };
     }
-
-    #initFromFragmentId = false;
-    #initialFolder;
 
     constructor() {
         super();
         this.mode = sessionStorage.getItem(MAS_RENDER_MODE) ?? 'render';
-        this.inSelection = false;
-        this.disabled = false;
-        this.showFilterPanel = false;
-        this.forceUpdate = this.forceUpdate.bind(this);
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-        this.addEventListener('toggle-filter-panel', this.toggleFilterPanel);
-        this.registerToSource();
+    handleTopFolderChange(e) {
+        this.repository.setPath(e.target.value);
+        pushState({ path: e.target.value });
     }
 
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.unregisterFromSource();
+    handleRenderModeChange(e) {
+        this.mode = e.target.value;
+        sessionStorage.setItem(MAS_RENDER_MODE, this.mode);
+        [...this.children].forEach((child) => child.requestUpdate());
     }
 
-    toggleFilterPanel() {
-        this.showFilterPanel = !this.showFilterPanel;
-    }
-
-    handlerSourceLoad() {
-        if (this.#initFromFragmentId) {
-            this.#initialFolder = getTopFolder(this.source.fragments[0]?.path);
-            this.fragmentFromIdLoaded = true;
-        }
-        this.forceUpdate();
-    }
-
-    registerToSource() {
-        this.source = document.getElementById(this.getAttribute('source'));
-        if (!this.source) return;
-        this.deeplinkDisposer = deeplink(({ path, query }) => {
-            this.#initialFolder =
-                path !== '/content/dam/mas' ? path?.split('/')?.pop() : null;
-            if (!this.#initialFolder && this.source.isFragmentId(query)) {
-                document.querySelector('mas-studio').searchText = query;
-                this.source.searchFragments();
-                this.#initFromFragmentId = true;
-            }
-        });
-        this.boundHandlerSourceLoad = this.handlerSourceLoad.bind(this);
-        this.source.addEventListener(EVENT_LOAD, this.boundHandlerSourceLoad);
-        this.source.addEventListener(EVENT_CHANGE, this.forceUpdate);
-        this.source.getTopFolders().then((folders) => {
-            this.topFolders = folders;
-        });
-    }
-
-    async forceUpdate() {
-        this.requestUpdate();
-    }
-
-    unregisterFromSource() {
-        if (this.deeplinkDisposer) {
-            this.deeplinkDisposer();
-        }
-        this.source?.removeEventListener(
-            EVENT_LOAD,
-            this.boundHandlerSourceLoad,
-        );
-        this.source?.removeEventListener(EVENT_CHANGE, this.forceUpdate);
-    }
-
-    selectTopFolder(topFolder) {
-        if (!topFolder) return;
-        this.source.path = topFolder;
-        pushState({
-            path: this.source.path,
-            query: this.source.searchText,
-        });
-    }
-
-    handleTopFolderChange(event) {
-        this.selectTopFolder(event.target.value);
-    }
-
-    get topFolderPicker() {
-        return this.shadowRoot.querySelector('sp-picker');
-    }
-
-    toggleTopFoldersDisabled(disabled) {
-        this.topFolderPicker.disabled = disabled;
-    }
-
-    renderTopFolders() {
-        if (!this.topFolders) return '';
-        const initialValue =
-            this.#initialFolder && this.topFolders.includes(this.#initialFolder)
-                ? this.#initialFolder
-                : 'ccd';
+    get topFolders() {
+        if (this.repository.topFolders.length === 0) return nothing;
         return html`<sp-picker
             @change=${this.handleTopFolderChange}
-            label="TopFolder"
-            class="topFolder"
             size="m"
-            value="${initialValue}"
+            value="${this.repository.path}"
         >
-            ${this.topFolders.map(
+            ${this.repository.topFolders.map(
                 (folder) =>
                     html`<sp-menu-item value="${folder}">
                         ${folder.toUpperCase()}
@@ -167,74 +76,43 @@ class ContentNavigation extends LitElement {
         </sp-picker>`;
     }
 
-    updated(changedProperties) {
-        if (changedProperties.size === 0) return;
-        if (changedProperties.has('mode')) {
-            sessionStorage.setItem(MAS_RENDER_MODE, this.mode);
-        }
-        this.forceUpdate();
-        this.selectTopFolder(this.topFolderPicker?.value);
-    }
-
-    get currentRenderer() {
-        return [...this.children].find((child) => child.canRender());
-    }
-
-    get toolbar() {
-        return this.shadowRoot.querySelector('mas-filter-toolbar');
-    }
-
     get searchInfo() {
         return html`<sp-icon-search></sp-icon-search> Search results for
-            "${this.source.searchText}"`;
+            "${this.repository.searchText}"`;
     }
 
     render() {
-        if (this.#initFromFragmentId && !this.#initialFolder) return '';
-        this.#initFromFragmentId = false;
         return html`<div id="toolbar">
-                ${this.renderTopFolders()}
+                ${this.topFolders}
                 <div class="divider"></div>
                 ${this.actions}
             </div>
-            ${this.showFilterPanel
+            ${this.repository.showFilterPanel
                 ? html`<mas-filter-panel
-                      source="${this.getAttribute('source')}"
+                      .repository="${this.repository}"
                   ></mas-filter-panel>`
                 : nothing}
             ${this.selectionActions}
-            ${this.source.searchText ? this.searchInfo : ''}
+            ${this.repository.searchText ? this.searchInfo : ''}
             <slot></slot> `;
     }
 
-    toggleSelectionMode(force) {
-        this.inSelection = force !== undefined ? force : !this.inSelection;
-        if (!this.inSelection) {
-            this.source.clearSelection();
-        }
-        this.toggleTopFoldersDisabled(this.inSelection);
-        this.notify();
-    }
-
-    get selectionCount() {
-        return this.source.selectedFragments.length ?? 0;
-    }
-
     get selectionActions() {
+        const selectionCount = this.repository.selectionCount;
         const hasSingleSelection = styleMap({
-            display: this.selectionCount === 1 ? 'flex' : 'none',
+            display: selectionCount === 1 ? 'flex' : 'none',
         });
         const hasSelection = styleMap({
-            display: this.selectionCount > 0 ? 'flex' : 'none',
+            display: selectionCount > 0 ? 'flex' : 'none',
         });
 
         return html`<sp-action-bar
             emphasized
-            ?open=${this.inSelection}
+            ?open=${this.repository.inSelection}
             variant="fixed"
-            @close=${() => this.toggleSelectionMode(false)}
+            @close=${() => this.repository.toggleSelectionMode(false)}
         >
-            ${this.selectionCount} selected
+            ${selectionCount} selected
             <sp-action-button
                 slot="buttons"
                 style=${hasSingleSelection}
@@ -285,14 +163,19 @@ class ContentNavigation extends LitElement {
             );
     }
 
+    get toolbar() {
+        if (this.repository.fragment) return nothing;
+        return html`<mas-filter-toolbar
+            .repository=${this.repository}
+        ></mas-filter-toolbar>`;
+    }
+
     get actions() {
         const inNoSelectionStyle = styleMap({
-            display: !this.disabled && !this.inSelection ? 'flex' : 'none',
+            display: !this.inSelection ? 'flex' : 'none',
         });
-        return html`<mas-filter-toolbar
-                searchText=${this.source.searchText}
-            ></mas-filter-toolbar>
-            <sp-action-group emphasized>
+        const disabled = !!this.repository.fragment;
+        return html`${this.toolbar}<sp-action-group emphasized>
                 <slot name="toolbar-actions"></slot>
                 <sp-action-button
                     emphasized
@@ -304,7 +187,8 @@ class ContentNavigation extends LitElement {
                 </sp-action-button>
                 <sp-action-button
                     style=${inNoSelectionStyle}
-                    @click=${this.toggleSelectionMode}
+                    ?disabled=${disabled}
+                    @click=${() => this.repository.toggleSelectionMode()}
                 >
                     <sp-icon-selection-checked
                         slot="icon"
@@ -314,6 +198,7 @@ class ContentNavigation extends LitElement {
                 <sp-action-menu
                     style=${inNoSelectionStyle}
                     selects="single"
+                    ?disabled=${disabled}
                     value="${this.mode}"
                     placement="left-end"
                     @change=${this.handleRenderModeChange}
@@ -322,15 +207,8 @@ class ContentNavigation extends LitElement {
                 </sp-action-menu>
             </sp-action-group>`;
     }
-
-    handleRenderModeChange(e) {
-        this.mode = e.target.value;
-        this.notify();
-    }
-
-    notify() {
-        this.dispatchEvent(new CustomEvent(EVENT_CHANGE));
-    }
 }
-
-customElements.define('content-navigation', ContentNavigation);
+customElements.define(
+    'content-navigation',
+    litObserver(ContentNavigation, ['repository']),
+);

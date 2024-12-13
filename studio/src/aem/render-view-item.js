@@ -1,23 +1,65 @@
 import { html, LitElement } from 'lit';
+import { litObserver, observe, subscribe } from 'picosm';
 
 class RenderViewItem extends LitElement {
     static properties = {
+        repository: {
+            type: Object,
+            state: true,
+        },
         fragment: {
             type: Object,
+            state: true,
         },
     };
+
+    #unobserve;
+    #unsubscribe;
 
     createRenderRoot() {
         return this;
     }
 
+    get aemFragment() {
+        return this.querySelector('aem-fragment');
+    }
+
+    renderFragment(force) {
+        if (this.fragment.hasChanges || force) {
+            this.aemFragment.refresh(false);
+        }
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.#unobserve = observe(
+            this.fragment,
+            () => this.renderFragment(),
+            300,
+        );
+        this.#unsubscribe = subscribe(this.fragment, (message) => {
+            if (message === 'discard') {
+                this.renderFragment(true);
+            }
+        });
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.#unobserve();
+        this.#unsubscribe();
+    }
+
     render() {
-        const selected =
-            this.parentElement.parentElement.source.selectedFragments.includes(
-                this.fragment,
-            );
         return html`<overlay-trigger placement="top"
-            ><merch-card class="${selected ? 'selected' : ''}" slot="trigger">
+            ><merch-card
+                class="${this.fragment.selected ? 'selected' : ''}"
+                @click=${(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }}
+                slot="trigger"
+            >
                 <aem-fragment
                     fragment="${this.fragment.id}"
                     ims
@@ -29,7 +71,8 @@ class RenderViewItem extends LitElement {
                 ></sp-status-light>
                 <div
                     class="overlay"
-                    @click=${() => this.fragment.toggleSelection()}
+                    @click=${() =>
+                        this.repository.toggleFragmentSelection(this.fragment)}
                 >
                     <sp-icon-remove size="l"></sp-icon-remove>
                     <sp-icon-add size="l"></sp-icon-add>
@@ -42,4 +85,7 @@ class RenderViewItem extends LitElement {
     }
 }
 
-customElements.define('render-view-item', RenderViewItem);
+customElements.define(
+    'render-view-item',
+    litObserver(RenderViewItem, ['fragment']),
+);

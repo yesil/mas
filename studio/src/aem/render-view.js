@@ -1,7 +1,7 @@
 import { html, LitElement, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import './render-view-item.js';
-import { EVENT_CHANGE, EVENT_FRAGMENT_CHANGE, EVENT_LOAD } from '../events.js';
+import { litObserver } from 'picosm';
 
 const MODE = 'render';
 
@@ -13,68 +13,22 @@ const models = {
 };
 
 class RenderView extends LitElement {
+    static get properties() {
+        return {
+            repository: { type: Object, state: true },
+        };
+    }
     constructor() {
         super();
-        this.forceUpdate = this.forceUpdate.bind(this);
         this.tooltipTimeout = null;
-        this.handleFragmentChange = this.handleFragmentChange.bind(this);
     }
 
     createRenderRoot() {
         return this;
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-        this.addEventListener('click', (e) => {
-            e.preventDefault(); // prevent following links.
-        });
-        this.parentElement.addEventListener(EVENT_CHANGE, this.forceUpdate);
-        this.parentElement.source.addEventListener(
-            EVENT_LOAD,
-            this.forceUpdate,
-        );
-        this.parentElement.source.addEventListener(
-            EVENT_CHANGE,
-            this.forceUpdate,
-        );
-        document.addEventListener(
-            EVENT_FRAGMENT_CHANGE,
-            this.handleFragmentChange,
-        );
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        document.removeEventListener(
-            EVENT_FRAGMENT_CHANGE,
-            this.handleFragmentChange,
-        );
-    }
-
-    handleFragmentChange(e) {
-        const {
-            detail: {
-                fragment: { id: fragmentId },
-                selection,
-            },
-        } = e;
-        if (!selection) {
-            const aemFragment = this.querySelector(
-                `aem-fragment[fragment="${fragmentId}"]`,
-            )?.refresh(false);
-        }
-        this.querySelector(
-            `render-view-item[fragment="${fragmentId}"]`,
-        )?.requestUpdate();
-    }
-
-    async forceUpdate(e) {
-        this.requestUpdate();
-    }
-
     handleClick(e) {
-        if (this.parentElement.inSelection) return;
+        if (this.repository.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         const currentTarget = e.currentTarget;
         this.tooltipTimeout = setTimeout(() => {
@@ -83,38 +37,26 @@ class RenderView extends LitElement {
     }
 
     handleMouseLeave(e) {
-        if (this.parentElement.inSelection) return;
+        if (this.repository.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
     }
 
     handleDoubleClick(e, fragment) {
-        if (this.parentElement.inSelection) return;
+        if (this.repository.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
-        this.parentElement.source.selectFragment(
-            e.clientX,
-            e.clientY,
-            fragment,
-        );
-    }
-
-    canRender() {
-        return (
-            this.parentElement?.mode === MODE &&
-            this.parentElement.source?.fragments
-        );
+        this.repository.selectFragment(e.clientX, fragment);
     }
 
     render() {
-        if (!this.canRender()) return nothing;
-        // TODO make me generic
+        if (this.parentElement.mode !== MODE) return nothing;
         return html` ${repeat(
-            this.parentElement.source.fragments,
-            (fragment) => fragment.path,
+            this.repository.fragments,
+            (fragment) => fragment.id,
             (fragment) =>
                 html`<render-view-item
-                    fragment="${fragment.id}"
+                    .repository=${this.repository}
                     .fragment=${fragment}
                     @click="${this.handleClick}"
                     @mouseleave="${this.handleMouseLeave}"
@@ -132,4 +74,4 @@ class RenderView extends LitElement {
     }
 }
 
-customElements.define('render-view', RenderView);
+customElements.define('render-view', litObserver(RenderView, ['repository']));

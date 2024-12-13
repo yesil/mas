@@ -1,16 +1,6 @@
-import { EVENT_FRAGMENT_CHANGE } from '../events.js';
-import { debounce } from '../utils/debounce.js';
+import { makeObservable } from 'picosm';
 
-function notifyChanges(details = {}) {
-    document.dispatchEvent(
-        new CustomEvent(EVENT_FRAGMENT_CHANGE, {
-            detail: { fragment: this, ...details },
-        }),
-    );
-}
-
-const notifyChangesDebounced = debounce(notifyChanges, 300);
-export class Fragment {
+class Fragment {
     path = '';
     hasChanges = false;
     status = '';
@@ -45,11 +35,8 @@ export class Fragment {
         this.modified = modified;
         this.tags = tags;
         this.fields = fields;
-        this.updateOriginal(false);
+        this.updateOriginal();
     }
-
-    #notify = notifyChanges;
-    #notifySlow = notifyChangesDebounced;
 
     get variant() {
         return this.fields.find((field) => field.name === 'variant')
@@ -65,32 +52,29 @@ export class Fragment {
         return this.status === 'PUBLISHED' ? 'positive' : 'info';
     }
 
-    updateOriginal(notify = true) {
+    updateOriginal() {
         this.original = null; // clear draft
         this.original = JSON.parse(JSON.stringify(this));
-        if (notify) this.#notify(notify);
     }
 
-    refreshFrom(fragmentData, notify = false) {
+    refreshFrom(fragmentData) {
         Object.assign(this, fragmentData);
         this.hasChanges = false;
-        this.updateOriginal(notify);
+        this.updateOriginal();
     }
 
     discardChanges() {
-        this.refreshFrom(this.original, true);
+        this.refreshFrom(this.original);
     }
 
     toggleSelection(value) {
         if (value !== undefined) this.selected = value;
         else this.selected = !this.selected;
-        this.#notify({ selection: true });
     }
 
     updateFieldInternal(fieldName, value) {
         this[fieldName] = value ?? '';
         this.hasChanges = true;
-        this.#notifySlow();
     }
 
     getField(fieldName) {
@@ -108,6 +92,13 @@ export class Fragment {
         field.values = value;
         this.hasChanges = true;
         change = true;
-        this.#notifySlow();
     }
 }
+
+const FragmentObservable = makeObservable(
+    Fragment,
+    ['discardChanges', 'updateField', 'updateFieldInternal', 'toggleSelection'],
+    ['variant', 'fragmentName', 'statusVariant'],
+);
+
+export { FragmentObservable as Fragment };

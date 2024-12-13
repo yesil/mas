@@ -422,7 +422,6 @@ class RteField extends LitElement {
 
         try {
             const html = this.innerHTML.trim();
-            this.innerHTML = '';
             const container = document.createElement('div');
             container.innerHTML = html;
             // Simplified DOM manipulation

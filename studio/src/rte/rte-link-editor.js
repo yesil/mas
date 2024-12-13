@@ -330,9 +330,7 @@ export class RteLinkEditor extends LitElement {
 
     #handleClose() {
         this.open = false;
-        this.dispatchEvent(
-            new CustomEvent('close', { bubbles: false, composed: true }),
-        );
+        this.dispatchEvent(new CustomEvent('close', { bubbles: false }));
     }
 }
 

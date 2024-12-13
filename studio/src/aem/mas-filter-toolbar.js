@@ -20,34 +20,16 @@ class MasFilterToolbar extends LitElement {
     `;
 
     static properties = {
-        searchText: { type: String, state: true, attribute: 'search-text' },
+        repository: { type: Object, state: true },
         variant: { type: String, state: true },
     };
-
-    constructor() {
-        super();
-        this.searchText = '';
-        this.variant = 'all';
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.deeplinkDisposer = deeplink(({ query }) => {
-            this.searchText = query;
-        });
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.deeplinkDisposer();
-    }
 
     render() {
         return html`
             <sp-action-button
                 toggles
                 label="Filter"
-                @click=${this.handleFilterClick}
+                @click=${() => this.repository.toggleFilterPanel()}
                 >Filter</sp-action-button
             >
             <sp-picker label="Sort" disabled>
@@ -59,7 +41,7 @@ class MasFilterToolbar extends LitElement {
                     placeholder="Search"
                     @change="${this.handleSearch}"
                     @submit="${this.handleSearch}"
-                    value=${this.searchText}
+                    value=${this.repository.searchText}
                     size="m"
                 ></sp-search>
                 <variant-picker
@@ -88,15 +70,6 @@ class MasFilterToolbar extends LitElement {
     doSearch() {
         this.dispatchEvent(
             new CustomEvent('search-fragments', {
-                bubbles: true,
-                composed: true,
-            }),
-        );
-    }
-
-    handleFilterClick() {
-        this.dispatchEvent(
-            new CustomEvent('toggle-filter-panel', {
                 bubbles: true,
                 composed: true,
             }),

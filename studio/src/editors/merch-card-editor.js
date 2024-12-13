@@ -2,12 +2,13 @@ import { html, LitElement, css, nothing } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import '../fields/multifield.js';
 import '../fields/mnemonic-field.js';
+import { litObserver } from 'picosm';
 
 const MODEL_PATH = '/conf/mas/settings/dam/cfm/models/card';
 
 class MerchCardEditor extends LitElement {
     static properties = {
-        fragment: { type: Object },
+        fragment: { type: Object, state: true },
     };
 
     static styles = css`
@@ -30,6 +31,11 @@ class MerchCardEditor extends LitElement {
             margin-top: 25px;
         }
     `;
+
+    constructor() {
+        super();
+        this.updateFragment = this.updateFragment.bind(this);
+    }
 
     get mnemonics() {
         const mnemonicIcon =

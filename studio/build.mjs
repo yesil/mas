@@ -6,7 +6,7 @@ const defaults = {
     define: { 'process.env.NODE_ENV': '"production"' },
     external: [],
     format: 'esm',
-    minify: true,
+    minify: false,
     platform: 'browser',
     sourcemap: true,
     target: ['es2020'],
@@ -28,4 +28,10 @@ await build({
     ...defaults,
     entryPoints: ['src/spectrum.css.js'],
     outfile: 'libs/spectrum.js',
+});
+
+await build({
+    ...defaults,
+    entryPoints: ['../node_modules/picosm/src/index.js'],
+    outfile: 'libs/picosm.js',
 });

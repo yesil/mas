@@ -1,14 +1,14 @@
 import { html, LitElement, nothing } from 'lit';
-import { EVENT_CHANGE, EVENT_SUBMIT } from './events.js';
+import { EVENT_SUBMIT } from './events.js';
 import { deeplink, pushState } from './deeplink.js';
 import './editor-panel.js';
 import './editors/merch-card-editor.js';
 import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
+import { MasRepository } from './aem/mas-repository.js';
+import { litObserver } from 'picosm';
 
-const EVENT_LOAD_START = 'load-start';
-const EVENT_LOAD_END = 'load-end';
 const BUCKET_TO_ENV = {
     e155390: 'qa',
     e59471: 'stage',
@@ -23,7 +23,7 @@ class MasStudio extends LitElement {
         path: { type: String, state: true },
         variant: { type: String, state: true },
         newFragment: { type: Object, state: true },
-        showEditorPanel: { type: Boolean, state: true },
+        repository: { type: Object, state: true },
     };
 
     constructor() {
@@ -32,46 +32,28 @@ class MasStudio extends LitElement {
         this.newFragment = null;
         this.variant = 'all';
         this.searchText = '';
-        this.path = '';
-        this.showEditorPanel = false;
+        this.path = 'ccd';
         this.showToast = this.showToast.bind(this);
     }
 
     connectedCallback() {
         super.connectedCallback();
         this.registerListeners();
-        this.addEventListener('clear-search', this.clearSearch);
-        this.addEventListener('search-fragments', this.doSearch);
-        this.addEventListener('variant-changed', this.handleVariantChange);
-        this.addEventListener(
-            'search-text-changed',
-            this.handleSearchTextChange,
-        );
         this.startDeeplink();
+        this.initRepository();
     }
 
     registerListeners() {
-        this.addEventListener(EVENT_LOAD_START, () => {
-            this.requestUpdate();
-        });
-        this.addEventListener(EVENT_LOAD_END, () => this.requestUpdate());
-        this.addEventListener(EVENT_CHANGE, () => {
-            if (!this.fragment) this.showEditorPanel = false;
-            else this.requestUpdate();
-        });
-
         // Listen for ESC key to close the fragment editor and quit selection mode
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                this.closeFragmentEditor();
-                this.source.clearSelection();
-                this.contentNavigation.toggleSelectionMode(false);
+                if (this.repository.fragment) {
+                    this.repository.unselectFragment();
+                    return;
+                }
+                this.repository.toggleSelectionMode(false);
             }
         });
-
-        this.addEventListener('select-fragment', (e) =>
-            this.handleOpenFragment(e),
-        );
     }
 
     disconnectedCallback() {
@@ -79,6 +61,14 @@ class MasStudio extends LitElement {
         if (this.deeplinkDisposer) {
             this.deeplinkDisposer();
         }
+    }
+
+    initRepository() {
+        this.repository = new MasRepository({
+            baseUrl: this.baseUrl,
+            bucket: this.bucket,
+            path: this.path ?? '',
+        });
     }
 
     get search() {
@@ -93,30 +83,26 @@ class MasStudio extends LitElement {
         });
     }
 
-    handleSearchTextChange(e) {
-        this.searchText = e.detail.searchText;
-    }
-
     updated(changedProperties) {
+        if (changedProperties.has('searchText')) {
+            this.repository.searchText = this.searchText;
+        }
+        if (changedProperties.has('path')) {
+            this.repository.path = this.path;
+        }
         if (
             changedProperties.has('searchText') ||
             changedProperties.has('path') ||
             changedProperties.has('variant')
         ) {
-            this.source?.searchFragments();
+            this.repository.setSearchText(this.searchText);
+            this.repository.setPath(this.path);
         }
-    }
-
-    get source() {
-        return this.querySelector('aem-fragments');
+        this.adjustEditorPosition();
     }
 
     get contentNavigation() {
         return this.querySelector('content-navigation');
-    }
-
-    get fragment() {
-        return this.source?.fragment;
     }
 
     get env() {
@@ -155,33 +141,22 @@ class MasStudio extends LitElement {
 
     get content() {
         return html`
-            <aem-fragments
-                id="aem"
-                base-url="${this.baseUrl}"
-                path="${this.path}"
-                search="${this.searchText}"
-                bucket="${this.bucket}"
-                variant="${this.variant}"
-            ></aem-fragments>
-            <content-navigation source="aem" ?disabled=${this.fragment}>
-                <table-view .customRenderItem=${this.customRenderItem}>
-                    <sp-table-head-cell slot="headers"
-                        >Variant</sp-table-head-cell
-                    >
-                </table-view>
-                <render-view></render-view>
+            <content-navigation
+                .repository="${this.repository}"
+                ?in-selection=${this.repository.inSelection}
+            >
+                <render-view .repository="${this.repository}"></render-view>
+                <table-view .repository="${this.repository}"></table-view>
             </content-navigation>
         `;
     }
 
     get editorPanel() {
-        if (!this.showEditorPanel) return nothing;
+        if (!this.repository.fragment) return nothing;
         return html`<editor-panel
             .showToast=${this.showToast}
-            .fragment=${this.fragment}
-            .source=${this.source}
-            .bucket=${this.bucket}
-            @close=${this.closeFragmentEditor}
+            .repository=${this.repository}
+            .fragment=${this.repository.fragment}
         ></editor-panel>`;
     }
 
@@ -204,7 +179,7 @@ class MasStudio extends LitElement {
     }
 
     get loadingIndicator() {
-        if (!this.source?.loading) return nothing;
+        if (this.repository.status !== 'loading') return nothing;
         return html`<sp-progress-circle
             indeterminate
             size="l"
@@ -218,7 +193,9 @@ class MasStudio extends LitElement {
     startDeeplink() {
         this.deeplinkDisposer = deeplink(({ query, path }) => {
             this.searchText = query ?? '';
-            this.path = path ?? '';
+            if (path) {
+                this.path = path;
+            }
         });
     }
 
@@ -238,15 +215,15 @@ class MasStudio extends LitElement {
      * @param {boolean} force - discard unsaved changes
      */
     async editFragment(fragment, force = false) {
-        if (fragment && fragment === this.fragment) {
+        if (fragment && fragment === this.repository.fragment) {
             this.requestUpdate();
             return;
         }
-        if (this.fragment?.hasChanges && !force) {
+        if (this.repository.fragment?.hasChanges && !force) {
             this.newFragment = fragment;
         } else {
             this.newFragment = null;
-            this.source?.setFragment(fragment);
+            this.repository.setFragment(fragment);
         }
         this.requestUpdate();
     }
@@ -256,44 +233,15 @@ class MasStudio extends LitElement {
         await this.editFragment(fragment, true);
     }
 
-    async adjustEditorPosition(x) {
-        await this.updateComplete;
+    async adjustEditorPosition() {
+        if (this.repository.fragment) return;
         // reposition the editor
+        const x = this.repository.fragmentPositionX;
         const viewportCenterX = window.innerWidth / 2;
         const left = x > viewportCenterX ? '0' : 'inherit';
         const right = x <= viewportCenterX ? '0' : 'inherit';
         this.style.setProperty('--editor-left', left);
         this.style.setProperty('--editor-right', right);
-    }
-
-    async handleOpenFragment(e) {
-        this.showEditorPanel = false;
-        this.requestUpdate();
-        await this.updateComplete;
-        const { x, fragment } = e.detail;
-        await this.adjustEditorPosition(x);
-        this.showEditorPanel = true;
-        await this.editFragment(fragment);
-    }
-
-    get fragmentElement() {
-        return this.querySelector(
-            `aem-fragment[fragment="${this.fragment.id}"]`,
-        );
-    }
-
-    /** Refresh the fragment with locally updated data and awaits until ready */
-    async refreshFragment(e) {
-        if (!this.fragmentElement) return;
-        this.fragment.eventTarget ??= this.fragmentElement.parentElement;
-        this.fragmentElement.refresh(false);
-        await this.fragmentElement.updateComplete;
-    }
-
-    async closeFragmentEditor() {
-        this.source?.fragment?.discardChanges();
-        await this.source?.setFragment(null);
-        this.showEditorPanel = false;
     }
 
     closeConfirmSelect() {
@@ -310,17 +258,12 @@ class MasStudio extends LitElement {
         }
         if (e.type === EVENT_SUBMIT) {
             e.preventDefault();
-            this.source?.searchFragments();
         }
     }
 
     handleVariantChange(e) {
         this.variant = e.target.value;
     }
-
-    doSearch() {
-        this.source?.searchFragments();
-    }
 }
 
-customElements.define('mas-studio', MasStudio);
+customElements.define('mas-studio', litObserver(MasStudio, ['repository']));

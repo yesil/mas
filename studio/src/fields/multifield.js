@@ -1,5 +1,6 @@
 import { html, css, LitElement, nothing } from 'lit';
 import { EVENT_CHANGE, EVENT_INPUT } from '../events.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 class MasMultifield extends LitElement {
     static get properties() {
@@ -246,8 +247,10 @@ class MasMultifield extends LitElement {
         if (!this.#template || !this.value) return nothing;
         return html`
             <div @change="${this.handleChange}" @input="${this.handleInput}">
-                ${this.value.map((field, index) =>
-                    this.renderField(field, index),
+                ${repeat(
+                    this.value,
+                    (field) => field.id, // Assuming each field has a unique 'id' property
+                    (field, index) => this.renderField(field, index),
                 )}
                 <sp-action-button quiet @click=${this.addField}>
                     <sp-icon-add label="Add" slot="icon"></sp-icon-add>Add

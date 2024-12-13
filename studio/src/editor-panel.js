@@ -1,12 +1,11 @@
 import { html, LitElement, css, nothing } from 'lit';
-import { EVENT_CLOSE, EVENT_FRAGMENT_CHANGE, EVENT_SAVE } from './events.js';
+import { notify, litObserver } from 'picosm';
 
 class EditorPanel extends LitElement {
     static properties = {
         showToast: { type: Function },
-        fragment: { type: Object },
-        source: { type: Object },
-        bucket: { type: String },
+        repository: { type: Object, state: true },
+        fragment: { type: Object, state: true },
     };
 
     static styles = css`
@@ -39,65 +38,20 @@ class EditorPanel extends LitElement {
         }
     `;
 
-    constructor() {
-        super();
-        this.handleFragmentChange = this.handleFragmentChange.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.addEventListener(EVENT_CLOSE, this.handleClose);
-        document.addEventListener(
-            EVENT_FRAGMENT_CHANGE,
-            this.handleFragmentChange,
-        );
-    }
-
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.removeEventListener(EVENT_CLOSE, this.handleClose);
-        document.removeEventListener(
-            EVENT_FRAGMENT_CHANGE,
-            this.handleFragmentChange,
-        );
-    }
-
-    handleFragmentChange(e) {
-        if (e.detail?.fragment === this.fragment) {
-            this.requestUpdate();
-        }
-    }
-
-    handleClose(e) {
-        if (e.target === this) return;
-        e.stopPropagation();
-    }
-
     async saveFragment() {
         this.showToast('Saving fragment...');
         try {
-            await this.source?.saveFragment();
-            this.dispatchEvent(new CustomEvent(EVENT_SAVE));
+            await this.repository?.saveFragment();
             this.showToast('Fragment saved', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be saved', 'negative');
         }
     }
 
-    async discardChanges() {
-        const fragment = this.fragment;
-        fragment.discardChanges();
-        this.fragment = null; // this is needed to force a re-render
-        this.requestUpdate();
-        await this.updateComplete;
-        this.fragment = fragment;
-    }
-
     async publishFragment() {
         this.showToast('Publishing fragment...');
         try {
-            await this.source?.publishFragment();
+            await this.repository?.publishFragment();
             this.showToast('Fragment published', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be published', 'negative');
@@ -115,7 +69,7 @@ class EditorPanel extends LitElement {
     async unpublishFragment() {
         this.showToast('Unpublishing fragment...');
         try {
-            await this.source?.unpublishFragment();
+            await this.repository?.unpublishFragment();
             this.showToast('Fragment unpublished', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be unpublished', 'negative');
@@ -125,7 +79,7 @@ class EditorPanel extends LitElement {
     async deleteFragment() {
         if (confirm('Are you sure you want to delete this fragment?')) {
             try {
-                await this.source?.deleteFragment();
+                await this.repository?.deleteFragment();
                 this.showToast('Fragment deleted', 'positive');
             } catch (e) {
                 this.showToast('Fragment could not be deleted', 'negative');
@@ -147,7 +101,7 @@ class EditorPanel extends LitElement {
     async copyFragment() {
         this.showToast('Cloning fragment...');
         try {
-            await this.source?.copyFragment();
+            await this.repository?.copyFragment();
             this.showToast('Fragment cloned', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be cloned', 'negative');
@@ -161,11 +115,20 @@ class EditorPanel extends LitElement {
     }
 
     updateFragment({ detail: e }) {
-        if (!this.fragment) return;
         const fieldName = e.target.dataset.field;
         let value = e.target.value || e.detail?.value;
         value = e.target.multiline ? value?.split(',') : [value ?? ''];
         this.fragment.updateField(fieldName, value);
+    }
+
+    async discardChanges() {
+        const fragment = this.fragment;
+        this.fragment = null;
+        this.requestUpdate();
+        fragment.discardChanges();
+        await this.updateComplete;
+        this.fragment = fragment;
+        notify(this.fragment, 'discard');
     }
 
     get fragmentEditorToolbar() {
@@ -192,7 +155,7 @@ class EditorPanel extends LitElement {
                     label="Discard changes"
                     id="btnDiscard"
                     ?disabled=${!this.fragment.hasChanges}
-                    @click="${this.discardChanges}"
+                    @click="${() => this.discardChanges()}"
                 >
                     <sp-icon-undo slot="icon"></sp-icon-undo>
                     <sp-tooltip self-managed placement="bottom"
@@ -255,8 +218,7 @@ class EditorPanel extends LitElement {
             <sp-action-group size="l" quiet>
                 <sp-action-button
                     label="Close"
-                    @click="${() =>
-                        this.dispatchEvent(new CustomEvent(EVENT_CLOSE))}"
+                    @click="${() => this.repository.unselectFragment()}"
                 >
                     <sp-icon-close-circle slot="icon"></sp-icon-close-circle>
                     <sp-tooltip self-managed placement="bottom"
@@ -271,49 +233,42 @@ class EditorPanel extends LitElement {
         return this.shadowRoot.querySelector('merch-card-editor');
     }
 
-    get fragmentEditor() {
-        return html`<div id="editor">
-            ${this.fragment
-                ? html`
-                      ${this.fragmentEditorToolbar}
-                      <merch-card-editor
-                          .fragment=${this.fragment}
-                          @close="${this.handleClose}"
-                          @update-fragment="${this.updateFragment}"
-                      >
-                      </merch-card-editor>
-                      <p>Fragment details (not shown on the card)</p>
-                      <sp-divider size="s"></sp-divider>
-                      <sp-field-label for="fragment-title"
-                          >Fragment Title</sp-field-label
-                      >
-                      <sp-textfield
-                          placeholder="Enter fragment title"
-                          id="fragment-title"
-                          data-field="title"
-                          value="${this.fragment.title}"
-                          @input="${this.updateFragmentInternal}"
-                      ></sp-textfield>
-                      <sp-field-label for="fragment-description"
-                          >Fragment Description</sp-field-label
-                      >
-                      <sp-textfield
-                          placeholder="Enter fragment description"
-                          id="fragment-description"
-                          data-field="description"
-                          multiline
-                          value="${this.fragment.description}"
-                          @input="${this.updateFragmentInternal}"
-                      ></sp-textfield>
-                  `
-                : nothing}
-        </div>`;
-    }
-
     render() {
         if (!this.fragment) return nothing;
-        return html`${this.fragmentEditor} ${this.selectFragmentDialog}`;
+        return html`<div id="editor">
+            ${this.fragmentEditorToolbar}
+            <merch-card-editor
+                .fragment=${this.fragment}
+                @close="${() => this.repository?.setFragment()}"
+                @update-fragment="${this.updateFragment}"
+            >
+            </merch-card-editor>
+            <p>Fragment details (not shown on the card)</p>
+            <sp-divider size="s"></sp-divider>
+            <sp-field-label for="fragment-title">Fragment Title</sp-field-label>
+            <sp-textfield
+                placeholder="Enter fragment title"
+                id="fragment-title"
+                data-field="title"
+                value="${this.fragment.title}"
+                @input="${this.updateFragmentInternal}"
+            ></sp-textfield>
+            <sp-field-label for="fragment-description"
+                >Fragment Description</sp-field-label
+            >
+            <sp-textfield
+                placeholder="Enter fragment description"
+                id="fragment-description"
+                data-field="description"
+                multiline
+                value="${this.fragment.description}"
+                @input="${this.updateFragmentInternal}"
+            ></sp-textfield>
+        </div>`;
     }
 }
 
-customElements.define('editor-panel', EditorPanel);
+customElements.define(
+    'editor-panel',
+    litObserver(EditorPanel, ['repository', ['fragment', 100]]),
+);

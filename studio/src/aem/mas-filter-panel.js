@@ -2,7 +2,7 @@ import { html, css, LitElement } from 'lit';
 
 class MasFilterPanel extends LitElement {
     static properties = {
-        source: { type: String },
+        repository: { type: Object, state: true },
     };
     static styles = css`
         :host {
@@ -17,24 +17,13 @@ class MasFilterPanel extends LitElement {
         }
     `;
 
-    #source;
-
-    constructor() {
-        super();
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.#source = document.getElementById(this.source);
-    }
-
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.#source.removeAttribute('tags');
+        this.repository.setTags([]);
     }
 
-    handeFilterChange(event) {
-        this.#source.setAttribute('tags', event.target.getAttribute('value'));
+    handleFilterChange(event) {
+        this.repository.setTags(event.target.value);
     }
 
     render() {
@@ -43,7 +32,7 @@ class MasFilterPanel extends LitElement {
                 label="Select filters"
                 namespace="/content/cq:tags/mas"
                 multiple
-                @change=${this.handeFilterChange}
+                @change=${this.handleFilterChange}
             ></aem-tag-picker-field>
         `;
     }
