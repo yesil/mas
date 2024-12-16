@@ -29,6 +29,7 @@ class MasRepository {
     topFolder = 'ccd';
     topFolders = [];
     showFilterPanel = false;
+    recentlyUpdatedfragments = [];
 
     setStatus(value) {
         this.status = value;
@@ -43,12 +44,7 @@ class MasRepository {
     tags = [];
     fragmentPositionX = 0;
 
-    constructor({
-        bucket = null,
-        baseUrl = null,
-        path = null,
-        tags = [],
-    } = {}) {
+    constructor({ bucket = null, baseUrl = null, path = null } = {}) {
         if (!(bucket || baseUrl)) {
             throw new Error('Either the bucket or baseUrl is required.');
         }
@@ -236,6 +232,24 @@ class MasRepository {
         Object.assign(fragment, latest);
         fragment.refreshFrom(latest);
         this.setFragment(fragment);
+        this.setStatus(status.idle);
+    }
+
+    async loadRecentlyUpdatedFragments() {
+        this.recentlyUpdatedfragments = [];
+        this.setStatus(status.loading);
+        const cursor = await this.#aem.sites.cf.fragments.search(
+            {
+                sort: [{ on: 'modifiedOrCreated', order: 'DESC' }],
+                path: `/content/dam/mas/${this.path}`,
+                // tags: ['mas:status/DEMO']
+            },
+            6,
+        );
+        const result = await cursor.next();
+        const fragments = result.value.map((item) => new Fragment(item, this));
+        await this.addToCache(fragments);
+        this.recentlyUpdatedfragments.push(...fragments);
         this.setStatus(status.idle);
     }
 

@@ -6,8 +6,12 @@ import './editors/merch-card-editor.js';
 import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
+import './mas-recently-updated.js';
 import { MasRepository } from './aem/mas-repository.js';
 import { litObserver } from 'picosm';
+import { contentIcon } from './img/content-icon.js';
+import { promosIcon } from './img/promos-icon.js';
+import { ostIcon } from './img/ost-icon.js';
 
 const BUCKET_TO_ENV = {
     e155390: 'qa',
@@ -24,6 +28,8 @@ class MasStudio extends LitElement {
         variant: { type: String, state: true },
         newFragment: { type: Object, state: true },
         repository: { type: Object, state: true },
+        showEditorPanel: { type: Boolean, state: true },
+        showSplash: { type: Boolean, state: true },
     };
 
     constructor() {
@@ -34,6 +40,9 @@ class MasStudio extends LitElement {
         this.searchText = '';
         this.path = 'ccd';
         this.showToast = this.showToast.bind(this);
+        this.path = '';
+        this.showEditorPanel = false;
+        this.showSplash = true;
     }
 
     connectedCallback() {
@@ -93,7 +102,8 @@ class MasStudio extends LitElement {
         if (
             changedProperties.has('searchText') ||
             changedProperties.has('path') ||
-            changedProperties.has('variant')
+            changedProperties.has('variant') ||
+            changedProperties.has('showSplash')
         ) {
             this.repository.setSearchText(this.searchText);
             this.repository.setPath(this.path);
@@ -140,6 +150,7 @@ class MasStudio extends LitElement {
     }
 
     get content() {
+        if (this.showSplash) return nothing;
         return html`
             <content-navigation
                 .repository="${this.repository}"
@@ -148,6 +159,7 @@ class MasStudio extends LitElement {
                 <render-view .repository="${this.repository}"></render-view>
                 <table-view .repository="${this.repository}"></table-view>
             </content-navigation>
+            ${this.fragmentEditor} ${this.selectFragmentDialog} ${this.toast}
         `;
     }
 
@@ -160,22 +172,124 @@ class MasStudio extends LitElement {
         ></editor-panel>`;
     }
 
+    get recentlyUpdated() {
+        return html`<mas-recently-updated .repository="${this.repository}">
+        </mas-recently-updated>`;
+    }
+
     customRenderItem(item) {
         if (!item) return html`<sp-table-cell></sp-table-cell>`;
         return html` <sp-table-cell>${item.variant}</sp-table-cell>`;
     }
 
+    showContent() {
+        this.showSplash = false;
+    }
+
+    openOst() {
+        openOfferSelectorTool();
+    }
+
+    showHome() {
+        this.showSplash = true;
+    }
+
+    get splashScreen() {
+        if (!this.showSplash) return nothing;
+        return html`
+            <div
+                class="${this.showSplash ? 'show' : 'hide'}"
+                id="splash-container"
+            >
+                <h1>Welcome</h1>
+                <div class="quick-actions">
+                    <h2>Quick Actions</h2>
+                    <div class="actions-grid">
+                        <div
+                            class="quick-action-card"
+                            @click=${this.showContent}
+                            heading="Go to Content"
+                        >
+                            <div slot="cover-photo">${contentIcon}</div>
+                            <div slot="heading">Go To Content</div>
+                        </div>
+                        <div
+                            class="quick-action-card"
+                            @click=${this.viewPromotions}
+                        >
+                            <div slot="cover-photo">${promosIcon}</div>
+                            <div slot="heading">View Promotions</div>
+                        </div>
+                        <div class="quick-action-card" @click=${this.openOst}>
+                            <div slot="cover-photo">${ostIcon}</div>
+                            <div slot="heading">Open Offer Selector Tool</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="recently-updated">${this.recentlyUpdated}</div>
+            </div>
+        `;
+    }
+
     render() {
         return html`
             <mas-top-nav env="${this.env}"></mas-top-nav>
-            <side-nav></side-nav>
-            ${this.content}${this.editorPanel} ${this.toast}
-            ${this.loadingIndicator}
+            <div class="studio-content">
+                <side-nav>
+                    <div class="dropdown-container">
+                        <mas-folder-picker
+                            @picker-change=${this.handleFolderChange}
+                        ></mas-folder-picker>
+                    </div>
+                    <sp-sidenav>
+                        <sp-sidenav-item
+                            label="Home"
+                            value="home"
+                            @click="${this.showHome}"
+                            selected
+                        >
+                            <sp-icon-home slot="icon"></sp-icon-home>
+                        </sp-sidenav-item>
+
+                        <sp-sidenav-item label="Promotions" value="promotions">
+                            <sp-icon-promote slot="icon"></sp-icon-promote>
+                        </sp-sidenav-item>
+
+                        <sp-sidenav-item label="Reporting" value="reporting">
+                            <sp-icon-graph-bar-vertical
+                                slot="icon"
+                            ></sp-icon-graph-bar-vertical>
+                        </sp-sidenav-item>
+
+                        <sp-sidenav-divider></sp-sidenav-divider>
+
+                        <sp-sidenav-item label="Support" value="support">
+                            <sp-icon-help slot="icon"></sp-icon-help>
+                        </sp-sidenav-item>
+                    </sp-sidenav>
+                </side-nav>
+                <div class="content-container">
+                    ${this.splashScreen}
+                    <div class="content">${this.content}</div>
+                    ${this.loadingIndicator}
+                </div>
+            </div>
         `;
     }
 
     get toast() {
         return html`<sp-toast timeout="6000" popover></sp-toast>`;
+    }
+
+    handleFolderChange(event) {
+        const selectedValue = event.detail.value;
+        document.dispatchEvent(
+            new CustomEvent('folder-change', {
+                detail: { value: selectedValue },
+            }),
+        );
+        this.bucket = selectedValue;
+        this.requestUpdate();
     }
 
     get loadingIndicator() {

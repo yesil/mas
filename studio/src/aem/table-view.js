@@ -12,6 +12,7 @@ class TableView extends LitElement {
 
             sp-table {
                 height: var(--table-height, 100%);
+                margin: 20px 16px;
             }
         `;
     }
@@ -54,7 +55,7 @@ class TableView extends LitElement {
                 <sp-table-head>
                     <sp-table-head-cell sortable>Title</sp-table-head-cell>
                     <sp-table-head-cell sortable>Name</sp-table-head-cell>
-                    <slot name="headers"></slot>
+                    <sp-table-head-cell sortable>Variant</sp-table-head-cell>
                     <sp-table-head-cell sortable>Status</sp-table-head-cell>
                     <sp-table-head-cell sortable
                         >Modified at</sp-table-head-cell
@@ -87,7 +88,7 @@ class TableView extends LitElement {
         if (!item) return nothing;
         return html` <sp-table-cell>${item.title}</sp-table-cell>
             <sp-table-cell>${item.name}</sp-table-cell>
-            ${this.customRenderItem?.(item)}
+            <sp-table-cell>${item.variant}</sp-table-cell>
             <sp-table-cell>${item.status}</sp-table-cell>
             <sp-table-cell>${item.modified.at}</sp-table-cell>
             <sp-table-cell>${item.modified.by}</sp-table-cell>`;

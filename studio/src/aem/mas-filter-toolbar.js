@@ -7,9 +7,7 @@ class MasFilterToolbar extends LitElement {
         :host {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 10px;
-            align-self: flex-end;
+            gap: 10px;
         }
         sp-picker {
             width: 100px;
@@ -17,11 +15,39 @@ class MasFilterToolbar extends LitElement {
         sp-textfield {
             width: 200px;
         }
+        sp-action-button {
+            border: none;
+            font-weight: bold;
+        }
+        sp-action-button:not(.filters-shown) {
+            color: var(--spectrum-gray-700);
+        }
+        sp-action-button.filters-shown {
+            background-color: var(--spectrum-blue-100);
+            color: var(--spectrum-accent-color-1000);
+        }
+        sp-action-button.filters-shown:hover {
+            background-color: var(--spectrum-blue-200);
+        }
+        .filters-badge {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--spectrum-accent-color-1000);
+            color: var(--spectrum-white);
+            border-radius: 2px;
+        }
+        sp-search {
+            --spectrum-search-border-radius: 16px;
+        }
     `;
 
     static properties = {
         repository: { type: Object, state: true },
         variant: { type: String, state: true },
+        filtersShown: { type: Boolean, state: true },
     };
 
     render() {
@@ -31,11 +57,18 @@ class MasFilterToolbar extends LitElement {
                 label="Filter"
                 @click=${() => this.repository.toggleFilterPanel()}
                 >Filter</sp-action-button
+                ?quiet=${!this.filtersShown}
+                class="${this.filtersShown ? 'filters-shown' : ''}"
             >
-            <sp-picker label="Sort" disabled>
-                <sp-menu-item>Ascending</sp-menu-item>
-                <sp-menu-item>Descending</sp-menu-item>
-            </sp-picker>
+                ${
+                    !this.filtersShown
+                        ? html`<sp-icon-filter-add
+                              slot="icon"
+                          ></sp-icon-filter-add>`
+                        : html`<div slot="icon" class="filters-badge">0</div>`
+                }
+                Filter</sp-action-button
+            >
             <div>
                 <sp-search
                     placeholder="Search"
@@ -44,15 +77,7 @@ class MasFilterToolbar extends LitElement {
                     value=${this.repository.searchText}
                     size="m"
                 ></sp-search>
-                <variant-picker
-                    id="vpick"
-                    show-all="true"
-                    default-value="${this.variant}"
-                    disabled
-                    @change="${this.handleVariantChange}"
-                ></variant-picker>
             </div>
-            <sp-button @click=${this.doSearch}>Search</sp-button>
         `;
     }
 

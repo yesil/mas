@@ -19,7 +19,9 @@ class ContentNavigation extends LitElement {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                height: 48px;
+                padding: 16px;
+                gap: 10px;
+                flex-wrap: wrap;
             }
 
             .divider {
@@ -33,6 +35,17 @@ class ContentNavigation extends LitElement {
 
             sp-action-bar[open] {
                 display: flex;
+            }
+
+            #toolbar-actions {
+                display: flex;
+                gap: 10px;
+                justify-self: end;
+                margin: 0 0 0 auto;
+
+                & sp-button {
+                    white-space: nowrap;
+                }
             }
         `;
     }
@@ -182,10 +195,10 @@ class ContentNavigation extends LitElement {
                     style=${inNoSelectionStyle}
                     disabled
                 >
-                    <sp-icon-new-item slot="icon"></sp-icon-new-item>
+                    <sp-icon-add slot="icon"></sp-icon-add>
                     Create New Card
-                </sp-action-button>
-                <sp-action-button
+                </sp-button>
+                <sp-button
                     style=${inNoSelectionStyle}
                     ?disabled=${disabled}
                     @click=${() => this.repository.toggleSelectionMode()}
@@ -194,18 +207,17 @@ class ContentNavigation extends LitElement {
                         slot="icon"
                     ></sp-icon-selection-checked>
                     Select
-                </sp-action-button>
+                </sp-button>
                 <sp-action-menu
                     style=${inNoSelectionStyle}
                     selects="single"
                     ?disabled=${disabled}
                     value="${this.mode}"
-                    placement="left-end"
                     @change=${this.handleRenderModeChange}
                 >
                     ${this.renderActions}
                 </sp-action-menu>
-            </sp-action-group>`;
+            </div>`;
     }
 }
 customElements.define(

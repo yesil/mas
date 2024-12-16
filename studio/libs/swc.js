@@ -10139,6 +10139,39 @@ var IconFileTxt = class extends IconBase {
 init_define_element();
 defineElement("sp-icon-file-txt", IconFileTxt);
 
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconFilterAdd.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/FilterAdd.js
+var FilterAddIcon = ({ width: a18 = 24, height: t26 = 24, hidden: e32 = false, title: l15 = "Filter Add" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${t26}
+    viewBox="0 0 36 36"
+    width=${a18}
+    aria-hidden=${e32 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${l15}
+  >
+    <path
+      d="M14.8 27a13.146 13.146 0 0 1 3.2-8.411C20.083 15.9 29.733 3.617 29.733 3.617A1 1 0 0 0 28.946 2H1.054a1 1 0 0 0-.787 1.617L12 18.589V33.9a.992.992 0 0 0 1.68.825l2.338-2.439A12.131 12.131 0 0 1 14.8 27Z"
+    />
+    <path
+      d="M27 18.1a8.9 8.9 0 1 0 8.9 8.9 8.9 8.9 0 0 0-8.9-8.9Zm5 9.4a.5.5 0 0 1-.5.5H28v3.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V28h-3.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5H26v-3.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5V26h3.5a.5.5 0 0 1 .5.5Z"
+    />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconFilterAdd.js
+var IconFilterAdd = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), FilterAddIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-filter-add.js
+init_define_element();
+defineElement("sp-icon-filter-add", IconFilterAdd);
+
 // ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconFolder.js
 init_src();
 
@@ -10327,6 +10360,36 @@ var IconMoney = class extends IconBase {
 // ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-money.js
 init_define_element();
 defineElement("sp-icon-money", IconMoney);
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconPromote.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/Promote.js
+var PromoteIcon = ({ width: t26 = 24, height: e32 = 24, hidden: r27 = false, title: a18 = "Promote" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${e32}
+    viewBox="0 0 36 36"
+    width=${t26}
+    aria-hidden=${r27 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${a18}
+  >
+    <path
+      d="M6 6a6 6 0 0 0 0 12h6V6ZM13.079 34h-2.908a1.5 1.5 0 0 1-1.455-1.136L6 20h6l2.534 12.136A1.5 1.5 0 0 1 13.079 34ZM32.5 23.957S25.974 18 17.425 18H14V6h3.425C25.845 6 32.5.043 32.5.043A1.268 1.268 0 0 1 34 1.426v21.148a1.268 1.268 0 0 1-1.5 1.383Z"
+    />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconPromote.js
+var IconPromote = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), PromoteIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-promote.js
+init_define_element();
+defineElement("sp-icon-promote", IconPromote);
 
 // ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconNewItem.js
 init_src();
@@ -10906,6 +10969,159 @@ var IconViewCard = class extends IconBase {
 // ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-view-card.js
 init_define_element();
 defineElement("sp-icon-view-card", IconViewCard);
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconHome.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/Home.js
+var HomeIcon = ({ width: e32 = 24, height: a18 = 24, hidden: t26 = false, title: l15 = "Home" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${a18}
+    viewBox="0 0 36 36"
+    width=${e32}
+    aria-hidden=${t26 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${l15}
+  >
+    <path
+      d="M35.332 20.25 18.75 3.668a1.063 1.063 0 0 0-1.5 0L.668 20.25a1.061 1.061 0 0 0 0 1.5l1.958 1.957a1 1 0 0 0 .707.293H4v9a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V23a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-9h.667a1 1 0 0 0 .707-.293l1.958-1.957a1.061 1.061 0 0 0 0-1.5Z"
+      fill-rule="evenodd"
+    />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconHome.js
+var IconHome = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), HomeIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-home.js
+init_define_element();
+defineElement("sp-icon-home", IconHome);
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconCampaign.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/Campaign.js
+var CampaignIcon = ({ width: a18 = 24, height: e32 = 24, hidden: t26 = false, title: r27 = "Campaign" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${e32}
+    viewBox="0 0 36 36"
+    width=${a18}
+    aria-hidden=${t26 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${r27}
+  >
+    <circle cx="18" cy="18" r="4.3" />
+    <path
+      d="M6.227 20.311H2A16.172 16.172 0 0 0 15.688 34v-4.227a12.007 12.007 0 0 1-9.461-9.462ZM29.773 20.311a12.007 12.007 0 0 1-9.461 9.462V34A16.172 16.172 0 0 0 34 20.311ZM15.688 6.228V2A16.171 16.171 0 0 0 2 15.688h4.228a12 12 0 0 1 9.46-9.46ZM29.772 15.688H34A16.171 16.171 0 0 0 20.312 2v4.228a12 12 0 0 1 9.46 9.46Z"
+    />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconCampaign.js
+var IconCampaign = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), CampaignIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-campaign.js
+init_define_element();
+defineElement("sp-icon-campaign", IconCampaign);
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconGraphBarVertical.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/GraphBarVertical.js
+var GraphBarVerticalIcon = ({ width: a18 = 24, height: t26 = 24, hidden: e32 = false, title: r27 = "Graph Bar Vertical" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${t26}
+    viewBox="0 0 36 36"
+    width=${a18}
+    aria-hidden=${e32 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${r27}
+  >
+    <path
+      d="M26 3v27h6V3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1ZM18 13v17h6V13a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1ZM10 21v9h6v-9a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1ZM2 25v5h6v-5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1Z"
+    />
+    <rect height="2" rx=".5" ry=".5" width="34" y="32" />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconGraphBarVertical.js
+var IconGraphBarVertical = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), GraphBarVerticalIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-graph-bar-vertical.js
+init_define_element();
+defineElement("sp-icon-graph-bar-vertical", IconGraphBarVertical);
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconHelp.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/Help.js
+var HelpIcon = ({ width: e32 = 24, height: a18 = 24, hidden: t26 = false, title: l15 = "Help" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${a18}
+    viewBox="0 0 36 36"
+    width=${e32}
+    aria-hidden=${t26 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${l15}
+  >
+    <path
+      d="M18 2a16 16 0 1 0 16 16A16 16 0 0 0 18 2Zm.047 26.876a2.69 2.69 0 1 1 0-5.375 2.62 2.62 0 0 1 2.8 2.67 2.581 2.581 0 0 1-2.8 2.705Zm3.566-12.818-.2.21c-.789.829-1.684 1.768-1.684 2.351a2.771 2.771 0 0 0 .359 1.348l.145.277-.113.429a.617.617 0 0 1-.567.378h-2.682a.867.867 0 0 1-.65-.235 4.111 4.111 0 0 1-.845-2.525c0-1.677.934-2.714 2.225-4.15.2-.219.39-.42.575-.609.629-.651 1.013-1.071 1.013-1.515 0-.308 0-1.245-1.786-1.245a5.918 5.918 0 0 0-3.159.919.592.592 0 0 1-.653-.02l-.237-.169-.055-.443v-2.9a.879.879 0 0 1 .393-.819 8.275 8.275 0 0 1 4.3-1.1c3.291 0 5.5 2.117 5.5 5.272a6.131 6.131 0 0 1-1.879 4.546Z"
+    />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconHelp.js
+var IconHelp = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), HelpIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-help.js
+init_define_element();
+defineElement("sp-icon-help", IconHelp);
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconChevronDown.js
+init_src();
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/icons/ChevronDown.js
+var ChevronDownIcon = ({ width: e32 = 24, height: t26 = 24, hidden: l15 = false, title: r27 = "Chevron Down" } = {}) => tag2`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    height=${t26}
+    viewBox="0 0 36 36"
+    width=${e32}
+    aria-hidden=${l15 ? "true" : "false"}
+    role="img"
+    fill="currentColor"
+    aria-label=${r27}
+  >
+    <path
+      d="M8 14.02a2 2 0 0 1 3.411-1.411l6.578 6.572 6.578-6.572a2 2 0 0 1 2.874 2.773l-.049.049-7.992 7.984a2 2 0 0 1-2.825 0l-7.989-7.983A1.989 1.989 0 0 1 8 14.02Z"
+    />
+  </svg>`;
+
+// ../node_modules/@spectrum-web-components/icons-workflow/src/elements/IconChevronDown.js
+var IconChevronDown = class extends IconBase {
+  render() {
+    return setCustomTemplateLiteralTag2(x), ChevronDownIcon({ hidden: !this.label, title: this.label });
+  }
+};
+
+// ../node_modules/@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-down.js
+init_define_element();
+defineElement("sp-icon-chevron-down", IconChevronDown);
 
 // ../node_modules/@spectrum-web-components/link/src/Link.js
 init_decorators2();
