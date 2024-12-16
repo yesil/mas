@@ -8,9 +8,7 @@ const filterByTags = (tags) => (item) =>
     tags.every((tag) => item.tags.some((t) => t.id === tag));
 
 class AEM {
-    #author;
     constructor(bucket, baseUrlOverride) {
-        this.#author = Boolean(bucket);
         const baseUrl =
             baseUrlOverride || `https://${bucket}.adobeaemcloud.com`;
         this.baseUrl = baseUrl;
@@ -150,9 +148,8 @@ class AEM {
      * @returns {Promise<Object>} the raw fragment item
      */
     async getFragmentByPath(path) {
-        const headers = this.#author ? this.headers : {};
         const response = await fetch(`${this.cfFragmentsUrl}?path=${path}`, {
-            headers,
+            headers: this.headers,
         }).catch((err) => {
             throw new Error(`${NETWORK_ERROR_MESSAGE}: ${err.message}`);
         });

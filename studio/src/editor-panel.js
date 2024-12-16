@@ -39,7 +39,6 @@ class EditorPanel extends LitElement {
     `;
 
     async saveFragment() {
-        this.showToast('Saving fragment...');
         try {
             await this.repository?.saveFragment();
             this.showToast('Fragment saved', 'positive');
@@ -49,7 +48,6 @@ class EditorPanel extends LitElement {
     }
 
     async publishFragment() {
-        this.showToast('Publishing fragment...');
         try {
             await this.repository?.publishFragment();
             this.showToast('Fragment published', 'positive');
@@ -67,7 +65,6 @@ class EditorPanel extends LitElement {
     }
 
     async unpublishFragment() {
-        this.showToast('Unpublishing fragment...');
         try {
             await this.repository?.unpublishFragment();
             this.showToast('Fragment unpublished', 'positive');
@@ -99,7 +96,6 @@ class EditorPanel extends LitElement {
     }
 
     async copyFragment() {
-        this.showToast('Cloning fragment...');
         try {
             await this.repository?.copyFragment();
             this.showToast('Fragment cloned', 'positive');
