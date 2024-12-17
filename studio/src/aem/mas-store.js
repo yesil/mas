@@ -22,11 +22,12 @@ const getDamPath = (path) => {
     return ROOT + '/' + path;
 };
 
-class MasRepository {
+class MasStore {
     status = 'idle';
     inSelection = false;
     searchText = '';
-    topFolder = 'ccd';
+    showSplash = true;
+    topFolder = null;
     topFolders = [];
     showFilterPanel = false;
     recentlyUpdatedfragments = [];
@@ -50,20 +51,30 @@ class MasRepository {
         }
         this.bucket = bucket;
         this.baseUrl = baseUrl;
-        this.path = path;
         this.#aem = new AEM(this.bucket, this.baseUrl);
         this.initTopFolders();
         this.initReactions();
     }
 
     initReactions() {
+        // search
         reaction(
             this,
-            ({ searchText, path, tags }) => {
-                return [searchText, path, tags];
+            ({ searchText, topFolder, tags }) => {
+                return [searchText, topFolder, tags];
             },
             () => this.searchFragments(),
             100,
+        );
+
+        // slash screen
+        reaction(
+            this,
+            ({ showSplash, topFolder }) => {
+                if (!showSplash) return [];
+                return [topFolder];
+            },
+            () => this.loadRecentlyUpdatedFragments(),
         );
     }
 
@@ -135,13 +146,13 @@ class MasRepository {
         }
         if (
             fragmentData &&
-            fragmentData.path.indexOf(getDamPath(this.path)) === 0
+            fragmentData.path.indexOf(getDamPath(this.topFolder)) === 0
         ) {
             const fragment = new Fragment(fragmentData, this);
             this.#searchResult = [fragment];
             await this.addToCache([fragment]);
         }
-        this.setStatus('loaded');
+        this.setStatus(status.idle);
     }
 
     isFragmentId(str) {
@@ -149,9 +160,10 @@ class MasRepository {
     }
 
     async searchFragments() {
-        console.log('searching', this.path, this.searchText, this.tags);
+        this.setStatus(status.loading);
+        console.log('searching', this.topFolder, this.searchText, this.tags);
         this.#search = {
-            path: getDamPath(this.path),
+            path: getDamPath(this.topFolder),
         };
 
         let isSearching = false;
@@ -172,6 +184,7 @@ class MasRepository {
             );
             await this.processFragments(cursor, isSearching);
         }
+        this.setStatus(status.idle);
     }
 
     async saveFragment() {
@@ -241,7 +254,7 @@ class MasRepository {
         const cursor = await this.#aem.sites.cf.fragments.search(
             {
                 sort: [{ on: 'modifiedOrCreated', order: 'DESC' }],
-                path: `/content/dam/mas/${this.path}`,
+                path: `/content/dam/mas/${this.topFolder}`,
                 // tags: ['mas:status/DEMO']
             },
             6,
@@ -265,7 +278,7 @@ class MasRepository {
         this.fragments.forEach((fragment) => fragment.toggleSelection(false));
     }
 
-    // allows to notify repository observers
+    // allows to notify store observers
     toggleFragmentSelection(fragment) {
         fragment.toggleSelection();
     }
@@ -279,16 +292,20 @@ class MasRepository {
         this.fragment = fragment;
     }
 
+    setTopFolder(folder) {
+        this.topFolder = folder || 'ccd';
+    }
+
     setTopFolders(folders) {
         this.topFolders = folders;
     }
 
-    setPath(path) {
-        this.path = path;
-    }
-
     setSearchText(value) {
         this.searchText = value;
+    }
+
+    setShowSplash(value) {
+        this.showSplash = value;
     }
 
     toggleSelectionMode(force) {
@@ -322,20 +339,21 @@ class MasRepository {
     }
 }
 
-const MasRepositoryObservable = makeObservable(
-    MasRepository,
+const MasStoreObservable = makeObservable(
+    MasStore,
     [
         'clearSelection',
         'setFragment',
-        'setStatus',
-        'setPath',
         'setSearchText',
+        'setShowSplash',
+        'setStatus',
         'setTags',
-        'toggleSelectionMode',
-        'toggleFragmentSelection',
+        'setTopFolder',
         'toggleFilterPanel',
+        'toggleFragmentSelection',
+        'toggleSelectionMode',
     ],
     ['selectedFragments', 'selectedFragmentsIds', 'fragments'],
 );
 
-export { MasRepositoryObservable as MasRepository, getDamPath };
+export { MasStoreObservable as MasStore };

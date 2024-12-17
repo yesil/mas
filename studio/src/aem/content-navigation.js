@@ -45,7 +45,7 @@ class ContentNavigation extends LitElement {
 
     static get properties() {
         return {
-            repository: { type: Object, state: true },
+            store: { type: Object, state: true },
             mode: { type: String, state: true },
         };
     }
@@ -63,25 +63,25 @@ class ContentNavigation extends LitElement {
 
     get searchInfo() {
         return html`<sp-icon-search></sp-icon-search> Search results for
-            "${this.repository.searchText}"`;
+            "${this.store.searchText}"`;
     }
 
     get filterPanel() {
-        if (!this.repository.showFilterPanel) return nothing;
+        if (!this.store.showFilterPanel) return nothing;
         return html` <mas-filter-panel
-            .repository="${this.repository}"
+            .store="${this.store}"
         ></mas-filter-panel>`;
     }
 
     render() {
         return html`<div id="toolbar">${this.actions}</div>
             ${this.filterPanel} ${this.selectionActions}
-            ${this.repository.searchText ? this.searchInfo : ''}
+            ${this.store.searchText ? this.searchInfo : ''}
             <slot></slot> `;
     }
 
     get selectionActions() {
-        const selectionCount = this.repository.selectionCount;
+        const selectionCount = this.store.selectionCount;
         const hasSingleSelection = styleMap({
             display: selectionCount === 1 ? 'flex' : 'none',
         });
@@ -91,9 +91,9 @@ class ContentNavigation extends LitElement {
 
         return html`<sp-action-bar
             emphasized
-            ?open=${this.repository.inSelection}
+            ?open=${this.store.inSelection}
             variant="fixed"
-            @close=${() => this.repository.toggleSelectionMode(false)}
+            @close=${() => this.store.toggleSelectionMode(false)}
         >
             ${selectionCount} selected
             <sp-action-button
@@ -147,9 +147,8 @@ class ContentNavigation extends LitElement {
     }
 
     get toolbar() {
-        if (this.repository.fragment) return nothing;
         return html`<mas-filter-toolbar
-            .repository=${this.repository}
+            .store=${this.store}
         ></mas-filter-toolbar>`;
     }
 
@@ -157,7 +156,7 @@ class ContentNavigation extends LitElement {
         const inNoSelectionStyle = styleMap({
             display: !this.inSelection ? 'flex' : 'none',
         });
-        const disabled = !!this.repository.fragment;
+        const disabled = !!this.store.fragment;
         return html`${this.toolbar}<sp-action-group emphasized>
                 <sp-action-button
                     emphasized
@@ -170,7 +169,7 @@ class ContentNavigation extends LitElement {
                 <sp-action-button
                     style=${inNoSelectionStyle}
                     ?disabled=${disabled}
-                    @click=${() => this.repository.toggleSelectionMode()}
+                    @click=${() => this.store.toggleSelectionMode()}
                 >
                     <sp-icon-selection-checked
                         slot="icon"
@@ -191,5 +190,5 @@ class ContentNavigation extends LitElement {
 }
 customElements.define(
     'content-navigation',
-    litObserver(ContentNavigation, ['repository']),
+    litObserver(ContentNavigation, ['store']),
 );

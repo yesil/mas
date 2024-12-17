@@ -22,14 +22,6 @@ mas-studio {
     flex-direction: column;
 }
 
-.show {
-    display: initial;
-}
-
-.hide {
-    display: none;
-}
-
 .studio-content {
     display: grid;
     grid-template-columns: 240px 1fr;
@@ -58,7 +50,7 @@ side-nav sp-sidenav-heading {
     padding: 0 16px;
 }
 
-.dropdown-container {
+mas-folder-picker {
     display: flex;
     align-items: center;
     padding: 8px 16px;
@@ -160,11 +152,6 @@ sp-status-light {
     border-radius: var(--consonant-merch-spacing-xs);
 }
 
-.render-card:has(merch-card[variant='ccd-slice']),
-.render-card:has(merch-card[variant='ccd-suggested']) {
-    border-radius: 4px;
-}
-
 .render-card-header {
     display: flex;
     justify-content: space-between;
@@ -202,11 +189,11 @@ render-view {
     align-items: start;
 }
 
-content-navigation render-view merch-card .overlay {
+render-view-item merch-card .overlay {
     display: none;
 }
 
-merch-card:not(.has-tooltip) ~ sp-tooltip {
+render-view-item:not(.has-tooltip) ~ sp-tooltip {
     display: none;
 }
 

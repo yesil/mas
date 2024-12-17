@@ -36,7 +36,7 @@ class MasFilterToolbar extends LitElement {
     `;
 
     static properties = {
-        repository: { type: Object, state: true },
+        store: { type: Object, state: true },
     };
 
     constructor() {
@@ -51,7 +51,7 @@ class MasFilterToolbar extends LitElement {
     }
 
     render() {
-        if (!this.repository) return nothing;
+        if (!this.store) return nothing;
         return html`
             <sp-action-button
                 toggles
@@ -67,7 +67,7 @@ class MasFilterToolbar extends LitElement {
                     size="m"
                     @change="${this.handleSearch}"
                     @submit="${this.handleSearch}"
-                    value=${this.repository.searchText}
+                    value=${this.store.searchText}
                     size="m"
                 ></sp-search>
             </div>
@@ -81,11 +81,11 @@ class MasFilterToolbar extends LitElement {
 
     toggleFilterPanel() {
         this.open = !this.open;
-        this.repository.toggleFilterPanel(this.open);
+        this.store.toggleFilterPanel(this.open);
     }
 }
 
 customElements.define(
     'mas-filter-toolbar',
-    litObserver(MasFilterToolbar, ['repository']),
+    litObserver(MasFilterToolbar, ['store']),
 );

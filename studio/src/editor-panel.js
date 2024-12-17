@@ -4,7 +4,7 @@ import { notify, litObserver } from 'picosm';
 class EditorPanel extends LitElement {
     static properties = {
         showToast: { type: Function },
-        repository: { type: Object, state: true },
+        store: { type: Object, state: true },
         fragment: { type: Object, state: true },
     };
 
@@ -40,7 +40,7 @@ class EditorPanel extends LitElement {
 
     async saveFragment() {
         try {
-            await this.repository?.saveFragment();
+            await this.store?.saveFragment();
             this.showToast('Fragment saved', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be saved', 'negative');
@@ -49,7 +49,7 @@ class EditorPanel extends LitElement {
 
     async publishFragment() {
         try {
-            await this.repository?.publishFragment();
+            await this.store?.publishFragment();
             this.showToast('Fragment published', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be published', 'negative');
@@ -66,7 +66,7 @@ class EditorPanel extends LitElement {
 
     async unpublishFragment() {
         try {
-            await this.repository?.unpublishFragment();
+            await this.store?.unpublishFragment();
             this.showToast('Fragment unpublished', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be unpublished', 'negative');
@@ -76,7 +76,7 @@ class EditorPanel extends LitElement {
     async deleteFragment() {
         if (confirm('Are you sure you want to delete this fragment?')) {
             try {
-                await this.repository?.deleteFragment();
+                await this.store?.deleteFragment();
                 this.showToast('Fragment deleted', 'positive');
             } catch (e) {
                 this.showToast('Fragment could not be deleted', 'negative');
@@ -97,7 +97,7 @@ class EditorPanel extends LitElement {
 
     async copyFragment() {
         try {
-            await this.repository?.copyFragment();
+            await this.store?.copyFragment();
             this.showToast('Fragment cloned', 'positive');
         } catch (e) {
             this.showToast('Fragment could not be cloned', 'negative');
@@ -214,7 +214,7 @@ class EditorPanel extends LitElement {
             <sp-action-group size="l" quiet>
                 <sp-action-button
                     label="Close"
-                    @click="${() => this.repository.unselectFragment()}"
+                    @click="${() => this.store.unselectFragment()}"
                 >
                     <sp-icon-close-circle slot="icon"></sp-icon-close-circle>
                     <sp-tooltip self-managed placement="bottom"
@@ -235,7 +235,7 @@ class EditorPanel extends LitElement {
             ${this.fragmentEditorToolbar}
             <merch-card-editor
                 .fragment=${this.fragment}
-                @close="${() => this.repository?.setFragment()}"
+                @close="${() => this.store?.setFragment()}"
                 @update-fragment="${this.updateFragment}"
             >
             </merch-card-editor>
@@ -266,5 +266,5 @@ class EditorPanel extends LitElement {
 
 customElements.define(
     'editor-panel',
-    litObserver(EditorPanel, ['repository', ['fragment', 100]]),
+    litObserver(EditorPanel, ['store', ['fragment', 100]]),
 );

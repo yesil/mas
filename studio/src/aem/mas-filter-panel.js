@@ -2,7 +2,7 @@ import { html, css, LitElement } from 'lit';
 
 class MasFilterPanel extends LitElement {
     static properties = {
-        repository: { type: Object, state: true },
+        store: { type: Object, state: true },
     };
     static styles = css`
         :host {
@@ -29,18 +29,18 @@ class MasFilterPanel extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        this.repository.setTags([]);
+        this.store.setTags([]);
     }
 
     handeFilterChange(event) {
         const newValue = event.target.getAttribute('value');
         if (!newValue) return;
-        const value = this.repository.tags || '';
+        const value = this.store.tags || '';
         let tags = value.split(',').filter((tag) => Boolean(tag));
         if (tags.includes(newValue))
             tags = tags.filter((tag) => tag !== newValue);
         else tags.push(newValue);
-        this.repository.setTags(tags.join(','));
+        this.store.setTags(tags.join(','));
     }
 
     render() {

@@ -10,7 +10,7 @@ import './mas-recently-updated.js';
 import './mas-folder-picker.js';
 import './aem/mas-fragment-status.js';
 
-import { MasRepository } from './aem/mas-repository.js';
+import { MasStore } from './aem/mas-store.js';
 import { litObserver } from 'picosm';
 import { contentIcon } from './img/content-icon.js';
 import { promosIcon } from './img/promos-icon.js';
@@ -30,9 +30,8 @@ class MasStudio extends LitElement {
         path: { type: String, state: true },
         variant: { type: String, state: true },
         newFragment: { type: Object, state: true },
-        repository: { type: Object, state: true },
+        store: { type: Object, state: true },
         showEditorPanel: { type: Boolean, state: true },
-        showSplash: { type: Boolean, state: true },
     };
 
     constructor() {
@@ -43,27 +42,25 @@ class MasStudio extends LitElement {
         this.searchText = '';
         this.path = 'ccd';
         this.showToast = this.showToast.bind(this);
-        this.path = '';
         this.showEditorPanel = false;
-        this.showSplash = true;
     }
 
     connectedCallback() {
         super.connectedCallback();
         this.registerListeners();
         this.startDeeplink();
-        this.initRepository();
+        this.initStore();
     }
 
     registerListeners() {
         // Listen for ESC key to close the fragment editor and quit selection mode
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (this.repository.fragment) {
-                    this.repository.unselectFragment();
+                if (this.store.fragment) {
+                    this.store.unselectFragment();
                     return;
                 }
-                this.repository.toggleSelectionMode(false);
+                this.store.toggleSelectionMode(false);
             }
         });
     }
@@ -75,8 +72,8 @@ class MasStudio extends LitElement {
         }
     }
 
-    initRepository() {
-        this.repository = new MasRepository({
+    initStore() {
+        this.store = new MasStore({
             baseUrl: this.baseUrl,
             bucket: this.bucket,
             path: this.path ?? '',
@@ -97,19 +94,18 @@ class MasStudio extends LitElement {
 
     updated(changedProperties) {
         if (changedProperties.has('searchText')) {
-            this.repository.searchText = this.searchText;
+            this.store.searchText = this.searchText;
         }
         if (changedProperties.has('path')) {
-            this.repository.path = this.path;
+            this.store.path = this.path;
         }
         if (
             changedProperties.has('searchText') ||
             changedProperties.has('path') ||
-            changedProperties.has('variant') ||
-            changedProperties.has('showSplash')
+            changedProperties.has('variant')
         ) {
-            this.repository.setSearchText(this.searchText);
-            this.repository.setPath(this.path);
+            this.store.setSearchText(this.searchText);
+            this.store.setTopFolder(this.path);
         }
         this.adjustEditorPosition();
     }
@@ -153,30 +149,30 @@ class MasStudio extends LitElement {
     }
 
     get content() {
-        if (this.showSplash) return nothing;
+        if (this.store.showSplash) return nothing;
         return html`
             <content-navigation
-                .repository="${this.repository}"
-                ?in-selection=${this.repository.inSelection}
+                .store="${this.store}"
+                ?in-selection=${this.store.inSelection}
             >
-                <render-view .repository="${this.repository}"></render-view>
-                <table-view .repository="${this.repository}"></table-view>
+                <render-view .store="${this.store}"></render-view>
+                <table-view .store="${this.store}"></table-view>
             </content-navigation>
-            ${this.fragmentEditor} ${this.selectFragmentDialog} ${this.toast}
+            ${this.editorPanel} ${this.selectFragmentDialog} ${this.toast}
         `;
     }
 
     get editorPanel() {
-        if (!this.repository.fragment) return nothing;
+        if (!this.store.fragment) return nothing;
         return html`<editor-panel
             .showToast=${this.showToast}
-            .repository=${this.repository}
-            .fragment=${this.repository.fragment}
+            .store=${this.store}
+            .fragment=${this.store.fragment}
         ></editor-panel>`;
     }
 
     get recentlyUpdated() {
-        return html`<mas-recently-updated .repository="${this.repository}">
+        return html`<mas-recently-updated .store="${this.store}">
         </mas-recently-updated>`;
     }
 
@@ -186,7 +182,7 @@ class MasStudio extends LitElement {
     }
 
     showContent() {
-        this.showSplash = false;
+        this.store.setShowSplash(false);
     }
 
     openOst() {
@@ -194,16 +190,13 @@ class MasStudio extends LitElement {
     }
 
     showHome() {
-        this.showSplash = true;
+        this.store.setShowSplash(true);
     }
 
     get splashScreen() {
-        if (!this.showSplash) return nothing;
+        if (!this.store.showSplash) return nothing;
         return html`
-            <div
-                class="${this.showSplash ? 'show' : 'hide'}"
-                id="splash-container"
-            >
+            <div id="splash-container">
                 <h1>Welcome</h1>
                 <div class="quick-actions">
                     <h2>Quick Actions</h2>
@@ -239,11 +232,9 @@ class MasStudio extends LitElement {
             <mas-top-nav env="${this.env}"></mas-top-nav>
             <div class="studio-content">
                 <side-nav>
-                    <div class="dropdown-container">
-                        <mas-folder-picker
-                            .repository="${this.repository}"
-                        ></mas-folder-picker>
-                    </div>
+                    <mas-folder-picker
+                        .store="${this.store}"
+                    ></mas-folder-picker>
                     <sp-sidenav>
                         <sp-sidenav-item
                             label="Home"
@@ -285,7 +276,7 @@ class MasStudio extends LitElement {
     }
 
     get loadingIndicator() {
-        if (this.repository.status !== 'loading') return nothing;
+        if (this.store.status !== 'loading') return nothing;
         return html`<sp-progress-circle
             indeterminate
             size="l"
@@ -321,15 +312,15 @@ class MasStudio extends LitElement {
      * @param {boolean} force - discard unsaved changes
      */
     async editFragment(fragment, force = false) {
-        if (fragment && fragment === this.repository.fragment) {
+        if (fragment && fragment === this.store.fragment) {
             this.requestUpdate();
             return;
         }
-        if (this.repository.fragment?.hasChanges && !force) {
+        if (this.store.fragment?.hasChanges && !force) {
             this.newFragment = fragment;
         } else {
             this.newFragment = null;
-            this.repository.setFragment(fragment);
+            this.store.setFragment(fragment);
         }
         this.requestUpdate();
     }
@@ -340,9 +331,9 @@ class MasStudio extends LitElement {
     }
 
     async adjustEditorPosition() {
-        if (this.repository.fragment) return;
+        if (this.store.fragment) return;
         // reposition the editor
-        const x = this.repository.fragmentPositionX;
+        const x = this.store.fragmentPositionX;
         const viewportCenterX = window.innerWidth / 2;
         const left = x > viewportCenterX ? '0' : 'inherit';
         const right = x <= viewportCenterX ? '0' : 'inherit';
@@ -372,4 +363,4 @@ class MasStudio extends LitElement {
     }
 }
 
-customElements.define('mas-studio', litObserver(MasStudio, ['repository']));
+customElements.define('mas-studio', litObserver(MasStudio, ['store']));

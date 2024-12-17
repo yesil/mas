@@ -15,7 +15,7 @@ const models = {
 class RenderView extends LitElement {
     static get properties() {
         return {
-            repository: { type: Object, state: true },
+            store: { type: Object, state: true },
         };
     }
     constructor() {
@@ -28,7 +28,7 @@ class RenderView extends LitElement {
     }
 
     handleClick(e) {
-        if (this.repository.inSelection) return;
+        if (this.store.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         const currentTarget = e.currentTarget;
         this.tooltipTimeout = setTimeout(() => {
@@ -37,30 +37,27 @@ class RenderView extends LitElement {
     }
 
     handleMouseLeave(e) {
-        if (this.repository.inSelection) return;
+        if (this.store.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
     }
 
     handleDoubleClick(e, fragment) {
-        if (this.repository.inSelection) return;
+        if (this.store.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
-        this.repository.selectFragment(e.clientX, fragment);
+        this.store.selectFragment(e.clientX, fragment);
     }
 
     render() {
         if (this.parentElement.mode !== MODE) return nothing;
         return html` ${repeat(
-            this.repository.fragments,
+            this.store.fragments,
             (fragment) => fragment.id,
             (fragment) =>
                 html`<render-view-item
-                    .repository=${this.repository}
+                    .store=${this.store}
                     .fragment=${fragment}
-                    @click="${this.handleClick}"
-                    @mouseleave="${this.handleMouseLeave}"
-                    @dblclick="${(e) => this.handleDoubleClick(e, fragment)}"
                 ></render-view-item>`,
         )}`;
     }
@@ -74,4 +71,4 @@ class RenderView extends LitElement {
     }
 }
 
-customElements.define('render-view', litObserver(RenderView, ['repository']));
+customElements.define('render-view', litObserver(RenderView, ['store']));

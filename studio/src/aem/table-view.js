@@ -21,7 +21,7 @@ class TableView extends LitElement {
         return {
             rowCount: { type: Number, attribute: 'row-count' },
             customRenderItem: { type: Function },
-            repository: { type: Object, state: true },
+            store: { type: Object, state: true },
         };
     }
 
@@ -41,14 +41,14 @@ class TableView extends LitElement {
 
     render() {
         if (this.parentElement.mode !== MODE) return nothing;
-        if (this.repository.fragments.length === 0) return nothing;
+        if (this.store.fragments.length === 0) return nothing;
         return html`
             <sp-table
                 emphasized
                 scroller
                 .itemValue=${this.itemValue}
                 .renderItem=${this.renderItem}
-                selects=${this.repository.inSelection ? 'multiple' : undefined}
+                selects=${this.store.inSelection ? 'multiple' : undefined}
                 @change=${this.handleTableSelectionChange}
                 @dblclick="${this.handleDoubleClick}"
             >
@@ -70,15 +70,15 @@ class TableView extends LitElement {
 
     updated() {
         if (!this.table) return;
-        if (!this.repository.inSelection) {
+        if (!this.store.inSelection) {
             this.table.deselectAllRows();
         } else if (
             this.table.selected.length === 0 &&
-            this.repository.selectedFragmentsIds
+            this.store.selectedFragmentsIds
         ) {
-            this.table.selected = this.repository.selectedFragmentsIds;
+            this.table.selected = this.store.selectedFragmentsIds;
         }
-        this.table.items = this.repository.fragments;
+        this.table.items = this.store.fragments;
         this.table.renderVirtualizedItems(); /* hack: force to render when items.lenght = 0 */
     }
 
@@ -97,12 +97,12 @@ class TableView extends LitElement {
     }
 
     handleDoubleClick(e) {
-        if (this.repository.inSelection) return;
+        if (this.store.inSelection) return;
         const { value } = e.target.closest('sp-table-row');
         if (!value) return;
-        const fragment = this.repository.fragments.find((f) => f.id === value);
+        const fragment = this.store.fragments.find((f) => f.id === value);
         if (!fragment) return;
-        this.repository.selectFragment(e.clientX, fragment);
+        this.store.selectFragment(e.clientX, fragment);
     }
 
     connectedCallback() {
@@ -115,13 +115,13 @@ class TableView extends LitElement {
     }
 
     handleTableSelectionChange(e) {
-        this.repository.fragments.forEach((fragment) => {
+        this.store.fragments.forEach((fragment) => {
             const selected = e.target.selected.includes(fragment.id);
             if (
                 (selected && !fragment.selected) ||
                 (!selected && fragment.selected)
             ) {
-                this.repository.toggleFragmentSelection(fragment);
+                this.store.toggleFragmentSelection(fragment);
             }
         });
     }
@@ -135,4 +135,4 @@ class TableView extends LitElement {
     }
 }
 
-customElements.define('table-view', litObserver(TableView, ['repository']));
+customElements.define('table-view', litObserver(TableView, ['store']));

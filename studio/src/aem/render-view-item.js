@@ -3,7 +3,7 @@ import { litObserver, observe, subscribe } from 'picosm';
 
 class RenderViewItem extends LitElement {
     static properties = {
-        repository: {
+        store: {
             type: Object,
             state: true,
         },
@@ -50,9 +50,31 @@ class RenderViewItem extends LitElement {
         this.#unsubscribe();
     }
 
+    handleClick(e) {
+        clearTimeout(this.tooltipTimeout);
+        const currentTarget = e.currentTarget;
+        this.tooltipTimeout = setTimeout(() => {
+            currentTarget.classList.add('has-tooltip');
+        }, 500);
+    }
+
+    handleMouseLeave(e) {
+        clearTimeout(this.tooltipTimeout);
+        e.currentTarget.classList.remove('has-tooltip');
+    }
+
+    handleDoubleClick(e, fragment) {
+        clearTimeout(this.tooltipTimeout);
+        e.currentTarget.classList.remove('has-tooltip');
+        this.store.selectFragment(e.clientX, fragment);
+    }
+
     render() {
         return html`<div
             class="render-card ${this.fragment.selected ? 'selected' : ''}"
+            @click="${this.handleClick}"
+            @mouseleave="${this.handleMouseLeave}"
+            @dblclick="${(e) => this.handleDoubleClick(e, this.fragment)}"
         >
             <div class="render-card-header">
                 <div class="render-card-actions"></div>
@@ -76,9 +98,7 @@ class RenderViewItem extends LitElement {
                     <div
                         class="overlay"
                         @click=${() =>
-                            this.repository.toggleFragmentSelection(
-                                this.fragment,
-                            )}
+                            this.store.toggleFragmentSelection(this.fragment)}
                     >
                         <sp-icon-remove size="l"></sp-icon-remove>
                         <sp-icon-add size="l"></sp-icon-add>
