@@ -197,11 +197,11 @@ render-view-item:not(.has-tooltip) ~ sp-tooltip {
     display: none;
 }
 
-:not(.selected) merch-card:hover sp-icon-add {
+.render-card:not(.selected) merch-card:hover sp-icon-add {
     display: block;
 }
 
-.selected merch-card:hover sp-icon-remove {
+.render-card.selected merch-card:hover sp-icon-remove {
     display: block;
 }
 

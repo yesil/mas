@@ -25,7 +25,6 @@ class ContentNavigation extends LitElement {
             }
 
             mas-filter-panel {
-                margin-bottom: 16px;
             }
 
             .divider {

@@ -64,6 +64,7 @@ class RenderViewItem extends LitElement {
     }
 
     handleDoubleClick(e, fragment) {
+        if (this.store.inSelection) return;
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
         this.store.selectFragment(e.clientX, fragment);

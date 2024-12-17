@@ -67,7 +67,7 @@ class MasStore {
             100,
         );
 
-        // slash screen
+        // splash screen
         reaction(
             this,
             ({ showSplash, topFolder }) => {
@@ -284,6 +284,7 @@ class MasStore {
     }
 
     setTags(value) {
+        if (values.length === 0 && this.tags.length === 0) return;
         this.tags = value;
     }
 
