@@ -24,6 +24,10 @@ class ContentNavigation extends LitElement {
                 flex-wrap: wrap;
             }
 
+            mas-filter-panel {
+                margin-bottom: 16px;
+            }
+
             .divider {
                 flex: 1;
             }
@@ -35,17 +39,6 @@ class ContentNavigation extends LitElement {
 
             sp-action-bar[open] {
                 display: flex;
-            }
-
-            #toolbar-actions {
-                display: flex;
-                gap: 10px;
-                justify-self: end;
-                margin: 0 0 0 auto;
-
-                & sp-button {
-                    white-space: nowrap;
-                }
             }
         `;
     }
@@ -62,31 +55,10 @@ class ContentNavigation extends LitElement {
         this.mode = sessionStorage.getItem(MAS_RENDER_MODE) ?? 'render';
     }
 
-    handleTopFolderChange(e) {
-        this.repository.setPath(e.target.value);
-        pushState({ path: e.target.value });
-    }
-
     handleRenderModeChange(e) {
         this.mode = e.target.value;
         sessionStorage.setItem(MAS_RENDER_MODE, this.mode);
         [...this.children].forEach((child) => child.requestUpdate());
-    }
-
-    get topFolders() {
-        if (this.repository.topFolders.length === 0) return nothing;
-        return html`<sp-picker
-            @change=${this.handleTopFolderChange}
-            size="m"
-            value="${this.repository.path}"
-        >
-            ${this.repository.topFolders.map(
-                (folder) =>
-                    html`<sp-menu-item value="${folder}">
-                        ${folder.toUpperCase()}
-                    </sp-menu-item>`,
-            )}
-        </sp-picker>`;
     }
 
     get searchInfo() {
@@ -94,18 +66,16 @@ class ContentNavigation extends LitElement {
             "${this.repository.searchText}"`;
     }
 
+    get filterPanel() {
+        if (!this.repository.showFilterPanel) return nothing;
+        return html` <mas-filter-panel
+            .repository="${this.repository}"
+        ></mas-filter-panel>`;
+    }
+
     render() {
-        return html`<div id="toolbar">
-                ${this.topFolders}
-                <div class="divider"></div>
-                ${this.actions}
-            </div>
-            ${this.repository.showFilterPanel
-                ? html`<mas-filter-panel
-                      .repository="${this.repository}"
-                  ></mas-filter-panel>`
-                : nothing}
-            ${this.selectionActions}
+        return html`<div id="toolbar">${this.actions}</div>
+            ${this.filterPanel} ${this.selectionActions}
             ${this.repository.searchText ? this.searchInfo : ''}
             <slot></slot> `;
     }
@@ -189,7 +159,6 @@ class ContentNavigation extends LitElement {
         });
         const disabled = !!this.repository.fragment;
         return html`${this.toolbar}<sp-action-group emphasized>
-                <slot name="toolbar-actions"></slot>
                 <sp-action-button
                     emphasized
                     style=${inNoSelectionStyle}
@@ -197,8 +166,8 @@ class ContentNavigation extends LitElement {
                 >
                     <sp-icon-add slot="icon"></sp-icon-add>
                     Create New Card
-                </sp-button>
-                <sp-button
+                </sp-action-button>
+                <sp-action-button
                     style=${inNoSelectionStyle}
                     ?disabled=${disabled}
                     @click=${() => this.repository.toggleSelectionMode()}
@@ -207,7 +176,7 @@ class ContentNavigation extends LitElement {
                         slot="icon"
                     ></sp-icon-selection-checked>
                     Select
-                </sp-button>
+                </sp-action-button>
                 <sp-action-menu
                     style=${inNoSelectionStyle}
                     selects="single"

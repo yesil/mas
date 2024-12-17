@@ -165,10 +165,6 @@ sp-status-light {
     border-radius: 4px;
 }
 
-.render-card:hover {
-    border-color: var(--ccd-gray-200-light, #e6e6e6);
-}
-
 .render-card-header {
     display: flex;
     justify-content: space-between;
@@ -179,10 +175,6 @@ merch-card {
     cursor: pointer;
     user-select: none;
     box-sizing: border-box;
-}
-
-merch-card.selected {
-    outline: 2px solid var(--spectrum-global-color-blue-600);
 }
 
 sp-progress-circle {
@@ -218,21 +210,27 @@ merch-card:not(.has-tooltip) ~ sp-tooltip {
     display: none;
 }
 
+:not(.selected) merch-card:hover sp-icon-add {
+    display: block;
+}
+
+.selected merch-card:hover sp-icon-remove {
+    display: block;
+}
+
+.selected merch-card {
+    outline: 2px solid var(--spectrum-global-color-blue-600);
+}
+
 merch-card:hover {
-    --consonant-merch-card-background-color: var(--spectrum-background-base-color);
+    --consonant-merch-card-background-color: var(
+        --spectrum-background-base-color
+    );
 }
 
 merch-card sp-icon-add,
 merch-card sp-icon-remove {
     display: none;
-}
-
-merch-card.selected:hover sp-icon-remove {
-    display: block;
-}
-
-merch-card:hover:not(.selected) sp-icon-add {
-    display: block;
 }
 
 content-navigation[in-selection] render-view merch-card .overlay {

@@ -1,6 +1,7 @@
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, nothing } from 'lit';
 import '../editors/variant-picker.js';
 import { pushState, deeplink } from '../deeplink.js';
+import { litObserver } from 'picosm';
 
 class MasFilterToolbar extends LitElement {
     static styles = css`
@@ -9,26 +10,15 @@ class MasFilterToolbar extends LitElement {
             align-items: center;
             gap: 10px;
         }
+
         sp-picker {
             width: 100px;
         }
+
         sp-textfield {
             width: 200px;
         }
-        sp-action-button {
-            border: none;
-            font-weight: bold;
-        }
-        sp-action-button:not(.filters-shown) {
-            color: var(--spectrum-gray-700);
-        }
-        sp-action-button.filters-shown {
-            background-color: var(--spectrum-blue-100);
-            color: var(--spectrum-accent-color-1000);
-        }
-        sp-action-button.filters-shown:hover {
-            background-color: var(--spectrum-blue-200);
-        }
+
         .filters-badge {
             width: 18px;
             height: 18px;
@@ -39,6 +29,7 @@ class MasFilterToolbar extends LitElement {
             color: var(--spectrum-white);
             border-radius: 2px;
         }
+
         sp-search {
             --spectrum-search-border-radius: 16px;
         }
@@ -46,32 +37,34 @@ class MasFilterToolbar extends LitElement {
 
     static properties = {
         repository: { type: Object, state: true },
-        variant: { type: String, state: true },
-        filtersShown: { type: Boolean, state: true },
     };
 
+    constructor() {
+        super();
+        this.open = false;
+    }
+
+    get filterCount() {
+        if (this.open)
+            return html`<div slot="icon" class="filters-badge">0</div>`;
+        return html`<sp-icon-filter-add slot="icon"></sp-icon-filter-add>`;
+    }
+
     render() {
+        if (!this.repository) return nothing;
         return html`
             <sp-action-button
                 toggles
                 label="Filter"
-                @click=${() => this.repository.toggleFilterPanel()}
-                >Filter</sp-action-button
-                ?quiet=${!this.filtersShown}
-                class="${this.filtersShown ? 'filters-shown' : ''}"
-            >
-                ${
-                    !this.filtersShown
-                        ? html`<sp-icon-filter-add
-                              slot="icon"
-                          ></sp-icon-filter-add>`
-                        : html`<div slot="icon" class="filters-badge">0</div>`
-                }
-                Filter</sp-action-button
-            >
+                @click=${this.toggleFilterPanel}
+                quiet
+                emphasized
+                >Filter ${this.filterCount}
+            </sp-action-button>
             <div>
                 <sp-search
                     placeholder="Search"
+                    size="m"
                     @change="${this.handleSearch}"
                     @submit="${this.handleSearch}"
                     value=${this.repository.searchText}
@@ -83,23 +76,16 @@ class MasFilterToolbar extends LitElement {
 
     handleSearch(e) {
         e.preventDefault();
-        this.searchText = e.target.value;
-        pushState({ query: this.searchText });
+        pushState({ query: e.target.value });
     }
 
-    handleVariantChange(e) {
-        this.variant = e.target.value;
-        pushState({ variant: this.variant });
-    }
-
-    doSearch() {
-        this.dispatchEvent(
-            new CustomEvent('search-fragments', {
-                bubbles: true,
-                composed: true,
-            }),
-        );
+    toggleFilterPanel() {
+        this.open = !this.open;
+        this.repository.toggleFilterPanel(this.open);
     }
 }
 
-customElements.define('mas-filter-toolbar', MasFilterToolbar);
+customElements.define(
+    'mas-filter-toolbar',
+    litObserver(MasFilterToolbar, ['repository']),
+);

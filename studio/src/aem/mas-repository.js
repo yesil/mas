@@ -298,8 +298,8 @@ class MasRepository {
         }
     }
 
-    toggleFilterPanel() {
-        this.showFilterPanel = !this.showFilterPanel;
+    toggleFilterPanel(value) {
+        this.showFilterPanel = value ?? !this.showFilterPanel;
     }
 
     get fragments() {
@@ -311,6 +311,10 @@ class MasRepository {
 
     get selectedFragments() {
         return this.fragments.filter((fragment) => fragment.selected);
+    }
+
+    get selectedFragmentsIds() {
+        return this.selectedFragments.map((fragment) => fragment.id);
     }
 
     get selectionCount() {
@@ -331,7 +335,7 @@ const MasRepositoryObservable = makeObservable(
         'toggleFragmentSelection',
         'toggleFilterPanel',
     ],
-    ['selectedFragments', 'fragments'],
+    ['selectedFragments', 'selectedFragmentsIds', 'fragments'],
 );
 
 export { MasRepositoryObservable as MasRepository, getDamPath };

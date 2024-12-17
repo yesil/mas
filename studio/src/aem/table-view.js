@@ -69,15 +69,17 @@ class TableView extends LitElement {
     }
 
     updated() {
-        (async () => {
-            if (this.table) {
-                if (!this.repository.inSelection) {
-                    this.table.deselectAllRows();
-                }
-                this.table.items = this.repository.fragments;
-                this.table.renderVirtualizedItems(); /* hack: force to render when items.lenght = 0 */
-            }
-        })();
+        if (!this.table) return;
+        if (!this.repository.inSelection) {
+            this.table.deselectAllRows();
+        } else if (
+            this.table.selected.length === 0 &&
+            this.repository.selectedFragmentsIds
+        ) {
+            this.table.selected = this.repository.selectedFragmentsIds;
+        }
+        this.table.items = this.repository.fragments;
+        this.table.renderVirtualizedItems(); /* hack: force to render when items.lenght = 0 */
     }
 
     itemValue(item) {

@@ -41,7 +41,7 @@ class MasRecentlyUpdated extends LitElement {
     handleDoubleClick(e, fragment) {
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
-        this.source.selectFragment(e.clientX, e.clientY, fragment);
+        this.repository.selectFragment(e.clientX, fragment);
     }
 
     renderItem(fragment) {
@@ -55,10 +55,10 @@ class MasRecentlyUpdated extends LitElement {
     }
 
     render() {
-        if (!this.path) return nothing;
+        if (!this.repository.recentlyUpdatedfragments) return;
         return html` <h2>Recently Updated</h2>
             <div class="container">
-                ${this.repository.recentlyUpdatedFragments.map(this.renderItem)}
+                ${this.repository.recentlyUpdatedfragments.map(this.renderItem)}
             </div>`;
     }
 }

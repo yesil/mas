@@ -7,6 +7,9 @@ import './rte/rte-field.js';
 import './rte/rte-link-editor.js';
 import './mas-top-nav.js';
 import './mas-recently-updated.js';
+import './mas-folder-picker.js';
+import './aem/mas-fragment-status.js';
+
 import { MasRepository } from './aem/mas-repository.js';
 import { litObserver } from 'picosm';
 import { contentIcon } from './img/content-icon.js';
@@ -238,7 +241,7 @@ class MasStudio extends LitElement {
                 <side-nav>
                     <div class="dropdown-container">
                         <mas-folder-picker
-                            @picker-change=${this.handleFolderChange}
+                            .repository="${this.repository}"
                         ></mas-folder-picker>
                     </div>
                     <sp-sidenav>
@@ -279,17 +282,6 @@ class MasStudio extends LitElement {
 
     get toast() {
         return html`<sp-toast timeout="6000" popover></sp-toast>`;
-    }
-
-    handleFolderChange(event) {
-        const selectedValue = event.detail.value;
-        document.dispatchEvent(
-            new CustomEvent('folder-change', {
-                detail: { value: selectedValue },
-            }),
-        );
-        this.bucket = selectedValue;
-        this.requestUpdate();
     }
 
     get loadingIndicator() {

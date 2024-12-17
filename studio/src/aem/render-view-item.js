@@ -51,7 +51,9 @@ class RenderViewItem extends LitElement {
     }
 
     render() {
-        return html`<div class="render-card">
+        return html`<div
+            class="render-card ${this.fragment.selected ? 'selected' : ''}"
+        >
             <div class="render-card-header">
                 <div class="render-card-actions"></div>
                 <mas-fragment-status
@@ -60,7 +62,6 @@ class RenderViewItem extends LitElement {
             </div>
             <overlay-trigger placement="top"
                 ><merch-card
-                    class="${this.fragment.selected ? 'selected' : ''}"
                     @click=${(e) => {
                         e.stopPropagation();
                         e.preventDefault();
