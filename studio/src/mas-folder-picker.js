@@ -39,6 +39,9 @@ export class MasFolderPicker extends LitElement {
                 --mod-picker-background-color-default: rgb(248, 248, 248);
                 --mod-picker-border-radius: 0;
                 --mod-picker-border-width: 0;
+                --mod-picker-background-color-default-open: none;
+                --mod-picker-background-color-hover: none;
+                --mod-picker-background-color-hover-open: none;
             }
         `;
     }

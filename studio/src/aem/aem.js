@@ -56,7 +56,10 @@ class AEM {
      * @param {string} [params.query] - The search query
      * @returns A generator function that fetches all the matching data using a cursor that is returned by the search API
      */
-    async *searchFragment({ path, query = '', tags = [], sort }, limit) {
+    async *searchFragment(
+        { path, query = '', tags = [], sort, limit },
+        searchAbortSignal,
+    ) {
         const filter = {
             path,
         };
@@ -92,6 +95,7 @@ class AEM {
                 `${this.cfSearchUrl}?${searchParams}`,
                 {
                     headers: this.headers,
+                    signal: searchAbortSignal.signal,
                 },
             ).catch((err) => {
                 throw new Error(`${NETWORK_ERROR_MESSAGE}: ${err.message}`);

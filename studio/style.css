@@ -55,6 +55,7 @@ mas-folder-picker {
     align-items: center;
     padding: 8px 16px;
     margin-top: 16px;
+    height: 48px;
 }
 
 side-nav sp-sidenav-item {

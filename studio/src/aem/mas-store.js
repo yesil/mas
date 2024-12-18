@@ -1,6 +1,7 @@
 import { makeObservable, notify, reaction } from 'picosm';
 import { filterByTags, AEM } from './aem.js';
 import { Fragment } from './fragment.js';
+import { pushState } from '../deeplink.js';
 
 let aemFragmentCache;
 
@@ -31,6 +32,8 @@ class MasStore {
     topFolders = [];
     showFilterPanel = false;
     recentlyUpdatedfragments = [];
+    searchAbortSignal = null;
+    recentlyAbortSignal = null;
 
     setStatus(value) {
         this.status = value;
@@ -60,10 +63,18 @@ class MasStore {
         // search
         reaction(
             this,
-            ({ searchText, topFolder, tags }) => {
-                return [searchText, topFolder, tags];
+            () => {
+                return [
+                    this.searchText,
+                    this.topFolder,
+                    this.tags,
+                    this.showSplash,
+                ];
             },
-            () => this.searchFragments(),
+            () => {
+                if (this.showSplash) return;
+                this.searchFragments();
+            },
             100,
         );
 
@@ -71,7 +82,7 @@ class MasStore {
         reaction(
             this,
             ({ showSplash, topFolder }) => {
-                if (!showSplash) return [];
+                if (!(showSplash && topFolder)) return [];
                 return [topFolder];
             },
             () => this.loadRecentlyUpdatedFragments(),
@@ -100,7 +111,14 @@ class MasStore {
             const fragEl = document.createElement('aem-fragment');
             aemFragmentCache = fragEl.cache;
         }
-        aemFragmentCache.add(...fragments);
+        fragments.forEach((fragment) => {
+            const existing = aemFragmentCache.get(fragment.id);
+            if (existing) {
+                existing.refreshFrom(fragment);
+            } else {
+                aemFragmentCache.add(fragment);
+            }
+        });
     }
 
     async processFragments(cursor, search = false) {
@@ -114,7 +132,7 @@ class MasStore {
 
         for await (const result of cursor) {
             if (cursor.cancelled) break;
-            const fragments = result.map((item) => new Fragment(item, this));
+            const fragments = result.map((item) => new Fragment(item));
             if (search) {
                 this.#searchResult = [...this.#searchResult, ...fragments];
             } else {
@@ -148,9 +166,11 @@ class MasStore {
             fragmentData &&
             fragmentData.path.indexOf(getDamPath(this.topFolder)) === 0
         ) {
-            const fragment = new Fragment(fragmentData, this);
-            this.#searchResult = [fragment];
+            let fragment = new Fragment(fragmentData);
             await this.addToCache([fragment]);
+            fragment = aemFragmentCache.get(fragment.id);
+            this.#searchResult = [fragment];
+            this.setFragment(fragment);
         }
         this.setStatus(status.idle);
     }
@@ -160,6 +180,8 @@ class MasStore {
     }
 
     async searchFragments() {
+        this.searchAbortSignal?.abort();
+        this.searchAbortSignal = new AbortController();
         this.setStatus(status.loading);
         console.log('searching', this.topFolder, this.searchText, this.tags);
         this.#search = {
@@ -181,6 +203,7 @@ class MasStore {
         } else {
             const cursor = await this.#aem.sites.cf.fragments.search(
                 this.#search,
+                this.searchAbortSignal,
             );
             await this.processFragments(cursor, isSearching);
         }
@@ -202,7 +225,7 @@ class MasStore {
         this.setStatus(status.loading);
         const oldFragment = this.fragment;
         const fragment = await this.#aem.sites.cf.fragments.copy(oldFragment);
-        const newFragment = new Fragment(fragment, this);
+        const newFragment = new Fragment(fragment);
         aemFragmentCache?.add(newFragment);
 
         if (this.searchText) {
@@ -238,6 +261,7 @@ class MasStore {
     }
 
     async selectFragment(x, fragment) {
+        this.showSplash = false;
         this.setStatus(status.loading);
         this.fragmentPositionX = x;
         this.setStatus(status.loading);
@@ -249,18 +273,20 @@ class MasStore {
     }
 
     async loadRecentlyUpdatedFragments() {
+        this.recentlyAbortSignal?.abort();
+        this.recentlyAbortSignal = new AbortController();
         this.recentlyUpdatedfragments = [];
         this.setStatus(status.loading);
         const cursor = await this.#aem.sites.cf.fragments.search(
             {
                 sort: [{ on: 'modifiedOrCreated', order: 'DESC' }],
                 path: `/content/dam/mas/${this.topFolder}`,
-                // tags: ['mas:status/DEMO']
+                limit: 6,
             },
-            6,
+            this.recentlyAbortSignal,
         );
         const result = await cursor.next();
-        const fragments = result.value.map((item) => new Fragment(item, this));
+        const fragments = result.value.map((item) => new Fragment(item));
         await this.addToCache(fragments);
         this.recentlyUpdatedfragments.push(...fragments);
         this.setStatus(status.idle);
@@ -307,6 +333,9 @@ class MasStore {
 
     setShowSplash(value) {
         this.showSplash = value;
+        if (value) {
+            pushState({ query: null });
+        }
     }
 
     toggleSelectionMode(force) {

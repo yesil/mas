@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { litObserver, observe, subscribe } from 'picosm';
+import { pushState } from '../deeplink.js';
 
 class RenderViewItem extends LitElement {
     static properties = {
@@ -65,6 +66,9 @@ class RenderViewItem extends LitElement {
 
     handleDoubleClick(e, fragment) {
         if (this.store.inSelection) return;
+        if (this.store.showSplash) {
+            pushState({ query: fragment.id });
+        }
         clearTimeout(this.tooltipTimeout);
         e.currentTarget.classList.remove('has-tooltip');
         this.store.selectFragment(e.clientX, fragment);

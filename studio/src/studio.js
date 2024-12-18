@@ -48,8 +48,8 @@ class MasStudio extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         this.registerListeners();
-        this.startDeeplink();
         this.initStore();
+        this.startDeeplink();
     }
 
     registerListeners() {
@@ -292,6 +292,10 @@ class MasStudio extends LitElement {
             this.searchText = query ?? '';
             if (path) {
                 this.path = path;
+            }
+
+            if (query) {
+                this.store.setShowSplash(false);
             }
         });
     }
