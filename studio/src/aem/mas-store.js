@@ -321,6 +321,7 @@ class MasStore {
 
     setTopFolder(folder) {
         this.topFolder = folder || 'ccd';
+        this.setFragment(null);
     }
 
     setTopFolders(folders) {
