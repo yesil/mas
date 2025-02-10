@@ -55,7 +55,7 @@ class MasSideNav extends LitElement {
         }
 
         .side-nav-support {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             width: 220px;
         }
