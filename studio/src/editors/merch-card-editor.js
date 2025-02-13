@@ -189,12 +189,22 @@ class MerchCardEditor extends LitElement {
                 <sp-field-label for="prices">Prices</sp-field-label>
                 <rte-field
                     id="prices"
-                    inline
                     data-field="prices"
                     default-link-style="primary-outline"
                     @change="${this.updateFragment}"
                     >${unsafeHTML(form.prices.values[0])}</rte-field
                 >
+            </sp-field-group>
+            <sp-field-group class="toggle" id="promoText">
+                <sp-field-label for="promo-text">Promo Text</sp-field-label>
+                <sp-textfield
+                    placeholder="Enter promo text"
+                    id="promo-text"
+                    data-field="promoText"
+                    value="${form.promoText?.values[0]}"
+                    @input="${this.updateFragment}"
+                    ?disabled=${this.disabled}
+                ></sp-textfield>
             </sp-field-group>
             <sp-field-group class="toggle" id="description">
                 <sp-field-label for="description">Description</sp-field-label>
@@ -207,6 +217,27 @@ class MerchCardEditor extends LitElement {
                     >${unsafeHTML(form.description.values[0])}</rte-field
                 >
             </sp-field-group>
+            <sp-field-group class="toggle" id="callout">
+                <sp-field-label for="callout"> Callout text </sp-field-label>
+                <rte-field
+                    id="callout"
+                    link
+                    data-field="callout"
+                    default-link-style="secondary-link"
+                    @change="${this.updateFragment}"
+                    ?readonly=${this.disabled}
+                    >${unsafeHTML(form.callout?.values[0])}</rte-field
+                >
+            </sp-field-group>
+            <sp-checkbox
+                size="m"
+                data-field="showStockCheckbox"
+                value="${form.showStockCheckbox?.values[0]}"
+                .checked="${form.showStockCheckbox?.values[0]}"
+                @change="${this.updateFragment}"
+                ?disabled=${this.disabled}
+                >Stock Checkbox</sp-checkbox
+            >
             <sp-field-group class="toggle" id="ctas">
                 <sp-field-label for="ctas">Footer</sp-field-label>
                 <rte-field
