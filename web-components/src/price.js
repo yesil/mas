@@ -19,7 +19,6 @@ import {
     computePromoStatus,
     toBoolean,
 } from '@dexter/tacocat-core';
-import { InlinePrice } from './inline-price.js';
 import { toOfferSelectorIds, toQuantity } from './utilities.js';
 
 export function Price({ literals, providers, settings }) {
@@ -123,12 +122,8 @@ export function Price({ literals, providers, settings }) {
         return method({ ...settings, ...options }, offer);
     }
 
-    const createInlinePrice = InlinePrice.createInlinePrice;
-
     return {
-        InlinePrice,
         buildPriceHTML,
         collectPriceOptions,
-        createInlinePrice,
     };
 }
