@@ -38,6 +38,8 @@ The following copy-related placeholders are supported:
 
 ### Link Placeholders
 
+Links are rendered as Spectrum links in the picker dialog, allowing authors to copy and paste them directly instead of manually authoring link components.
+
 #### Getting Started Links
 
 - `{{mcs.links.getting_started.text}}` - Getting started link text
