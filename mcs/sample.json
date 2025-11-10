@@ -1,0 +1,1284 @@
+[
+    {
+        "id": "joAWgwgDwLnN2Do3T9f8ndopjzInCVgpEwpBxQ5TD50",
+        "requested_cpa_id": "joAWgwgDwLnN2Do3T9f8ndopjzInCVgpEwpBxQ5TD50",
+        "code": "PA-55",
+        "family": "CC_EXPRESS",
+        "cloud": "CREATIVE",
+        "merchandising": {
+            "assets": {
+                "icons": {
+                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/adobeexpress_appicon_noshadow_48x48.png",
+                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/adobeexpress_appicon_noshadow_16x16.png",
+                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/adobeexpress.svg",
+                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/adobeexpress_appicon_noshadow_128x128.png"
+                },
+                "background_images": {
+                    "328x80": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/backgroundImages/raw/328x80/Ru@1x.png",
+                    "558x80": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/backgroundImages/raw/558x80/Ru@2x.png"
+                }
+            },
+            "copy": {
+                "name": "Adobe Express",
+                "short_name": "Adobe Express",
+                "internal_name": "Adobe Express",
+                "description": "Adobe Express rassemble tous les outils dont vous avez besoin pour créer et partager en toute confiance de superbes contenus graphiques, photo et vidéo en un rien de temps. Optimisé par Photoshop et Acrobat.",
+                "short_description": "Créez en toute confiance du contenu de réseaux sociaux, des affiches, des prospectus, des cartes de visite et des logos en un rien de temps."
+            },
+            "links": {
+                "getting_started": [
+                    {
+                        "text": "Commencer",
+                        "href": "https://express.adobe.com/"
+                    }
+                ],
+                "getting_started_template": [
+                    {
+                        "text": "Commencer",
+                        "href": "https://www.adobe.com/go/ccx_getstarted_fr"
+                    }
+                ]
+            },
+            "misc": {},
+            "context": "default",
+            "metadata": {
+                "content_fragment_path": "/content/dam/mcs/fr_fr/product/cf-product-6546962f-d8ca-49be-9759-1dadca73ecf7"
+            }
+        },
+        "type": "BASE",
+        "administrable_items": {
+            "PA-55_default": {
+                "code": "PA-55_default",
+                "enabled": true,
+                "merchandising": {
+                    "assets": {
+                        "icons": {
+                            "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/adobeexpress_appicon_noshadow_48x48.png",
+                            "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/adobeexpress_appicon_noshadow_16x16.png",
+                            "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/adobeexpress.svg",
+                            "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/adobeexpress_appicon_noshadow_128x128.png"
+                        },
+                        "background_images": {
+                            "328x80": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/backgroundImages/raw/328x80/Ru@1x.png",
+                            "558x80": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/backgroundImages/raw/558x80/Ru@2x.png"
+                        }
+                    },
+                    "copy": {
+                        "name": "Adobe Express",
+                        "short_name": "Adobe Express",
+                        "description": "Adobe Express rassemble tous les outils dont vous avez besoin pour créer et partager en toute confiance de superbes contenus graphiques, photo et vidéo en un rien de temps. Optimisé par Photoshop et Acrobat.",
+                        "short_description": "Créez en toute confiance du contenu de réseaux sociaux, des affiches, des prospectus, des cartes de visite et des logos en un rien de temps."
+                    },
+                    "links": {
+                        "getting_started": [
+                            {
+                                "text": "Commencer",
+                                "href": "https://express.adobe.com/"
+                            }
+                        ],
+                        "getting_started_template": [
+                            {
+                                "text": "Commencer",
+                                "href": "https://www.adobe.com/go/ccx_getstarted_fr"
+                            }
+                        ]
+                    },
+                    "metadata": {
+                        "content_fragment_path": "/content/dam/mcs/fr_fr/product/cf-product-6546962f-d8ca-49be-9759-1dadca73ecf7"
+                    }
+                },
+                "fulfillable_items": {
+                    "spark_video": {
+                        "id": "b755a283-f4e8-4cc8-afe6-b106b22551f5",
+                        "code": "spark_video",
+                        "type": "DESKTOP",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 1,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/spark_video_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/spark_video_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/spark_video.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/spark_video_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Spark Video",
+                                "enterprise_name": "Adobe Spark Video",
+                                "description": "Créez de courtes vidéos percutantes en quelques minutes.",
+                                "short_description": "Créez de courtes vidéos percutantes en quelques minutes."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-64af1322-a934-4069-8f79-ed277a8220f2"
+                            }
+                        }
+                    },
+                    "cc_storage": {
+                        "id": "cb14fe7d-7b02-4c95-9efa-d423b2059f84",
+                        "code": "cc_storage",
+                        "type": "QUOTA",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "cap": 100,
+                            "unit": "GB",
+                            "overage": "NA"
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/cc_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/cc_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/cc_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/cc_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Actifs Creative Cloud",
+                                "enterprise_name": "Creative Cloud Assets",
+                                "description": "Tous vos actifs créatifs. Toujours à portée de main. Avec les bibliothèques Creative Cloud, vous avez un accès rapide aux polices, aux couleurs, aux graphiques, aux images Adobe Stock et aux autres éléments créatifs que vous utilisez le plus. Tous vos actifs restent à jour sur votre bureau et vos appareils mobiles. Vous pouvez même partager des bibliothèques avec des membres de l’équipe pour assurer la cohérence de vos conceptions avec tout le monde sur la même page.",
+                                "short_description": "Espace de stockage en ligne afin que vos actifs soient à votre disposition n’importe où et sur n’importe quel appareil ou ordinateur."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-9fd19733-5892-4967-9c01-daf2fcee6530"
+                            }
+                        },
+                        "feature_sets": {
+                            "CS_LVL_2": {
+                                "id": "CS_LVL_2",
+                                "label": "CS LVL 2",
+                                "enabled": true
+                            },
+                            "VRT_30": {
+                                "id": "VRT_30",
+                                "label": "VRT 30",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "cc_extract": {
+                        "id": "89f20c6a-96a1-4df2-a8ac-8a67b8c76d7c",
+                        "code": "cc_extract",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA"
+                        },
+                        "ui": {
+                            "visible": false,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/cc_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/cc_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/cc_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/cc_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Extract",
+                                "enterprise_name": "Extract",
+                                "description": "Creative Cloud Extract permet aux designers et développeurs web d’extraire les informations de conception d’une composition PSD sous forme de code et d’actifs. Il est notamment possible de convertir en code CSS des polices, couleurs et mesures provenant d’un fichier PSD, mais aussi d’enregistrer directement les images de la composition PSD en tant que fichiers SVG, PNG ou JPEG optimisés.",
+                                "short_description": "Extract permet aux designers et développeurs web d’extraire les informations relatives au design d’un fichier PSD en tant que code et actifs."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-16addce5-8a19-45f7-9da0-dd3333d96259"
+                            }
+                        }
+                    },
+                    "core_services_cc": {
+                        "id": "77f39a25-eb6b-480c-9c5c-c6ad03c87382",
+                        "code": "core_services_cc",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/cc_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/cc_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/cc_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/cc_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Core CC Services",
+                                "enterprise_name": "Core Creative Cloud Services",
+                                "description": "Creative Cloud Service est au cœur de la fonction du produit et est toujours en place avec un plan incluant le stockage. Les services principaux incluent la synchronisation de fichiers, la collaboration, les bibliothèques Creative Cloud et bien plus encore.",
+                                "short_description": "Creative Cloud Service est au cœur de la fonction du produit et est toujours en place avec un plan incluant le stockage."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-aa113ff9-3ed3-487c-9441-11fc758bf776"
+                            }
+                        },
+                        "feature_sets": {
+                            "CS_LVL_2": {
+                                "id": "CS_LVL_2",
+                                "label": "CS LVL 2",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "spark_post": {
+                        "id": "4a64575f-beca-458e-92aa-ea57b0f34c5b",
+                        "code": "spark_post",
+                        "type": "DESKTOP",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": false,
+                            "group": 1,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/adobeexpress_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/adobeexpress_appicon_noshadow_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/adobeexpress.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/adobeexpress_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Adobe Express",
+                                "enterprise_name": "Adobe Express",
+                                "description": "Adobe Express rassemble tous les outils dont vous avez besoin pour créer et partager en toute confiance de superbes contenus graphiques, photo et vidéo en un rien de temps. Optimisé par Photoshop et Acrobat.",
+                                "short_description": "Créez en toute confiance du contenu de réseaux sociaux, des affiches, des prospectus, des cartes de visite et des logos en un rien de temps."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-712e66e2-ee6e-4bb4-9171-a3486d174e09"
+                            }
+                        }
+                    },
+                    "spark": {
+                        "id": "33229576-711e-4a66-9382-a40acd9ca586",
+                        "code": "spark",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA"
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/adobeexpress_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/adobeexpress_appicon_noshadow_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/adobeexpress.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/adobeexpress_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Adobe Express",
+                                "enterprise_name": "Adobe Express",
+                                "description": "Adobe Express rassemble tous les outils dont vous avez besoin pour créer et partager en toute confiance de superbes contenus graphiques, photo et vidéo en un rien de temps. Optimisé par Photoshop et Acrobat.",
+                                "short_description": "Créez en toute confiance du contenu de réseaux sociaux, des affiches, des prospectus, des cartes de visite et des logos en un rien de temps."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-ca217d0a-32fc-49dd-8c74-872316d69e47"
+                            }
+                        },
+                        "feature_sets": {
+                            "IND_P": {
+                                "id": "IND_P",
+                                "label": "IND P",
+                                "enabled": true
+                            },
+                            "upgr_in_exprs": {
+                                "id": "upgr_in_exprs",
+                                "label": "Upgr In Exprs",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "portfolio": {
+                        "id": "50bed6f9-d3fa-4f81-8940-0d8e59c9162b",
+                        "code": "portfolio",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA"
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/Pf_appicon_noshadow_48x48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/Pf_appicon_noshadow_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/pf_appicon_256x256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/Pf_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Adobe Portfolio",
+                                "enterprise_name": "Adobe Portfolio",
+                                "description": "Lorsque votre travail créatif représente le travail de votre vie, rien n’est plus important que d’avoir un magnifique portfolio. Adobe Portfolio, fourni gratuitement avec n’importe quelle formule Adobe Creative Cloud, vous permet de créer rapidement et simplement un site web pour mettre en valeur votre travail de création, afin que vous puissiez vous concentrer sur ce que vous faites le mieux.",
+                                "short_description": "Sites web simples et esthétiques pour vos portfolios créatifs."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-01507263-d2f3-46cc-a302-14c2025c468d"
+                            }
+                        },
+                        "feature_sets": {
+                            "PREMIUM_LVL": {
+                                "id": "PREMIUM_LVL",
+                                "label": "PREMIUM LVL",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "photoshop_express": {
+                        "id": "7d430f3b-b5c5-4358-a7eb-f9db9b0aa8a2",
+                        "code": "photoshop_express",
+                        "type": "DESKTOP",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 1,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/ps_express_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/ps_express_appicon_noshadow_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/ps_express_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/ps_express_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Adobe Photoshop Express",
+                                "enterprise_name": "Photoshop Express",
+                                "description": "Photoshop Express est un éditeur de photo mobile qui offre les options de retouche les plus fréquemment utilisées en exploitant la technologie Photoshop pour faciliter les retouches et enrichir vos photos avant de les partager.",
+                                "short_description": "Capturer. Retoucher. Partager. S’amuser. La magie de la photo au bout des doigts."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-c009375e-e9f3-478f-8121-cfbf2248e231"
+                            }
+                        }
+                    },
+                    "export_pdf": {
+                        "id": "c82feff7-ab72-471d-af7e-c1653fd0aa5a",
+                        "code": "export_pdf",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/acrobat_reader_appicon_noshadow_48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/acrobat_reader_appicon_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/acrobat_reader_appicon_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/acrobat_reader_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Acrobat Export PDF",
+                                "enterprise_name": "Adobe Export PDF",
+                                "description": "Convertissez un nombre illimité de fichiers PDF en fichiers MS Word, Excel, ou RTF pour les modifier facilement grâce à ce service en ligne pratique.",
+                                "short_description": "Convertissez des fichiers PDF aux formats Word, Excel ou RTF en ligne."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-f1441afe-5182-4fd3-a6f7-f835b2d40bf2"
+                            }
+                        },
+                        "feature_sets": {
+                            "ACOM_W_1": {
+                                "id": "ACOM_W_1",
+                                "label": "ACOM W 1",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "dc_storage": {
+                        "id": "0f9087f3-f67a-4015-a3e8-6a92cbf8cec1",
+                        "code": "dc_storage",
+                        "type": "QUOTA",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "cap": 100,
+                            "unit": "GB",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/dc_appicon_noshadow_48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/dc_appicon_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/dc_appicon_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/dc_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Stockage DC",
+                                "enterprise_name": "DC Storage",
+                                "description": "Stockage Document Cloud",
+                                "short_description": "Stockage Document Cloud"
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-59b0c9f9-a69e-43be-8c0e-b4803e8b6d6e"
+                            }
+                        },
+                        "feature_sets": {
+                            "ACOM_FREE": {
+                                "id": "ACOM_FREE",
+                                "label": "ACOM FREE",
+                                "enabled": true
+                            },
+                            "VRT_30": {
+                                "id": "VRT_30",
+                                "label": "VRT 30",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "cc_preview": {
+                        "id": "e7bdf9ec-8229-46eb-9d16-a2e3c8653fd7",
+                        "code": "cc_preview",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": false,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/cc_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/cc_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/cc_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/cc_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Aperçu sur le périphérique",
+                                "enterprise_name": "Device Preview",
+                                "description": "Le service Aperçu sur le périphérique est une fonctionnalité de Photoshop et Dreamweaver qui permet d’obtenir un aperçu précis et contextualisé de conceptions et de sites web sur un appareil donné. Les modifications sont appliquées en temps réel sur l’appareil, pour que l’utilisateur puisse vérifier leur rendu au fur et à mesure.",
+                                "short_description": "Obtenez des aperçus en temps réel de vos compositions et sites web."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-e08a7481-f9c2-4d66-a1fb-00c299182994"
+                            }
+                        }
+                    },
+                    "pdf_services": {
+                        "id": "e8de6aa9-77ed-4e6e-a421-5c74907cf3ab",
+                        "code": "pdf_services",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "levels": 0,
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/acrobat_reader_appicon_48x48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/acrobat_reader_appicon_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/acrobat_reader_appicon_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/acrobat_reader_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "PDF Services",
+                                "enterprise_name": "PDF Services",
+                                "description": "La suite « PDF Services » contient des outils essentiels permettant de stocker et de partager des fichiers en ligne, mais aussi de créer, combiner, exporter, classer, compléter et signer, et envoyer et suivre des documents.",
+                                "short_description": "Les services PDF sont des outils essentiels pour stocker et partager des fichiers PDF en ligne."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-88fb8a30-31c7-44a9-9813-cc021ad18573"
+                            }
+                        }
+                    },
+                    "create_pdf_standalone": {
+                        "id": "e400f310-de98-4593-af1d-0e5dde2142e5",
+                        "code": "create_pdf_standalone",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/acrobat_reader_appicon_noshadow_48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/acrobat_reader_appicon_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/acrobat_reader_appicon_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/acrobat_reader_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Acrobat Create PDF",
+                                "enterprise_name": "Create PDF Standalone",
+                                "description": "Vous pouvez facilement créer des fichiers PDF à partir de vos fichiers MS Word, Excel, RTF et de formats d’image tels que JPG, TIFF et PNG ainsi que les formats PowerPoint.",
+                                "short_description": "Créez des fichiers PDF à partir d’autres formats de fichiers tels que MS Word, Excel, JPG et plus encore."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-03221dab-1968-4280-9185-6a44c2d96dbd"
+                            }
+                        },
+                        "feature_sets": {
+                            "ACOM_W_1": {
+                                "id": "ACOM_W_1",
+                                "label": "ACOM W 1",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "canvas": {
+                        "id": "f3c71f0f-360c-4da3-8bd9-bf3ec7471372",
+                        "code": "canvas",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/cc_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/cc_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/cc_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/cc_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Projet Spice (pré-version)",
+                                "enterprise_name": "Project Spice (Prerelease)",
+                                "description": "Ce projet n’accepte plus les nouveaux participants de pré-lancement",
+                                "short_description": "Ce projet n’accepte plus les nouveaux participants de pré-lancement"
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-d407bff9-2b39-4aba-bd74-016d59adf0ed"
+                            }
+                        }
+                    },
+                    "premiere_rush_cc_feature_access": {
+                        "id": "8ee43029-1db7-4129-a00e-2edf99cfca51",
+                        "code": "premiere_rush_cc_feature_access",
+                        "type": "FEATURE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "unit": "paid_level1",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/ru_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/ru_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/ru_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/ru_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Premiere Rush",
+                                "enterprise_name": "Premiere Rush",
+                                "description": "Premiere Rush est la solution tout-en-un pour créer et partager des vidéos en ligne, depuis un appareil mobile ou fixe. Cette formule comprend Premiere Rush avec 100 Go d’espace de stockage et l’accès à des polices exclusives.",
+                                "short_description": "La solution tout-en-un pour créer et partager des vidéos."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-28d21640-534a-43a5-b935-f5289954e812"
+                            }
+                        }
+                    },
+                    "stock_limited": {
+                        "id": "dac19688-d02e-4535-b94e-954a578b052d",
+                        "code": "stock_limited",
+                        "type": "QUOTA",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": false,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/St_appicon_noshadow_48x48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/St_appicon_noshadow_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/st_appicon_256x256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/St_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Images Adobe Stock",
+                                "enterprise_name": "Adobe Stock Images",
+                                "description": "Accédez à des millions de ressources de haute qualité et libres de droits pour votre prochain projet créatif.",
+                                "short_description": "Accédez à des millions de ressources de haute qualité et libres de droits pour votre prochain projet créatif."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-212e4366-cf1e-4cc6-8c8d-2236d9d2f136"
+                            }
+                        }
+                    },
+                    "adobe_premiere_rush_mobile": {
+                        "id": "7476a4ee-557d-4779-a409-4f4910591a66",
+                        "code": "adobe_premiere_rush_mobile",
+                        "type": "DESKTOP",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 1,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/ru_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/ru_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/ru_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/ru_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Premiere Rush Mobile",
+                                "enterprise_name": "Premiere Rush Mobile",
+                                "description": "Premiere Rush est la solution idéale pour créer et partager des vidéos en ligne. Cette formule comprend Premiere Rush pour iPhone ou téléphone Android, du contenu exclusif et bien plus encore.",
+                                "short_description": "Créez et partagez des vidéos depuis un smartphone iPhone ou Android."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-c0e34e62-dde3-4308-b16d-f1ae51529634"
+                            }
+                        },
+                        "feature_sets": {
+                            "full": {
+                                "id": "full",
+                                "label": "Full",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "bulk_create": {
+                        "id": "1d7def0f-3859-43c6-b54c-783b54f4dfad",
+                        "code": "bulk_create",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Firefly Creative Production",
+                                "enterprise_name": "Firefly Creative Production",
+                                "description": "Tirez parti de l’interface Firefly Creative Production pour modifier facilement des images en masse.",
+                                "short_description": "Tirez parti de l’interface Firefly Creative Production pour modifier facilement des images en masse."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-21f52ba9-56a5-4c4b-885c-24c256839e15"
+                            }
+                        }
+                    },
+                    "rush_mobile_feature_access": {
+                        "id": "430384eb-bb39-4b78-8a5a-64471f17f02f",
+                        "code": "rush_mobile_feature_access",
+                        "type": "FEATURE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/ru_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/ru_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/ru_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/ru_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Premiere Rush Mobile",
+                                "enterprise_name": "Premiere Rush Mobile",
+                                "description": "Premiere Rush est la solution idéale pour créer et partager des vidéos en ligne. Cette formule comprend Premiere Rush pour iPhone ou téléphone Android, du contenu exclusif et bien plus encore.",
+                                "short_description": "Créez et partagez des vidéos depuis un smartphone iPhone ou Android."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-265545bc-85b8-439f-90b1-31e67206892f"
+                            }
+                        },
+                        "feature_sets": {
+                            "full": {
+                                "id": "full",
+                                "label": "Full",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "firefly_fair_use": {
+                        "id": "a24cc40e-b956-42db-b749-990cf40c370b",
+                        "code": "firefly_fair_use",
+                        "type": "QUOTA",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": false,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/en/icons/firefly_appicon_Jan2025_48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/en/icons/firefly_appicon_Jan2025_16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/en/icons/firefly_appicon_Jan2025_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/en/icons/firefly_appicon_Jan2025_128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Firefly fair use",
+                                "enterprise_name": "Firefly fair use",
+                                "description": "Provides access to certain workflows powered by Adobe Firefly. Adobe Firefly is a family of creative generative AI models powering some of Adobe's generative AI features. Firefly will drive real content workflows used by creators of all levels.",
+                                "short_description": "Provides access to certain workflows powered by Adobe Firefly.  Adobe Firefly is a family of creative generative AI models powering some of Adobe's generative AI features."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/en/entitlement/cf-entitlement-293d6587-fd66-450d-87db-482d9f171f0c"
+                            }
+                        },
+                        "feature_sets": {
+                            "premium": {
+                                "id": "premium",
+                                "label": "Premium",
+                                "enabled": true
+                            },
+                            "ff_lvl_22_mtrd_both": {
+                                "id": "ff_lvl_22_mtrd_both",
+                                "label": "Ff Lvl 22 Mtrd Both",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "behance": {
+                        "id": "c7a8a308-1abf-46f2-8f04-3e587fa6ac5a",
+                        "code": "behance",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA"
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/Be_appicon_noshadow_48x48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/Be_appicon_noshadow_16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/be_appicon_256x256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/Be_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Behance Network",
+                                "enterprise_name": "Community",
+                                "description": "Behance est une plate-forme sur laquelle les membres inscrits peuvent créer un portfolio public pour présenter leurs travaux de création. Avec le module Adobe Portfolio, chaque utilisateur peut, en quelques minutes, créer et gérer son propre portfolio entièrement personnalisé.",
+                                "short_description": "Behance est une plate-forme permettant à ses membres de créer un portfolio public pour présenter leurs travaux créatifs."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-b277c560-e428-444b-a9c1-cda7d137bea9"
+                            }
+                        },
+                        "feature_sets": {
+                            "PAID_LVL_1": {
+                                "id": "PAID_LVL_1",
+                                "label": "PAID LVL 1",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "photoshop_express_feature_access": {
+                        "id": "d24c76d4-bdf0-40ad-8194-50e6653363a6",
+                        "code": "photoshop_express_feature_access",
+                        "type": "FEATURE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/ps_express_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/ps_express_appicon_noshadow_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/ps_express_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/ps_express_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Accès aux fonctionnalités Photoshop Express",
+                                "enterprise_name": "Photoshop Express Feature Access",
+                                "description": "Accès aux fonctionnalités Photoshop Express",
+                                "short_description": "Accès aux fonctionnalités Photoshop Express"
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-80d7b0dc-0bf2-4146-af03-e5b6c46fc4e1"
+                            }
+                        }
+                    },
+                    "typekit": {
+                        "id": "267d918f-9b7e-45d3-9099-947a58a789a1",
+                        "code": "typekit",
+                        "type": "SERVICE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA"
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/adobe-fonts-no-shadow-48x48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/adobe-fonts-16x16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/adobe-fonts.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/adobe-fonts-128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Adobe Fonts",
+                                "enterprise_name": "Fonts",
+                                "description": "Des milliers de polices que les abonnés à Creative Cloud peuvent utiliser dans les applications pour postes de travail et sur le web.",
+                                "short_description": "Des milliers de polices à utiliser dans les applications pour postes de travail et sur le web."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-7b01434e-b791-43dc-9fa4-b6949f13decb"
+                            }
+                        },
+                        "feature_sets": {
+                            "PAID_LVL_2": {
+                                "id": "PAID_LVL_2",
+                                "label": "PAID LVL 2",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "cc_express_mobile_feature_access": {
+                        "id": "0ab6f879-9eb4-4e69-a54b-cde96f32aff7",
+                        "code": "cc_express_mobile_feature_access",
+                        "type": "FEATURE",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/adobeexpress_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/adobeexpress_appicon_noshadow_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/adobeexpress.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/adobeexpress_appicon_noshadow_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Accès aux fonctionnalités d’Adobe  Express",
+                                "enterprise_name": "Adobe Express Feature Access",
+                                "description": "Accès aux fonctionnalités d’Adobe  Express",
+                                "short_description": "Accès aux fonctionnalités d’Adobe  Express"
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-5c086435-6bf8-4c11-b4c8-b8aadde36d06"
+                            }
+                        }
+                    },
+                    "firefly_credits": {
+                        "id": "2214397b-b77f-4a50-9941-2081e12e9c3a",
+                        "code": "firefly_credits",
+                        "type": "QUOTA",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "cap": 250,
+                            "unit": "GENERATIVE CREDITS",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_48.png",
+                                    "16x16": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_16.png",
+                                    "svg": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_256.svg",
+                                    "128x128": "https://mcs.odin.adobe.com/content/dam/mcs/fr_fr/icons/firefly_appicon_Jan2025_128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Adobe Firefly",
+                                "enterprise_name": "Adobe Firefly",
+                                "description": "Permet d’accéder à certains workflows optimisés par Adobe Firefly. Adobe Firefly est une famille de modèles d’IA générative créative qui alimentent certaines fonctionnalités d’IA générative d’Adobe. Firefly gère les workflows de contenu réel utilisés par les créateurs de tous niveaux.",
+                                "short_description": "Permet d’accéder à certains workflows optimisés par Adobe Firefly. Adobe Firefly est une famille de modèles d’IA générative créative qui alimentent certaines fonctionnalités d’IA générative d’Adobe.",
+                                "units": {
+                                    "default": "crédits génératifs"
+                                }
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-5c29c2f2-1925-4035-83c8-282e3a0a1524"
+                            }
+                        },
+                        "feature_sets": {
+                            "hard_capped": {
+                                "id": "hard_capped",
+                                "label": "Hard Capped",
+                                "enabled": true
+                            },
+                            "premium": {
+                                "id": "premium",
+                                "label": "Premium",
+                                "enabled": true
+                            },
+                            "standard_credits": {
+                                "id": "standard_credits",
+                                "label": "Standard Credits",
+                                "enabled": true
+                            },
+                            "premium_credits": {
+                                "id": "premium_credits",
+                                "label": "Premium Credits",
+                                "enabled": true
+                            },
+                            "ff_lvl_22_mtrd_both": {
+                                "id": "ff_lvl_22_mtrd_both",
+                                "label": "Ff Lvl 22 Mtrd Both",
+                                "enabled": true
+                            }
+                        }
+                    },
+                    "spark_page": {
+                        "id": "47fb45dc-f5f0-4cf1-8197-2484e2290310",
+                        "code": "spark_page",
+                        "type": "DESKTOP",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 1,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/spark_page_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/spark_page_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/spark_page.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/spark_page_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Spark Page",
+                                "enterprise_name": "Adobe Spark Page",
+                                "description": "Transformez les mots et les images en magnifiques pages Web en quelques minutes seulement.",
+                                "short_description": "Transformez les mots et les images en magnifiques pages Web en quelques minutes seulement."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-f1d0831b-3202-4532-bf2d-6e48e2d3a083"
+                            }
+                        }
+                    },
+                    "premiere_rush_cc": {
+                        "id": "b8b745d6-b901-4460-88e0-246aa6e7e0e0",
+                        "code": "premiere_rush_cc",
+                        "type": "DESKTOP",
+                        "fulfillment_configurable": false,
+                        "delegation_configurable": false,
+                        "charging_model": {
+                            "model": "RECURRING",
+                            "overage": "NA",
+                            "rollover": 0
+                        },
+                        "ui": {
+                            "visible": true,
+                            "group": 0,
+                            "position": 50
+                        },
+                        "api_access": false,
+                        "off_by_default": false,
+                        "enabled": true,
+                        "merchandising": {
+                            "assets": {
+                                "icons": {
+                                    "48x48": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/48x48/ru_appicon_noshadow_48x48.png",
+                                    "16x16": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/16x16/ru_appicon_16x16.png",
+                                    "svg": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/svg/ru_appicon.svg",
+                                    "128x128": "https://odin.adobe.com/content/dam/mcs/fr_fr/icons/raw/128x128/ru_appicon_128x128.png"
+                                }
+                            },
+                            "copy": {
+                                "name": "Premiere Rush",
+                                "enterprise_name": "Premiere Rush",
+                                "description": "Premiere Rush est la solution tout-en-un pour créer et partager des vidéos en ligne, depuis un appareil mobile ou fixe. Cette formule comprend Premiere Rush avec 100 Go d’espace de stockage et l’accès à des polices exclusives.",
+                                "short_description": "La solution tout-en-un pour créer et partager des vidéos."
+                            },
+                            "metadata": {
+                                "content_fragment_path": "/content/dam/mcs/fr_fr/entitlement/cf-entitlement-e8cf66fd-d4f2-4679-a83c-8addba29e62b"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+]
