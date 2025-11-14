@@ -31,6 +31,20 @@ const { metafile } = await build({
 });
 writeFileSync(`commerce.json`, JSON.stringify(metafile));
 
+// commerce.js
+await build({
+    ...defaults,
+    alias: {
+        react: 'test/mocks/react.js',
+    },
+    entryPoints: ['./src/commerce.min.js'],
+    outfile: `${outfolder}/commerce.min.js`,
+    platform: 'browser',
+    banner: {
+        js: `window.masPriceLiterals = ${priceLiteralsContent}.data;`,
+    },
+});
+
 // mas.js
 await build({
     ...defaults,
