@@ -569,6 +569,36 @@ describe('Fragment', () => {
             expect(fragment.hasChanges).to.be.false;
         });
 
+        it('replaceFrom excludes offerData and groupedVariations from the cloned data', () => {
+            const fragment = new Fragment(createFragmentConfig({ fields: [] }));
+
+            fragment.replaceFrom({
+                ...createFragmentConfig({ fields: [{ name: 'title', values: ['New'] }] }),
+                offerData: { offerId: 'abc' },
+                groupedVariations: [{ path: '/content/dam/mas/sandbox/en_US/pzn/var' }],
+            });
+
+            expect(fragment.getFieldValues('title')).to.deep.equal(['New']);
+            expect(fragment.offerData).to.be.undefined;
+            expect(fragment.groupedVariations).to.be.undefined;
+        });
+
+        it('refreshFrom excludes offerData and groupedVariations from initialValue', () => {
+            const fragment = new Fragment(
+                createFragmentConfig({
+                    fields: [{ name: 'title', values: ['Original'] }],
+                    offerData: { offerId: 'xyz' },
+                    groupedVariations: [{ path: '/content/dam/mas/sandbox/en_US/pzn/var' }],
+                }),
+            );
+
+            expect(fragment.offerData).to.be.undefined;
+            expect(fragment.groupedVariations).to.be.undefined;
+            expect(fragment.initialValue.offerData).to.be.undefined;
+            expect(fragment.initialValue.groupedVariations).to.be.undefined;
+            expect(fragment.initialValue.fields.find((f) => f.name === 'title').values).to.deep.equal(['Original']);
+        });
+
         it('generateFragmentStore maintains source/preview isolation', () => {
             const fragment = new Fragment(createFragmentConfig({ fields: [{ name: 'desc', values: [] }] }));
             const parent = new Fragment(createFragmentConfig({ fields: [{ name: 'desc', values: ['parent'] }] }));
@@ -649,6 +679,103 @@ describe('Fragment', () => {
                 }),
             );
             expect(fragment.getCurrentTagTitle('mas:product_code/')).to.equal('My Custom Code');
+        });
+    });
+
+    describe('getPublishableReferences', () => {
+        it('returns empty object when there are no references', () => {
+            const fragment = new Fragment(createFragmentConfig({ references: [] }));
+            expect(fragment.getPublishableReferences()).to.deep.equal({ variations: [], cards: [] });
+        });
+
+        it('returns all variations and cards regardless of status', () => {
+            const fragment = new Fragment(
+                createFragmentConfig({
+                    path: '/content/dam/mas/sandbox/en_US/my-fragment',
+                    references: [
+                        { id: 'var-1', path: '/content/dam/mas/sandbox/en_GB/my-fragment', status: 'DRAFT' },
+                        { id: 'card-1', path: '/content/dam/mas/sandbox/en_US/some-card', status: 'UNPUBLISHED' },
+                        { id: 'pub-1', path: '/content/dam/mas/sandbox/en_AU/my-fragment', status: 'PUBLISHED' },
+                    ],
+                    fields: [
+                        {
+                            name: 'variations',
+                            values: [
+                                '/content/dam/mas/sandbox/en_GB/my-fragment',
+                                '/content/dam/mas/sandbox/en_AU/my-fragment',
+                            ],
+                        },
+                        { name: 'cards', values: ['/content/dam/mas/sandbox/en_US/some-card'] },
+                    ],
+                }),
+            );
+            const result = fragment.getPublishableReferences();
+            expect(result.variations).to.have.length(2);
+            expect(result.variations.map((r) => r.id)).to.include.members(['var-1', 'pub-1']);
+            expect(result.cards).to.have.length(1);
+            expect(result.cards[0].id).to.equal('card-1');
+        });
+
+        it('includes MODIFIED and NEW status references', () => {
+            const fragment = new Fragment(
+                createFragmentConfig({
+                    path: '/content/dam/mas/sandbox/en_US/my-fragment',
+                    references: [
+                        { id: 'var-1', path: '/content/dam/mas/sandbox/en_GB/my-fragment', status: 'MODIFIED' },
+                        { id: 'var-2', path: '/content/dam/mas/sandbox/en_AU/my-fragment', status: 'NEW' },
+                        { id: 'card-1', path: '/content/dam/mas/sandbox/en_US/some-card', status: 'NEW' },
+                    ],
+                    fields: [
+                        {
+                            name: 'variations',
+                            values: [
+                                '/content/dam/mas/sandbox/en_GB/my-fragment',
+                                '/content/dam/mas/sandbox/en_AU/my-fragment',
+                            ],
+                        },
+                        { name: 'cards', values: ['/content/dam/mas/sandbox/en_US/some-card'] },
+                    ],
+                }),
+            );
+            const result = fragment.getPublishableReferences();
+            expect(result.variations).to.have.length(2);
+            expect(result.variations.map((r) => r.id)).to.include.members(['var-1', 'var-2']);
+            expect(result.cards).to.have.length(1);
+            expect(result.cards[0].id).to.equal('card-1');
+        });
+
+        it('includes already PUBLISHED references in the dialog', () => {
+            const fragment = new Fragment(
+                createFragmentConfig({
+                    path: '/content/dam/mas/sandbox/en_US/my-fragment',
+                    references: [{ id: 'var-1', path: '/content/dam/mas/sandbox/en_GB/my-fragment', status: 'PUBLISHED' }],
+                    fields: [{ name: 'variations', values: ['/content/dam/mas/sandbox/en_GB/my-fragment'] }],
+                }),
+            );
+            const result = fragment.getPublishableReferences();
+            expect(result.variations).to.have.length(1);
+            expect(result.variations[0].id).to.equal('var-1');
+            expect(result.cards).to.have.length(0);
+        });
+
+        it('includes merch-card-collection child refs from collections field in cards', () => {
+            const fragment = new Fragment(
+                createFragmentConfig({
+                    path: '/content/dam/mas/sandbox/en_US/my-collection',
+                    references: [
+                        { id: 'col-1', path: '/content/dam/mas/sandbox/en_US/sub-collection', status: 'DRAFT' },
+                        { id: 'card-1', path: '/content/dam/mas/sandbox/en_US/card-one', status: 'NEW' },
+                    ],
+                    fields: [
+                        { name: 'variations', values: [] },
+                        { name: 'collections', values: ['/content/dam/mas/sandbox/en_US/sub-collection'] },
+                        { name: 'cards', values: ['/content/dam/mas/sandbox/en_US/card-one'] },
+                    ],
+                }),
+            );
+            const result = fragment.getPublishableReferences();
+            expect(result.cards.map((r) => r.id)).to.include.members(['col-1', 'card-1']);
+            expect(result.variations).to.have.length(0);
         });
     });
 });

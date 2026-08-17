@@ -2,10 +2,11 @@ import { isPznCountryTagId, tagRefToTagId } from '../common/utils/personalizatio
 import { buildOfferTags, resolveOfferMnemonicIconUrl } from './offer-utils.js';
 import { COLLECTION_MODEL_PATH, ROOT_PATH, TAG_PROMOTION_PREFIX } from '../constants.js';
 import { normalizeTagId } from '../aem/tag-id-utils.js';
+import { fromAttribute } from '../aem/tag-path-utils.js';
 import { getItemsSelectionStore } from '../common/items-selection-store.js';
 import Store from '../store.js';
 import { closeOfferSelectorTool } from '../rte/ost.js';
-import { getService, isUUID, parseStudioDeepLinksFromText } from '../utils.js';
+import { getService, isUUID, normalizeKey, parseStudioDeepLinksFromText } from '../utils.js';
 
 export const PROMOTION_FIELD_TYPE_MAP = {
     title: { type: 'text' },
@@ -29,7 +30,12 @@ export function normalizePromotionSearchInput(raw) {
     const trimmed = raw.trim();
     if (!trimmed) return '';
     const deepLinks = parseStudioDeepLinksFromText(trimmed);
-    if (deepLinks.length && deepLinks[0].fragmentId) return deepLinks[0].fragmentId;
+    if (
+        deepLinks.length &&
+        ['merch-card', 'merch-card-collection'].includes(deepLinks[0].contentType) &&
+        deepLinks[0].fragmentId
+    )
+        return deepLinks[0].fragmentId;
     if (isUUID(trimmed)) return trimmed;
     const marker = ROOT_PATH;
     const idx = trimmed.indexOf(marker);
@@ -81,6 +87,18 @@ export function splitPromotionTagsFieldValues(allValues) {
         else retained.push(t);
     }
     return { promotion, retained };
+}
+
+/**
+ * Derives a promotion tag slug/path from a title.
+ * @param {string} [title]
+ * @returns {{ slug: string, tagPath: string }|null}
+ */
+export function buildPromotionTagPath(title) {
+    const slug = normalizeKey(title?.trim());
+    if (!slug) return null;
+    const [tagPath] = fromAttribute(`${TAG_PROMOTION_PREFIX}${slug}`);
+    return tagPath ? { slug, tagPath } : null;
 }
 
 export function serializePromotionSurfacesForAem(values) {
@@ -149,27 +167,24 @@ export async function classifyPromotionPathsForSelection(
  * @param {number} itemCount Selected cards + collections count
  * @returns {string|null}
  */
-export function getPromotionRequiredFieldsValidation(fragment, itemCount) {
-    if (!fragment.getFieldValue('title')) {
-        return 'Please enter a Title.';
-    }
-    if (!fragment.getFieldValue('promoCode')) {
-        return 'Please enter a Promo Code.';
+export function getPromotionRequiredFieldsValidation(fragment, itemCount, isEvergreen = fragment.isEvergreen) {
+    if (!normalizeKey(fragment.getFieldValue('title').trim())) {
+        return 'Please enter a title.';
     }
     if (!fragment.getFieldValue('startDate')) {
-        return 'Please set a Start Date.';
+        return 'Please set a start date.';
     }
-    if (!fragment.getFieldValue('endDate')) {
-        return 'Please set an End Date.';
+    if (!isEvergreen && !fragment.getFieldValue('endDate')) {
+        return 'Please set an end date.';
     }
     if (splitPromotionTagsFieldValues(fragment.getFieldValues('tags')).promotion.length === 0) {
-        return 'Please add at least one Promotion tag.';
+        return 'Please add at least one promotion tag.';
     }
     if (!fragment.getFieldValues('geos').length) {
-        return 'Please add at least one Geo.';
+        return 'Please add at least one geo.';
     }
     if (!parsePromotionSurfacesFieldValues(fragment.getFieldValues('surfaces')).length) {
-        return 'Please add at least one Surface.';
+        return 'Please add at least one surface.';
     }
     if (itemCount <= 0) {
         return 'Please add at least one fragment or collection.';
@@ -471,7 +486,7 @@ export async function handlePromotionOstOfferSelect({ detail: { offerSelectorId,
         offerSelectorId,
         offer,
         store.selectedOffers,
-        Store.promotions.offerDataCache,
+        Store.promotions.offerRecordsCache,
         productArrangementCode,
     );
     closeOfferSelectorTool();
@@ -479,9 +494,14 @@ export async function handlePromotionOstOfferSelect({ detail: { offerSelectorId,
 }
 
 const PROMOTION_OFFER_SUBSTITUTION_PREFIX = 'substitute';
+const PROMOTION_IGNORE_VARIATIONS_PREFIX = 'ignore-variations';
 
 export function isPromotionOfferSubstitutionEntry(entry) {
     return typeof entry === 'string' && entry.startsWith(`${PROMOTION_OFFER_SUBSTITUTION_PREFIX}|`);
+}
+
+export function isPromotionIgnoreVariationsEntry(entry) {
+    return typeof entry === 'string' && entry.startsWith(`${PROMOTION_IGNORE_VARIATIONS_PREFIX}|`);
 }
 
 export function promotionOfferRecordHasDisplayName(cacheEntry) {
@@ -493,7 +513,8 @@ export function promotionOfferRecordHasDisplayName(cacheEntry) {
 export function parsePromotionOffersField(values) {
     const promoExceptions = new Map();
     const offerSubstitutions = new Map();
-    if (!Array.isArray(values)) return { promoExceptions, offerSubstitutions };
+    const ignoredVariations = new Map();
+    if (!Array.isArray(values)) return { promoExceptions, offerSubstitutions, ignoredVariations };
     for (const entry of values) {
         if (!entry) continue;
         if (isPromotionOfferSubstitutionEntry(entry)) {
@@ -504,12 +525,18 @@ export function parsePromotionOffersField(values) {
             }
             continue;
         }
+        if (isPromotionIgnoreVariationsEntry(entry)) {
+            const [, offerId, geoStr = ''] = entry.split('|');
+            const country = formatGeoDisplayLabel(geoStr) || geoStr;
+            if (offerId && country) ignoredVariations.set(`${offerId}|${country}`, true);
+            continue;
+        }
         const [offerId, promoCode, geoStr = ''] = entry.split('|');
         const country = formatGeoDisplayLabel(geoStr) || geoStr;
         if (!offerId || !promoCode || !country) continue;
         promoExceptions.set(`${offerId}|${country}`, promoCode);
     }
-    return { promoExceptions, offerSubstitutions };
+    return { promoExceptions, offerSubstitutions, ignoredVariations };
 }
 
 export function parsePromoCodeExceptions(values) {
@@ -518,6 +545,10 @@ export function parsePromoCodeExceptions(values) {
 
 export function parseOfferSubstitutions(values) {
     return parsePromotionOffersField(values).offerSubstitutions;
+}
+
+export function parseIgnoredVariations(values) {
+    return parsePromotionOffersField(values).ignoredVariations;
 }
 
 export function serializePromoCodeExceptions(map, displayToCq) {
@@ -538,6 +569,17 @@ export function serializeOfferSubstitutions(map, displayToCq) {
     });
 }
 
+export function serializeIgnoredVariations(map, displayToCq) {
+    if (!map?.size) return [];
+    return [...map.entries()]
+        .filter(([, ignored]) => ignored)
+        .map(([key]) => {
+            const [offerId, label] = key.split('|');
+            const geoTag = displayToCq?.get(label) ?? label;
+            return `${PROMOTION_IGNORE_VARIATIONS_PREFIX}|${offerId}|${geoTag}`;
+        });
+}
+
 export function parseSelectedOfferIdsFromOffersField(values) {
     if (!Array.isArray(values)) return [];
     return values
@@ -546,12 +588,19 @@ export function parseSelectedOfferIdsFromOffersField(values) {
         .filter(Boolean);
 }
 
-export function serializePromotionOffersField(promoExceptions, offerSubstitutions, selectedOfferIds, displayToCq) {
+export function serializePromotionOffersField(
+    promoExceptions,
+    offerSubstitutions,
+    ignoredVariations,
+    selectedOfferIds,
+    displayToCq,
+) {
     const selectedLines = Array.isArray(selectedOfferIds) ? selectedOfferIds.filter(Boolean) : [];
     return [
         ...selectedLines,
         ...serializePromoCodeExceptions(promoExceptions, displayToCq),
         ...serializeOfferSubstitutions(offerSubstitutions, displayToCq),
+        ...serializeIgnoredVariations(ignoredVariations, displayToCq),
     ];
 }
 
@@ -644,6 +693,7 @@ export function buildPromotionOffersFieldValues(promotionFragment, selectedOffer
     const parsed = parsePromotionOffersField(offerValues);
     let promoExceptions = overrides.promoExceptions ?? parsed.promoExceptions;
     let offerSubstitutions = overrides.offerSubstitutions ?? parsed.offerSubstitutions;
+    let ignoredVariations = overrides.ignoredVariations ?? parsed.ignoredVariations;
     const geos = promotionFragment?.getFieldValues?.('geos') ?? [];
     const displayToCq = new Map(geos.map((g) => [formatGeoDisplayLabel(g), g]).filter(([label]) => label));
     if (geos.length) {
@@ -651,12 +701,17 @@ export function buildPromotionOffersFieldValues(promotionFragment, selectedOffer
         const isValid = (key) => valid.has(key.split('|')[1]);
         promoExceptions = new Map([...promoExceptions].filter(([k]) => isValid(k)));
         offerSubstitutions = new Map([...offerSubstitutions].filter(([k]) => isValid(k)));
+        ignoredVariations = new Map([...ignoredVariations].filter(([k]) => isValid(k)));
     }
-    return serializePromotionOffersField(promoExceptions, offerSubstitutions, selectedOfferIds, displayToCq);
+    return serializePromotionOffersField(promoExceptions, offerSubstitutions, ignoredVariations, selectedOfferIds, displayToCq);
 }
 
 export function getEffectiveSubstituteOffer(offerSubstitutions, baseOfferId, country) {
     return offerSubstitutions?.get(`${baseOfferId}|${country}`) ?? null;
+}
+
+export function getEffectiveIgnoreVariations(ignoredVariations, offerId, country) {
+    return ignoredVariations?.get(`${offerId}|${country}`) === true;
 }
 
 export function groupOfferSubstitutionsForOffer(offerSubstitutions, offerKeys, countries, resolveOfferLabel) {

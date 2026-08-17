@@ -101,7 +101,8 @@ export class Fragment {
      * @param {Boolean | undefined} hasChanges
      */
     replaceFrom(fragmentData, hasChanges) {
-        const clonedData = structuredClone(fragmentData);
+        const { offerData, groupedVariations, ...cloneableData } = fragmentData ?? {};
+        const clonedData = structuredClone(cloneableData);
         Object.assign(this, clonedData);
         if (hasChanges === undefined) return;
         this.hasChanges = hasChanges;
@@ -109,7 +110,8 @@ export class Fragment {
 
     refreshFrom(fragmentData) {
         this.replaceFrom(fragmentData, false);
-        this.initialValue = structuredClone(fragmentData);
+        const { offerData, groupedVariations, ...cloneableData } = fragmentData ?? {};
+        this.initialValue = structuredClone(cloneableData);
         this.newTags = undefined;
     }
 
@@ -131,6 +133,26 @@ export class Fragment {
     hasVariations() {
         const variations = this.getVariations();
         return variations.length > 0;
+    }
+
+    getPublishableReferences() {
+        if (!this.references?.length) return { variations: [], cards: [] };
+
+        const variationPaths = new Set(this.getFieldValues('variations'));
+        const cardPaths = new Set([...this.getFieldValues('cards'), ...this.getFieldValues('collections')]);
+
+        const variations = [];
+        const cards = [];
+
+        for (const ref of this.references) {
+            if (variationPaths.has(ref.path)) {
+                variations.push(ref);
+            } else if (cardPaths.has(ref.path)) {
+                cards.push(ref);
+            }
+        }
+
+        return { variations, cards };
     }
 
     /**
