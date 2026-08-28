@@ -216,6 +216,14 @@ describe('settings', () => {
             const entry = resolveSettingEntry({}, 'en_US', setting, 'JP');
             expect(entry.booleanValue).to.equal(false);
         });
+
+        it('matches override with no country filter when country is undefined', () => {
+            const setting = makeSetting([
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: [] },
+            ]);
+            const entry = resolveSettingEntry({}, 'en_US', setting, undefined);
+            expect(entry.booleanValue).to.equal(true);
+        });
     });
 
     describe('getSettings', () => {
