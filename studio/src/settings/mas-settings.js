@@ -1145,7 +1145,7 @@ class MasSettings extends LitElement {
                             name="override-countries"
                             .value=${(this.form.countries || []).join(', ')}
                             placeholder="e.g. KR, JP"
-                            @change=${this.#handleOverrideCountriesChange}
+                            @input=${this.#handleOverrideCountriesChange}
                         ></sp-textfield>
                     </sp-field-group>
                     ${this.tagsTemplate} ${this.overrideBooleanToggleTemplate}

@@ -1519,4 +1519,90 @@ describe('Settings Store Namespace', () => {
 
         store.editSetting();
     });
+
+    it('normalizeSettingFragment decodes country:XX entries from locales into countries array', () => {
+        const fragment = createSettingReference({
+            id: 'setting-hide-trial-ctas-kr',
+            name: 'hideTrialCTAs',
+            label: 'Hide Trial CTAs',
+            locales: ['fr_FR', 'country:KR', 'country:JP'],
+            valueType: 'boolean',
+            value: true,
+            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas-kr',
+        });
+        const record = normalizeSettingFragment(new Fragment(fragment));
+        expect(record.locales).to.deep.equal(['fr_FR']);
+        expect(record.countries).to.deep.equal(['KR', 'JP']);
+    });
+
+    it('addOverride with countries encodes country:XX into locales field and uses country in fragment name', async () => {
+        const topLevel = createSettingReference({
+            id: 'setting-hide-trial-ctas',
+            name: 'hideTrialCTAs',
+            label: 'Hide Trial CTAs',
+            locales: [],
+            valueType: 'boolean',
+            value: false,
+            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas',
+        });
+        const harness = createMutationHarness({ topLevel, overrides: [] });
+        const store = new SettingsStore();
+        store.setAem(harness.aem);
+        await store.loadSurface('sandbox');
+
+        const rowId = store.rows.get()[0].value.id;
+        const createdId = await store.addOverride(rowId, {
+            countries: ['KR'],
+            locales: [],
+            valueType: 'boolean',
+            booleanValue: true,
+        });
+
+        expect(createdId).to.be.a('string');
+        const created = harness.calls.create[0];
+        expect(created.name).to.include('kr');
+        const localesField = created.fields.find((f) => f.name === 'locales');
+        expect(localesField.values).to.include('country:KR');
+    });
+
+    it('updateOverride with countries re-encodes country:XX into locales field', async () => {
+        const topLevel = createSettingReference({
+            id: 'setting-hide-trial-ctas',
+            name: 'hideTrialCTAs',
+            label: 'Hide Trial CTAs',
+            locales: [],
+            valueType: 'boolean',
+            value: false,
+            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas',
+        });
+        const existingOverride = createSettingReference({
+            id: 'setting-hide-trial-ctas-kr',
+            name: 'hideTrialCTAs',
+            label: 'Hide Trial CTAs',
+            locales: ['country:KR'],
+            valueType: 'boolean',
+            value: true,
+            fieldName: 'entries',
+            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas-kr',
+        });
+        const harness = createMutationHarness({ topLevel, overrides: [existingOverride] });
+        const store = new SettingsStore();
+        store.setAem(harness.aem);
+        await store.loadSurface('sandbox');
+
+        const rowId = store.rows.get()[0].value.id;
+        const overrideId = store.rows.get()[0].value.overrides[0].id;
+        const updated = await store.updateOverride(rowId, overrideId, {
+            countries: ['JP'],
+            locales: [],
+            valueType: 'boolean',
+            booleanValue: true,
+        });
+
+        expect(updated).to.equal(true);
+        const savedOverride = harness.calls.save.find((f) => f.id === overrideId);
+        const localesField = savedOverride.fields.find((f) => f.name === 'locales');
+        expect(localesField.values).to.include('country:JP');
+        expect(localesField.values).to.not.include('country:KR');
+    });
 });

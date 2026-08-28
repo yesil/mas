@@ -463,6 +463,21 @@
                             Store.settings.addOverride = originalAddOverride;
                         });
 
+                        it('countries textfield input parses comma-separated values into uppercased countries array', async () => {
+                            const { settingsPage, table } = await setupPage({ references: referencesWithOverride });
+                            const overrideDialog = await openOverrideDialog(settingsPage, table);
+                            expect(overrideDialog).to.exist;
+
+                            const countriesField = overrideDialog.querySelector('sp-textfield[name="override-countries"]');
+                            expect(countriesField).to.exist;
+
+                            countriesField.value = 'kr, jp, us';
+                            countriesField.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+                            await waitForUpdates(settingsPage, 1);
+
+                            expect(settingsPage.form.countries).to.deep.equal(['KR', 'JP', 'US']);
+                        });
+
                         it('publishes override from dialog publish action', async () => {
                             const { settingsPage, table } = await setupPage({ references: referencesWithOverride });
                             const originalAddOverride = Store.settings.addOverride;

@@ -473,6 +473,43 @@ describe('settings', () => {
             expect(result.body.settings?.tagLabels).to.exist;
         });
 
+        it('applies country override to child fragments in a collection body', async () => {
+            const context = {
+                locale: 'en_US',
+                country: 'KR',
+                body: {
+                    model: { id: COLLECTION_MODEL_ID },
+                    references: {
+                        ref1: {
+                            type: 'content-fragment',
+                            value: { fields: { variant: 'plans' } },
+                        },
+                    },
+                },
+                promises: {
+                    settings: Promise.resolve({
+                        hideTrialCTAs: {
+                            default: {
+                                name: 'hideTrialCTAs',
+                                valuetype: 'boolean',
+                                booleanValue: false,
+                            },
+                            override: [
+                                {
+                                    name: 'hideTrialCTAs',
+                                    valuetype: 'boolean',
+                                    booleanValue: true,
+                                    countries: ['KR'],
+                                },
+                            ],
+                        },
+                    }),
+                },
+            };
+            const result = await settings.process(context);
+            expect(result.body.references.ref1.value.settings.hideTrialCTAs).to.be.true;
+        });
+
         it('applyCollectionSettings uses empty tagLabels when Object.fromEntries is falsy', function () {
             const fromEntriesStub = sinon.stub(Object, 'fromEntries').returns(null);
             const context = {
@@ -880,6 +917,41 @@ describe('settings', () => {
             };
             const result = await settings.process(context);
             expect(result.body.settings.hideTrialCTAs).to.be.false;
+        });
+
+        it('prefers country override over locale override when both match and fragment has no tags', async () => {
+            const context = {
+                locale: 'en_US',
+                country: 'KR',
+                body: { fields: { variant: 'plans' } },
+                promises: {
+                    settings: Promise.resolve({
+                        hideTrialCTAs: {
+                            default: {
+                                name: 'hideTrialCTAs',
+                                valuetype: 'boolean',
+                                booleanValue: false,
+                            },
+                            override: [
+                                {
+                                    name: 'hideTrialCTAs',
+                                    valuetype: 'boolean',
+                                    booleanValue: false,
+                                    locales: ['en_US'],
+                                },
+                                {
+                                    name: 'hideTrialCTAs',
+                                    valuetype: 'boolean',
+                                    booleanValue: true,
+                                    countries: ['KR'],
+                                },
+                            ],
+                        },
+                    }),
+                },
+            };
+            const result = await settings.process(context);
+            expect(result.body.settings.hideTrialCTAs).to.be.true;
         });
 
         it('applies setting when templates is empty array (no template filter)', async () => {

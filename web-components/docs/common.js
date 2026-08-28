@@ -71,7 +71,6 @@ const createMasCommerceService = (params, commerceEnv) => {
         'env',
         'lana-tags',
         'data-mas-ff-defaults',
-        'mas-io-url',
     ].forEach((attribute) => {
         const value = params[attribute];
         if (value) masCommerceService.setAttribute(attribute, value);
