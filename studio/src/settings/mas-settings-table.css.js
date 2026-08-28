@@ -8,14 +8,15 @@ export const tableStyles = css`
         display: block;
         --cell-expand-width: 60px;
         --cell-label-width: 11.67%;
-        --cell-locale-width: 9.41%;
-        --cell-template-width: 8.71%;
-        --cell-value-width: 12.28%;
-        --cell-tags-width: 11.41%;
-        --cell-editor-width: 11.85%;
-        --cell-datetime-width: 10.71%;
-        --cell-status-width: 9.67%;
-        --cell-actions-width: 9.06%;
+        --cell-locale-width: 8%;
+        --cell-country-width: 8%;
+        --cell-template-width: 7.5%;
+        --cell-value-width: 11%;
+        --cell-tags-width: 10%;
+        --cell-editor-width: 10.5%;
+        --cell-datetime-width: 9.5%;
+        --cell-status-width: 8.5%;
+        --cell-actions-width: 8%;
     }
 
     #settings-content {
@@ -74,6 +75,12 @@ export const tableStyles = css`
     #settings-table sp-table-head-cell.locale-column,
     #settings-table .mas-setting-row > .locale-column {
         width: var(--cell-locale-width);
+        min-width: 0;
+    }
+
+    #settings-table sp-table-head-cell.country-column,
+    #settings-table .mas-setting-row > .country-column {
+        width: var(--cell-country-width);
         min-width: 0;
     }
 
@@ -361,6 +368,7 @@ export const tableStyles = css`
         grid-template-columns:
             minmax(0, var(--cell-label-width))
             minmax(0, var(--cell-locale-width))
+            minmax(0, var(--cell-country-width))
             minmax(0, var(--cell-template-width))
             minmax(0, var(--cell-value-width))
             minmax(0, var(--cell-tags-width))

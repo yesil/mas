@@ -17,7 +17,19 @@ export class MasSettingsTable extends LitElement {
         sortDirection: { type: String, attribute: false },
     };
 
-    #columnNames = ['expand', 'label', 'locale', 'template', 'value', 'tags', 'editor', 'datetime', 'status', 'actions'];
+    #columnNames = [
+        'expand',
+        'label',
+        'locale',
+        'country',
+        'template',
+        'value',
+        'tags',
+        'editor',
+        'datetime',
+        'status',
+        'actions',
+    ];
 
     #columnSyncFrame = 0;
 
@@ -219,6 +231,16 @@ export class MasSettingsTable extends LitElement {
         `;
     }
 
+    #countryCellTemplate(countries = []) {
+        const { primary, extraCount } = this.#localeSummary(countries);
+        return html`
+            <div class="summary-content">
+                <span class="summary-text">${primary}</span>
+                ${this.#countTagTemplate(extraCount)}
+            </div>
+        `;
+    }
+
     #localeCellTemplate(locales = []) {
         const { primary, extraCount } = this.#localeSummary(locales);
 
@@ -371,6 +393,9 @@ export class MasSettingsTable extends LitElement {
                 <sp-table-cell class="locale-column" data-column="locale"
                     >${this.#localeCellTemplate(row.locales)}</sp-table-cell
                 >
+                <sp-table-cell class="country-column" data-column="country"
+                    >${this.#countryCellTemplate(row.countries)}</sp-table-cell
+                >
                 <sp-table-cell class="template-column" data-column="template">${this.#templateCellTemplate(row)}</sp-table-cell>
                 <sp-table-cell class="value-column" data-column="value"
                     >${this.#valueCellTemplate(row, { rowId: row.id })}</sp-table-cell
@@ -406,6 +431,7 @@ export class MasSettingsTable extends LitElement {
                         ${this.#labelCellTemplate(override, { nested: true })}
                     </div>
                     <div class="override-cell locale-column">${this.#localeCellTemplate(override.locales)}</div>
+                    <div class="override-cell country-column">${this.#countryCellTemplate(override.countries)}</div>
                     <div class="override-cell template-column">
                         <span class="cell-text" title=${this.#templateSummary(override.templateIds, override.template)}
                             >${this.#templateSummary(override.templateIds, override.template)}</span
@@ -539,6 +565,7 @@ export class MasSettingsTable extends LitElement {
                         Label
                     </sp-table-head-cell>
                     <sp-table-head-cell class="locale-column" data-column="locale">Locale</sp-table-head-cell>
+                    <sp-table-head-cell class="country-column" data-column="country">Country</sp-table-head-cell>
                     <sp-table-head-cell class="template-column" data-column="template">Template</sp-table-head-cell>
                     <sp-table-head-cell class="value-column" data-column="value">Value</sp-table-head-cell>
                     <sp-table-head-cell class="tags-column" data-column="tags">Tags</sp-table-head-cell>
