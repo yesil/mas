@@ -7,6 +7,7 @@ import { canAccessSettings } from '../groups.js';
 import './mas-settings-table.js';
 import '../mas-quick-actions.js';
 import '../mas-locale-picker.js';
+import '../mas-country-picker.js';
 import '../aem/aem-tag-picker-field.js';
 import '../common/fields/tree-picker-field.js';
 import '../common/fields/quantity-select.js';
@@ -748,15 +749,19 @@ class MasSettings extends LitElement {
 
     get overrideConflict() {
         if (this.dialog?.type !== 'override') return null;
-        if (!this.form.locales.length) return null;
+        const hasLocales = this.form.locales.length > 0;
+        const hasCountries = (this.form.countries || []).length > 0;
+        if (!hasLocales && !hasCountries) return null;
         const row = Store.settings.getRowStore(this.dialog.rowId)?.value;
         if (!row) return null;
         return (
             row.overrides.find((override) => {
                 if (this.dialog.mode === 'edit' && override.id === this.dialog.overrideId) return false;
                 const overrideLocales = override.locales || [];
-                const localesOverlap = overrideLocales.some((locale) => this.form.locales.includes(locale));
-                if (!localesOverlap) return false;
+                const overrideCountries = override.countries || [];
+                const localesOverlap = hasLocales && overrideLocales.some((locale) => this.form.locales.includes(locale));
+                const countriesOverlap = hasCountries && overrideCountries.some((c) => (this.form.countries || []).includes(c));
+                if (!localesOverlap && !countriesOverlap) return false;
                 const formTemplates = this.form.templateIds;
                 const overrideTemplates = override.templateIds || [];
                 if (formTemplates.length === 0) return true;
@@ -974,13 +979,8 @@ class MasSettings extends LitElement {
         this.#setFormField('locales', [...detail.locales]);
     };
 
-    #handleOverrideCountriesChange = (event) => {
-        const raw = event.target.value;
-        const countries = raw
-            .split(',')
-            .map((c) => c.trim().toUpperCase())
-            .filter(Boolean);
-        this.#setFormField('countries', countries);
+    #handleOverrideCountriesChange = ({ detail }) => {
+        this.#setFormField('countries', [...detail.countries]);
     };
 
     #handleQuantitySelectChange = (event) => {
@@ -1140,13 +1140,14 @@ class MasSettings extends LitElement {
                         ></mas-locale-picker>
                     </sp-field-group>
                     <sp-field-group>
-                        <sp-field-label>Countries (comma-separated)</sp-field-label>
-                        <sp-textfield
-                            name="override-countries"
-                            .value=${(this.form.countries || []).join(', ')}
-                            placeholder="e.g. KR, JP"
-                            @input=${this.#handleOverrideCountriesChange}
-                        ></sp-textfield>
+                        <sp-field-label>Countries</sp-field-label>
+                        <mas-country-picker
+                            selection-label="Select countries"
+                            empty-selection-label=${this.dialog?.mode === 'edit' ? 'All countries' : 'Select countries'}
+                            .emptySelectionIsValue=${this.dialog?.mode === 'edit'}
+                            .countries=${(this.form.countries || []).join(',')}
+                            @countries-changed=${this.#handleOverrideCountriesChange}
+                        ></mas-country-picker>
                     </sp-field-group>
                     ${this.tagsTemplate} ${this.overrideBooleanToggleTemplate}
                     <sp-field-group>

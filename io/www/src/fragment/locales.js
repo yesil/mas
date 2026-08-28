@@ -619,6 +619,11 @@ export function getCountryFlag(country) {
     return COUNTRY_DATA[country]?.flag || '🏴';
 }
 
+// Returns all known country codes sorted alphabetically
+export function getCountryCodes() {
+    return Object.keys(COUNTRY_DATA).sort();
+}
+
 export function getDefaultLocale(surface, localeCode) {
     const [language, country] = parseLocaleCode(localeCode);
     if (!DEFAULT_LOCALES[surface]) {

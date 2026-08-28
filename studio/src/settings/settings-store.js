@@ -55,9 +55,11 @@ export const normalizeSettingFragment = (fragment) => {
     const rawLocales = fragment.getFieldValues('locales');
     const locales = rawLocales.filter((l) => !`${l}`.startsWith('country:'));
     const countries =
-        data.countries?.length > 0
-            ? data.countries
-            : rawLocales.filter((l) => `${l}`.startsWith('country:')).map((l) => `${l}`.slice(8));
+        fragment.getFieldValues('countries').length > 0
+            ? fragment.getFieldValues('countries').map((c) => `${c}`.toUpperCase())
+            : data.countries?.length > 0
+              ? data.countries
+              : rawLocales.filter((l) => `${l}`.startsWith('country:')).map((l) => `${l}`.slice(8));
     const tags = fragment.getFieldValues('tags');
 
     return {
@@ -186,13 +188,14 @@ const toResolverFragment = (fragment) => {
 export function getGlobalSettingsDefaults(fragment, rows = []) {
     const runtimeFragment = toResolverFragment(fragment);
     const locale = fragment?.locale || '';
+    const country = fragment?.country || '';
 
     return rows.reduce((defaults, rowLike) => {
         const row = getRowRecord(rowLike);
         if (!row?.name) return defaults;
 
         const definition = getSettingNameDefinition(row.name);
-        const entry = resolveSettingEntry(runtimeFragment, locale, toResolverSetting(row));
+        const entry = resolveSettingEntry(runtimeFragment, locale, toResolverSetting(row), country);
         if (!entry) return defaults;
 
         defaults[definition?.propertyName || row.name] = extractValue(entry, runtimeFragment);
@@ -457,7 +460,13 @@ export class SettingsStore {
                     name: 'locales',
                     type: 'text',
                     multiple: true,
-                    values: [...(override.locales || []), ...(override.countries || []).map((c) => `country:${c}`)],
+                    values: override.locales || [],
+                });
+                upsertField(fields, {
+                    name: 'countries',
+                    type: 'text',
+                    multiple: true,
+                    values: override.countries || [],
                 });
                 upsertField(fields, { name: 'tags', type: 'tag', multiple: true, values: override.tags });
                 upsertField(fields, { name: 'valuetype', type: 'text', multiple: false, values: [valueType] });
@@ -561,7 +570,13 @@ export class SettingsStore {
                     name: 'locales',
                     type: 'text',
                     multiple: true,
-                    values: [...locales, ...countries.map((c) => `country:${c}`)],
+                    values: locales,
+                });
+                upsertField(fields, {
+                    name: 'countries',
+                    type: 'text',
+                    multiple: true,
+                    values: countries,
                 });
                 upsertField(fields, { name: 'tags', type: 'tag', multiple: true, values: override.tags || [] });
                 upsertField(fields, { name: 'valuetype', type: 'text', multiple: false, values: [valueType] });
@@ -988,11 +1003,11 @@ export class SettingsStore {
     }
 
     #buildEntryFields({ name, templateIds, locales, countries = [], tags, valueType, value, booleanValue }) {
-        const allLocales = [...locales, ...countries.map((c) => `country:${c}`)];
         const fields = [
             { name: 'name', type: 'text', multiple: false, values: [name] },
             { name: 'templates', type: 'text', multiple: true, values: templateIds },
-            { name: 'locales', type: 'text', multiple: true, values: allLocales },
+            { name: 'locales', type: 'text', multiple: true, values: locales },
+            { name: 'countries', type: 'text', multiple: true, values: countries },
             { name: 'tags', type: 'tag', multiple: true, values: tags },
             { name: 'valuetype', type: 'text', multiple: false, values: [valueType] },
         ];

@@ -9,6 +9,7 @@ import {
     applyCollectionSettings,
     parsePlaceholderRemap,
     applyPlaceholderRemaps,
+    resolveSettingEntry,
     PLACEHOLDER_REMAP_SETTING,
 } from '../../src/fragment/transformers/settings.js';
 import SETTINGS_RESPONSE from './mocks/settings-sandbox.json' with { type: 'json' };
@@ -161,6 +162,59 @@ describe('settings', () => {
                 },
             };
             expect(collectSettingEntries(fragment)).to.deep.equal({});
+        });
+
+        it('reads countries directly from countries field (new model)', () => {
+            const fragment = {
+                references: {
+                    ref1: { value: { fields: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false } } },
+                    ref2: {
+                        value: {
+                            fields: {
+                                name: 'hideTrialCTAs',
+                                valuetype: 'boolean',
+                                booleanValue: true,
+                                countries: ['KR', 'JP'],
+                            },
+                        },
+                    },
+                },
+            };
+            const result = collectSettingEntries(fragment);
+            expect(result.hideTrialCTAs.override).to.have.length(1);
+            expect(result.hideTrialCTAs.override[0].countries).to.deep.equal(['KR', 'JP']);
+            expect(result.hideTrialCTAs.override[0].locales).to.deep.equal([]);
+        });
+    });
+
+    describe('resolveSettingEntry', () => {
+        const makeSetting = (overrides = []) => ({
+            default: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false, locales: [], countries: [] },
+            override: overrides,
+        });
+
+        it('matches country override when country codes are uppercase', () => {
+            const setting = makeSetting([
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'] },
+            ]);
+            const entry = resolveSettingEntry({}, 'en_US', setting, 'KR');
+            expect(entry.booleanValue).to.equal(true);
+        });
+
+        it('matches country override case-insensitively when request sends lowercase', () => {
+            const setting = makeSetting([
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'] },
+            ]);
+            const entry = resolveSettingEntry({}, 'en_US', setting, 'kr');
+            expect(entry.booleanValue).to.equal(true);
+        });
+
+        it('returns default when country does not match', () => {
+            const setting = makeSetting([
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'] },
+            ]);
+            const entry = resolveSettingEntry({}, 'en_US', setting, 'JP');
+            expect(entry.booleanValue).to.equal(false);
         });
     });
 

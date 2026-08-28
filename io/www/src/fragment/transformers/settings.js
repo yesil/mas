@@ -203,8 +203,11 @@ export function resolveSettingEntry(fragment, locale, setting, country) {
     const filtered = setting.override.filter((overrideSetting) => {
         const localeOk =
             !overrideSetting.locales || overrideSetting.locales.length === 0 || overrideSetting.locales.includes(locale);
+        const normalizedCountry = country?.toUpperCase() ?? '';
         const countryOk =
-            !overrideSetting.countries || overrideSetting.countries.length === 0 || overrideSetting.countries.includes(country);
+            !overrideSetting.countries ||
+            overrideSetting.countries.length === 0 ||
+            overrideSetting.countries.some((c) => c.toUpperCase() === normalizedCountry);
         const tagsOk =
             !overrideSetting.tags ||
             overrideSetting.tags.length === 0 ||
