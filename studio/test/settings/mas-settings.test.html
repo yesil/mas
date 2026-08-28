@@ -463,16 +463,19 @@
                             Store.settings.addOverride = originalAddOverride;
                         });
 
-                        it('countries textfield input parses comma-separated values into uppercased countries array', async () => {
+                        it('countries-changed event from mas-country-picker updates form countries array', async () => {
                             const { settingsPage, table } = await setupPage({ references: referencesWithOverride });
                             const overrideDialog = await openOverrideDialog(settingsPage, table);
                             expect(overrideDialog).to.exist;
 
-                            const countriesField = overrideDialog.querySelector('sp-textfield[name="override-countries"]');
-                            expect(countriesField).to.exist;
+                            const countryPicker = overrideDialog.querySelector('mas-country-picker');
+                            expect(countryPicker).to.exist;
 
-                            countriesField.value = 'kr, jp, us';
-                            countriesField.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+                            countryPicker.dispatchEvent(new CustomEvent('countries-changed', {
+                                bubbles: true,
+                                composed: true,
+                                detail: { countries: ['KR', 'JP', 'US'] },
+                            }));
                             await waitForUpdates(settingsPage, 1);
 
                             expect(settingsPage.form.countries).to.deep.equal(['KR', 'JP', 'US']);
