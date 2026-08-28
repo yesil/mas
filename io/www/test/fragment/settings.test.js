@@ -70,7 +70,6 @@ describe('settings', () => {
             expect(result.hideTrialCTAs.override[0].countries).to.include('KR');
         });
 
-
         it('returns empty object when references is null', () => {
             expect(collectSettingEntries({})).to.deep.equal({});
             expect(collectSettingEntries({ references: null })).to.deep.equal({});
