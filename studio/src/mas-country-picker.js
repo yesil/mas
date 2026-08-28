@@ -63,10 +63,14 @@ export class MasCountryPicker extends LitElement {
             display: none;
         }
 
+        sp-underlay {
+            z-index: 199;
+        }
+
         sp-underlay + sp-dialog.selection-dialog {
             position: fixed;
             border-radius: 16px;
-            z-index: 1;
+            z-index: 200;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
