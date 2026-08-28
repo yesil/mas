@@ -222,8 +222,7 @@ export function resolveSettingEntry(fragment, locale, setting, country) {
     } else {
         let maxScore = -1;
         for (const overrideSetting of filtered) {
-            const tagMatches =
-                overrideSetting.tags?.filter((tag) => fragmentTags.includes(tag)).length ?? 0;
+            const tagMatches = overrideSetting.tags?.filter((tag) => fragmentTags.includes(tag)).length ?? 0;
             const score =
                 (overrideSetting.locales?.length > 0 ? 1 : 0) +
                 (overrideSetting.countries?.length > 0 ? 2 : 0) +
