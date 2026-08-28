@@ -471,11 +471,13 @@
                             const countryPicker = overrideDialog.querySelector('mas-country-picker');
                             expect(countryPicker).to.exist;
 
-                            countryPicker.dispatchEvent(new CustomEvent('countries-changed', {
-                                bubbles: true,
-                                composed: true,
-                                detail: { countries: ['KR', 'JP', 'US'] },
-                            }));
+                            countryPicker.dispatchEvent(
+                                new CustomEvent('countries-changed', {
+                                    bubbles: true,
+                                    composed: true,
+                                    detail: { countries: ['KR', 'JP', 'US'] },
+                                }),
+                            );
                             await waitForUpdates(settingsPage, 1);
 
                             expect(settingsPage.form.countries).to.deep.equal(['KR', 'JP', 'US']);
