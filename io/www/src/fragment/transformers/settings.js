@@ -128,19 +128,8 @@ export function collectSettingEntries(settingFragment) {
         } = ref;
         if (!fields) continue;
         const { name, tags } = fields;
-        const rawLocales = fields.locales || [];
-        const locales = rawLocales.filter((l) => !`${l}`.startsWith('country:'));
-        let countries =
-            fields.countries?.length > 0
-                ? fields.countries
-                : rawLocales.filter((l) => `${l}`.startsWith('country:')).map((l) => `${l}`.slice(8));
-        if (!countries.length && fields.data) {
-            try {
-                countries = JSON.parse(fields.data)?.countries || [];
-            } catch {
-                // malformed data field — ignore
-            }
-        }
+        const locales = fields.locales || [];
+        const countries = fields.countries || [];
         if (!name) continue;
         if (!grouped[name]) {
             grouped[name] = { default: null, override: [] };

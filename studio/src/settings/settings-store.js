@@ -52,14 +52,8 @@ export const normalizeSettingFragment = (fragment) => {
               : fragment.getFieldValue('textValue');
     const overridesField = fragment.getFieldValue('overrides');
     const overrides = overridesField ? JSON.parse(overridesField) : [];
-    const rawLocales = fragment.getFieldValues('locales');
-    const locales = rawLocales.filter((l) => !`${l}`.startsWith('country:'));
-    const countries =
-        fragment.getFieldValues('countries').length > 0
-            ? fragment.getFieldValues('countries').map((c) => `${c}`.toUpperCase())
-            : data.countries?.length > 0
-              ? data.countries
-              : rawLocales.filter((l) => `${l}`.startsWith('country:')).map((l) => `${l}`.slice(8));
+    const locales = fragment.getFieldValues('locales');
+    const countries = fragment.getFieldValues('countries').map((c) => `${c}`.toUpperCase());
     const tags = fragment.getFieldValues('tags');
 
     return {

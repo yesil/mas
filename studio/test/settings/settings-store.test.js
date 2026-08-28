@@ -1520,21 +1520,6 @@ describe('Settings Store Namespace', () => {
         store.editSetting();
     });
 
-    it('normalizeSettingFragment falls back to country:XX entries in locales for legacy data', () => {
-        const fragment = createSettingReference({
-            id: 'setting-hide-trial-ctas-kr',
-            name: 'hideTrialCTAs',
-            label: 'Hide Trial CTAs',
-            locales: ['fr_FR', 'country:KR', 'country:JP'],
-            valueType: 'boolean',
-            value: true,
-            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas-kr',
-        });
-        const record = normalizeSettingFragment(new Fragment(fragment));
-        expect(record.locales).to.deep.equal(['fr_FR']);
-        expect(record.countries).to.deep.equal(['KR', 'JP']);
-    });
-
     it('normalizeSettingFragment reads countries directly from countries field', () => {
         const fragment = createSettingReference({
             id: 'setting-hide-trial-ctas-kr',
