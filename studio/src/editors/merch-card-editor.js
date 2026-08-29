@@ -506,6 +506,8 @@ class MerchCardEditor extends LitElement {
         }
 
         if (!settingsContextFragment.locale) settingsContextFragment.locale = this.fragment.locale;
+        if (!settingsContextFragment.country)
+            settingsContextFragment.country = settingsContextFragment.locale?.split('_')[1] || '';
 
         return settingsContextFragment;
     }

@@ -278,6 +278,35 @@ describe('Settings Store Namespace', () => {
         expect(defaults.addon).to.equal('{{addon-checkout}}');
     });
 
+    it('resolves country override using fragment.country', () => {
+        const rows = [
+            createSettingsRowRecord(
+                createSettingReference({
+                    id: 'setting-hide-trial-default',
+                    name: 'hideTrialCTAs',
+                    value: false,
+                }),
+                [
+                    createSettingReference({
+                        id: 'setting-hide-trial-kr',
+                        name: 'hideTrialCTAs',
+                        value: true,
+                        fields: [{ name: 'countries', values: ['KR'] }],
+                    }),
+                ],
+            ),
+        ];
+
+        const fragment = new Fragment({
+            path: '/content/dam/mas/acom/en_US/test-card',
+            fields: [],
+        });
+        fragment.country = 'KR';
+
+        const defaults = getGlobalSettingsDefaults(fragment, rows);
+        expect(defaults.hideTrialCTAs).to.equal(true);
+    });
+
     it('deduplicates in-flight surface loads for the same surface', async () => {
         const topLevel = createSettingReference({
             id: 'setting-display-plan-type',

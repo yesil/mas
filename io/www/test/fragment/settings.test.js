@@ -146,6 +146,16 @@ describe('settings', () => {
             const entry = resolveSettingEntry({}, 'en_US', setting, undefined);
             expect(entry.booleanValue).to.equal(true);
         });
+
+        it('country-specific override wins over tag-only override when both match', () => {
+            const fragment = { fields: { tags: ['catalog'] } };
+            const setting = makeSetting([
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'], tags: [] },
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false, locales: [], countries: [], tags: ['catalog'] },
+            ]);
+            const entry = resolveSettingEntry(fragment, 'en_US', setting, 'KR');
+            expect(entry.booleanValue).to.equal(true);
+        });
     });
 
     describe('getSettings', () => {
