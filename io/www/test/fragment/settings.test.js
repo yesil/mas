@@ -151,7 +151,14 @@ describe('settings', () => {
             const fragment = { fields: { tags: ['catalog'] } };
             const setting = makeSetting([
                 { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'], tags: [] },
-                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false, locales: [], countries: [], tags: ['catalog'] },
+                {
+                    name: 'hideTrialCTAs',
+                    valuetype: 'boolean',
+                    booleanValue: false,
+                    locales: [],
+                    countries: [],
+                    tags: ['catalog'],
+                },
             ]);
             const entry = resolveSettingEntry(fragment, 'en_US', setting, 'KR');
             expect(entry.booleanValue).to.equal(true);
@@ -199,6 +206,69 @@ describe('settings', () => {
             fetchStub.withArgs(settingsContentUrl('sid')).returns(createResponse(500, null, 'Internal Server Error'));
             const result = await getSettings(createContext());
             expect(result).to.be.null;
+        });
+
+        it('serves stale cache when settings index fetch fails after cache expires', async () => {
+            const clock = sinon.useFakeTimers({ now: Date.now(), toFake: ['Date'] });
+            const referencesBody = {
+                references: {
+                    ref1: {
+                        value: {
+                            fields: {
+                                name: 'secureLabel',
+                                valuetype: 'optional-text',
+                                booleanValue: true,
+                                textValue: '{{secure-label}}',
+                                locales: [],
+                                countries: [],
+                            },
+                        },
+                    },
+                },
+            };
+            mockSettingsFetch(DEFAULT_SURFACE, 'sid', referencesBody);
+            const ctx = createContext();
+            const fresh = await getSettings(ctx);
+            expect(fresh).to.exist;
+
+            clock.tick(6 * 60 * 1000);
+            fetchStub.withArgs(settingsIndexUrl()).returns(createResponse(503, null, 'Service Unavailable'));
+
+            const stale = await getSettings(createContext());
+            expect(stale).to.deep.equal(fresh);
+            clock.restore();
+        });
+
+        it('serves stale cache when settings references fetch fails after cache expires', async () => {
+            const clock = sinon.useFakeTimers({ now: Date.now(), toFake: ['Date'] });
+            const referencesBody = {
+                references: {
+                    ref1: {
+                        value: {
+                            fields: {
+                                name: 'secureLabel',
+                                valuetype: 'optional-text',
+                                booleanValue: true,
+                                textValue: '{{secure-label}}',
+                                locales: [],
+                                countries: [],
+                            },
+                        },
+                    },
+                },
+            };
+            mockSettingsFetch(DEFAULT_SURFACE, 'sid2', referencesBody);
+            const ctx = createContext();
+            const fresh = await getSettings(ctx);
+            expect(fresh).to.exist;
+
+            clock.tick(6 * 60 * 1000);
+            fetchStub.withArgs(settingsIndexUrl()).returns(createResponse(200, { id: 'sid2' }));
+            fetchStub.withArgs(settingsContentUrl('sid2')).returns(createResponse(500, null, 'Internal Server Error'));
+
+            const stale = await getSettings(createContext());
+            expect(stale).to.deep.equal(fresh);
+            clock.restore();
         });
 
         it('returns grouped settings on success', async () => {

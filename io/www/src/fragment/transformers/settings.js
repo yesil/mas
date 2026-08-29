@@ -152,13 +152,13 @@ export async function getSettings(context) {
     if (cachedSettings && !cachedSettings.isExpired) return cachedSettings.settings;
     const { id } = await getSettingsId(context);
     if (!id) {
-        return null;
+        return cachedSettings?.settings ?? null;
     }
     const response = await fetch(odinReferences(id, context.preview, REFERENCES.ALL), context, 'settings');
 
     if (response.status !== 200) {
-        logDebug(() => 'Failed to fetch settings fragment', context);
-        return null;
+        logDebug(() => 'Failed to fetch settings fragment, serving stale cache', context);
+        return cachedSettings?.settings ?? null;
     }
 
     const settings = collectSettingEntries(response.body);
