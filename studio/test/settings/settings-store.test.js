@@ -49,6 +49,7 @@ const createSettingsRowRecord = (topLevel, overrides = []) => ({
             label: record.label,
             locales: record.locales,
             locale: record.locales.join(', '),
+            geos: record.geos,
             templateIds: record.templateIds,
             template: '',
             value: record.value,
@@ -1643,5 +1644,44 @@ describe('Settings Store Namespace', () => {
         expect(geosField.type).to.equal('tag');
         expect(geosField.values).to.include('mas:pzn/country/JP');
         expect(geosField.values).to.not.include('mas:pzn/country/KR');
+    });
+
+    it('rejects overrides without a template, locale, geo, or tag filter', async () => {
+        const topLevel = createSettingReference({
+            id: 'setting-hide-trial-ctas',
+            name: 'hideTrialCTAs',
+            label: 'Hide Trial CTAs',
+            locales: [],
+            valueType: 'boolean',
+            value: false,
+            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas',
+        });
+        const existingOverride = createSettingReference({
+            id: 'setting-hide-trial-ctas-kr',
+            name: 'hideTrialCTAs',
+            label: 'Hide Trial CTAs',
+            locales: [],
+            valueType: 'boolean',
+            value: true,
+            fieldName: 'entries',
+            path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas-kr',
+            fields: [{ name: 'geos', type: 'tag', values: ['mas:pzn/country/KR'] }],
+        });
+        const harness = createMutationHarness({ topLevel, overrides: [existingOverride] });
+        const store = new SettingsStore();
+        store.setAem(harness.aem);
+        await store.loadSurface('sandbox');
+
+        const rowId = store.rows.get()[0].value.id;
+        const createdId = await store.addOverride(rowId, { valueType: 'boolean', booleanValue: true });
+        const updated = await store.updateOverride(rowId, existingOverride.id, {
+            valueType: 'boolean',
+            booleanValue: true,
+        });
+
+        expect(createdId).to.equal(null);
+        expect(updated).to.equal(false);
+        expect(harness.calls.create).to.be.empty;
+        expect(harness.calls.save).to.be.empty;
     });
 });

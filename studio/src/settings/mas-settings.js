@@ -16,7 +16,12 @@ import { toAttribute } from '../aem/tag-path-utils.js';
 import { createQuantitySelectValue } from '../common/fields/quantity-select.js';
 import { getVariantTreeData } from '../editors/variant-picker.js';
 import { SETTING_NAME_DEFINITIONS } from '../../../io/www/src/fragment/transformers/settings.js';
-import { DELETE_BLOCKED_STATUSES, getSettingNameDefinition } from './settings-store.js';
+import {
+    DELETE_BLOCKED_STATUSES,
+    OVERRIDE_SCOPE_REQUIRED_MESSAGE,
+    getSettingNameDefinition,
+    hasOverrideSelection,
+} from './settings-store.js';
 
 const MAS_TAG_NAMESPACE = '/content/cq:tags/mas';
 const isGeoTagPath = (path) => /\/pzn\/country\/[^/]+$/i.test(path) || /\/locale\/(?:[^/]+\/)?[^/]+_[^/]+$/i.test(path);
@@ -698,14 +703,23 @@ class MasSettings extends LitElement {
         return this.form.name === 'addon' && this.form.addonEnabled && !this.#toAddonPlaceholderKey(this.form.value);
     }
 
+    get isOverrideScopeMissing() {
+        return !hasOverrideSelection(this.form);
+    }
+
     get isOverrideSaveDisabled() {
         if (Store.settings.loading.get()) return true;
+        if (this.isOverrideScopeMissing) return true;
         if (Boolean(this.overrideConflict)) return true;
         if (this.isAddonPlaceholderMissing) return true;
         return false;
     }
 
     #submitOverride = async (publish = false) => {
+        if (this.isOverrideScopeMissing) {
+            showToast(OVERRIDE_SCOPE_REQUIRED_MESSAGE, 'negative');
+            return;
+        }
         if (this.overrideConflict) {
             showToast('Conflict detected. Choose a different locale or template.', 'negative');
             return;
@@ -1162,7 +1176,11 @@ class MasSettings extends LitElement {
                             @change=${this.#handleOverrideGeosChange}
                         ></mas-promo-variation-geos>
                     </sp-field-group>
-                    ${this.tagsTemplate} ${this.overrideBooleanToggleTemplate}
+                    ${this.tagsTemplate}
+                    ${this.isOverrideScopeMissing
+                        ? html`<sp-help-text variant="negative">${OVERRIDE_SCOPE_REQUIRED_MESSAGE}</sp-help-text>`
+                        : nothing}
+                    ${this.overrideBooleanToggleTemplate}
                     <sp-field-group>
                         <sp-field-label>Value</sp-field-label>
                         ${this.valueInputTemplate}

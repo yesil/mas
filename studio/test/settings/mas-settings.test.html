@@ -414,6 +414,42 @@
                     });
 
                     describe('override flow', () => {
+                        it('requires at least one override filter', async () => {
+                            const { settingsPage, table } = await setupPage();
+                            const originalAddOverride = Store.settings.addOverride;
+                            let addOverrideCalls = 0;
+                            Store.settings.addOverride = async () => {
+                                addOverrideCalls++;
+                                return 'new-override-id';
+                            };
+
+                            const overrideDialog = await openOverrideDialog(settingsPage, table);
+                            const saveDraftButton = getDialogActionButton(overrideDialog, 'Save as draft');
+                            const publishButton = getDialogActionButton(overrideDialog, 'Publish');
+
+                            expect(saveDraftButton.disabled).to.equal(true);
+                            expect(publishButton.disabled).to.equal(true);
+                            expect(overrideDialog.querySelector('sp-help-text')?.textContent.trim()).to.equal(
+                                'Select at least one template, locale, geo, or tag.',
+                            );
+
+                            saveDraftButton.disabled = false;
+                            saveDraftButton.click();
+                            await waitForUpdates(settingsPage, 1);
+                            expect(addOverrideCalls).to.equal(0);
+
+                            settingsPage.form = {
+                                ...settingsPage.form,
+                                geos: ['mas:pzn/country/KR'],
+                            };
+                            await waitForUpdates(settingsPage, 1);
+
+                            expect(getDialogActionButton(overrideDialog, 'Save as draft').disabled).to.equal(false);
+                            expect(getDialogActionButton(overrideDialog, 'Publish').disabled).to.equal(false);
+                            expect(overrideDialog.querySelector('sp-help-text')).to.equal(null);
+                            Store.settings.addOverride = originalAddOverride;
+                        });
+
                         it('submits addon overrides with and without locale selection', async () => {
                             const { settingsPage, table } = await setupPage({ references: referencesWithOverride });
                             const originalAddOverride = Store.settings.addOverride;

@@ -127,6 +127,10 @@ export function extractValue(entry, fragment) {
     }
 }
 
+export function hasOverrideScope(entry = {}) {
+    return ['templates', 'locales', 'geos', 'tags'].some((field) => entry[field]?.length > 0);
+}
+
 export function collectSettingEntries(settingFragment) {
     const { references } = settingFragment;
     const grouped = {};
@@ -136,18 +140,15 @@ export function collectSettingEntries(settingFragment) {
             value: { fields },
         } = ref;
         if (!fields) continue;
-        const { name, tags } = fields;
+        const { name } = fields;
         const locales = fields.locales ?? [];
         const geos = fields.geos ?? [];
         if (!name) continue;
-        if (!grouped[name]) {
-            grouped[name] = { default: null, override: [] };
-        }
         const normalizedFields = { ...fields, locales, geos };
-        if (locales.length > 0 || geos.length > 0 || tags?.length > 0) {
+        if (!grouped[name]) {
+            grouped[name] = { default: normalizedFields, override: [] };
+        } else if (hasOverrideScope(normalizedFields)) {
             grouped[name].override.push(normalizedFields);
-        } else {
-            grouped[name].default = normalizedFields;
         }
     }
 
@@ -212,7 +213,7 @@ export function resolveSettingEntry(fragment, locale, setting, country) {
                 !overrideSetting.templates ||
                 overrideSetting.templates.length === 0 ||
                 overrideSetting.templates.includes(template);
-            return geo !== null && tagsOk && templateOk;
+            return hasOverrideScope(overrideSetting) && geo !== null && tagsOk && templateOk;
         });
     if (filtered.length === 0) return defaultEntry;
     let bestMatch;

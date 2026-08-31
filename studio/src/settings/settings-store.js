@@ -18,7 +18,11 @@ const SETTINGS_ENTRY_MODEL_ID = 'L2NvbmYvbWFzL3NldHRpbmdzL2RhbS9jZm0vbW9kZWxzL3N
 const FRAGMENT_SUFFIX_LENGTH = 4;
 const FRAGMENT_NAME_COLLISION_LIMIT = 20;
 const TOP_LEVEL_CONFLICT_MESSAGE = 'A top-level setting already exists for this setting name.';
+export const OVERRIDE_SCOPE_REQUIRED_MESSAGE = 'Select at least one template, locale, geo, or tag.';
 export const DELETE_BLOCKED_STATUSES = ['PUBLISHED', 'MODIFIED'];
+
+export const hasOverrideSelection = ({ templateIds = [], locales = [], geos = [], tags = [] } = {}) =>
+    templateIds.length > 0 || locales.length > 0 || geos.length > 0 || tags.length > 0;
 
 const trueValues = new Set(['true', '1', 'yes', 'on']);
 const falseValues = new Set(['false', '0', 'no', 'off']);
@@ -490,6 +494,10 @@ export class SettingsStore {
     }
 
     async addOverride(rowId, override = {}) {
+        if (!hasOverrideSelection(override)) {
+            showToast(OVERRIDE_SCOPE_REQUIRED_MESSAGE, 'negative');
+            return null;
+        }
         const rowStore = this.getRowStore(rowId);
         const row = rowStore.value;
         const settingName = row.name;
@@ -542,6 +550,10 @@ export class SettingsStore {
         const row = rowStore.value;
         const currentOverride = row.overrides.find((item) => item.id === overrideId);
         if (!currentOverride) return false;
+        if (!hasOverrideSelection(override)) {
+            showToast(OVERRIDE_SCOPE_REQUIRED_MESSAGE, 'negative');
+            return false;
+        }
 
         const locales = [...(override.locales || [])];
         const geos = [...(override.geos || [])];
