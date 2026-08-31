@@ -7,14 +7,19 @@ import { canAccessSettings } from '../groups.js';
 import './mas-settings-table.js';
 import '../mas-quick-actions.js';
 import '../mas-locale-picker.js';
-import '../mas-country-picker.js';
 import '../aem/aem-tag-picker-field.js';
+import '../promotions/mas-promo-variation-geos.js';
 import '../common/fields/tree-picker-field.js';
 import '../common/fields/quantity-select.js';
+import { ensureNamespaceTags } from '../aem/tag-cache.js';
+import { toAttribute } from '../aem/tag-path-utils.js';
 import { createQuantitySelectValue } from '../common/fields/quantity-select.js';
 import { getVariantTreeData } from '../editors/variant-picker.js';
 import { SETTING_NAME_DEFINITIONS } from '../../../io/www/src/fragment/transformers/settings.js';
 import { DELETE_BLOCKED_STATUSES, getSettingNameDefinition } from './settings-store.js';
+
+const MAS_TAG_NAMESPACE = '/content/cq:tags/mas';
+const isGeoTagPath = (path) => /\/pzn\/country\/[^/]+$/i.test(path) || /\/locale\/(?:[^/]+\/)?[^/]+_[^/]+$/i.test(path);
 
 const getSettingDefaultValue = (definition) => {
     if (definition.editor === 'boolean') return true;
@@ -191,6 +196,7 @@ class MasSettings extends LitElement {
         aem: { type: Object, attribute: false },
         dialog: { state: true },
         form: { state: true },
+        geoOptions: { state: true },
         showDiscardDialog: { state: true },
     };
 
@@ -217,6 +223,7 @@ class MasSettings extends LitElement {
         this.loadedSurface = '';
         this.dialog = null;
         this.form = this.#getDefaultForm();
+        this.geoOptions = [];
         this.formBaseline = this.#getDefaultForm();
         this.formRouteId = null;
         this.discardPromiseResolver = null;
@@ -292,12 +299,23 @@ class MasSettings extends LitElement {
         if (!Store.settings.aem) {
             Store.settings.initAem(this.bucket, this.baseUrl);
         }
+        void this.#loadGeoOptions();
         this.loadedSurface = surface;
         Store.settings.ensureSurfaceLoaded(surface).then(() => {
             if (this.surface !== surface) {
                 this.#loadSettings();
             }
         });
+    }
+
+    async #loadGeoOptions() {
+        const aem = Store.settings.aem;
+        if (!aem?.tags?.list) return;
+        const tags = await ensureNamespaceTags(MAS_TAG_NAMESPACE, (namespace) => aem.tags.list(namespace));
+        this.geoOptions = [...tags.keys()]
+            .filter(isGeoTagPath)
+            .map((path) => toAttribute(path))
+            .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
     }
 
     #getDefaultForm() {
@@ -311,7 +329,7 @@ class MasSettings extends LitElement {
             value: '',
             booleanValue: false,
             locales: [],
-            countries: [],
+            geos: [],
             addonEnabled: false,
         };
     }
@@ -356,7 +374,7 @@ class MasSettings extends LitElement {
             value,
             booleanValue: Boolean(form.booleanValue),
             locales: [...(form.locales || [])].sort(),
-            countries: [...(form.countries || [])].sort(),
+            geos: [...(form.geos || [])].sort(),
             addonEnabled: Boolean(form.addonEnabled),
         };
     }
@@ -420,7 +438,7 @@ class MasSettings extends LitElement {
             value,
             booleanValue: Boolean(override.booleanValue),
             locales: [...(override.locales || [])],
-            countries: [...(override.countries || [])],
+            geos: [...(override.geos || [])],
             addonEnabled: settingDefinition?.editor === 'addon' ? Boolean(override.booleanValue) : false,
         };
         this.formBaseline = structuredClone(this.form);
@@ -536,7 +554,7 @@ class MasSettings extends LitElement {
             value,
             booleanValue: Boolean(row.booleanValue),
             locales: [],
-            countries: [],
+            geos: [],
             addonEnabled: settingDefinition?.editor === 'addon' ? Boolean(row.booleanValue) : false,
         };
     };
@@ -706,7 +724,7 @@ class MasSettings extends LitElement {
 
         const payload = {
             locales: [...this.form.locales],
-            countries: [...(this.form.countries || [])],
+            geos: [...(this.form.geos || [])],
             templateIds: [...this.form.templateIds],
             tags: [...this.form.tags],
             valueType,
@@ -749,19 +767,15 @@ class MasSettings extends LitElement {
 
     get overrideConflict() {
         if (this.dialog?.type !== 'override') return null;
-        const hasLocales = this.form.locales.length > 0;
-        const hasCountries = (this.form.countries || []).length > 0;
-        if (!hasLocales && !hasCountries) return null;
+        if (!this.form.locales.length) return null;
         const row = Store.settings.getRowStore(this.dialog.rowId)?.value;
         if (!row) return null;
         return (
             row.overrides.find((override) => {
                 if (this.dialog.mode === 'edit' && override.id === this.dialog.overrideId) return false;
                 const overrideLocales = override.locales || [];
-                const overrideCountries = override.countries || [];
-                const localesOverlap = hasLocales && overrideLocales.some((locale) => this.form.locales.includes(locale));
-                const countriesOverlap = hasCountries && overrideCountries.some((c) => (this.form.countries || []).includes(c));
-                if (!localesOverlap && !countriesOverlap) return false;
+                const localesOverlap = overrideLocales.some((locale) => this.form.locales.includes(locale));
+                if (!localesOverlap) return false;
                 const formTemplates = this.form.templateIds;
                 const overrideTemplates = override.templateIds || [];
                 if (formTemplates.length === 0) return true;
@@ -979,8 +993,8 @@ class MasSettings extends LitElement {
         this.#setFormField('locales', [...detail.locales]);
     };
 
-    #handleOverrideCountriesChange = ({ detail }) => {
-        this.#setFormField('countries', [...detail.countries]);
+    #handleOverrideGeosChange = ({ detail }) => {
+        this.#setFormField('geos', [...detail.value]);
     };
 
     #handleQuantitySelectChange = (event) => {
@@ -1140,14 +1154,13 @@ class MasSettings extends LitElement {
                         ></mas-locale-picker>
                     </sp-field-group>
                     <sp-field-group>
-                        <sp-field-label>Countries</sp-field-label>
-                        <mas-country-picker
-                            selection-label="Select countries"
-                            empty-selection-label=${this.dialog?.mode === 'edit' ? 'All countries' : 'Select countries'}
-                            .emptySelectionIsValue=${this.dialog?.mode === 'edit'}
-                            .countries=${(this.form.countries || []).join(',')}
-                            @countries-changed=${this.#handleOverrideCountriesChange}
-                        ></mas-country-picker>
+                        <sp-field-label>Geos</sp-field-label>
+                        <mas-promo-variation-geos
+                            compact
+                            .geos=${this.geoOptions}
+                            .value=${this.form.geos}
+                            @change=${this.#handleOverrideGeosChange}
+                        ></mas-promo-variation-geos>
                     </sp-field-group>
                     ${this.tagsTemplate} ${this.overrideBooleanToggleTemplate}
                     <sp-field-group>

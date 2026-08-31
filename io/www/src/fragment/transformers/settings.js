@@ -1,5 +1,14 @@
 import { odinUrl, odinReferences, REFERENCES } from '../utils/paths.js';
-import { COLLECTION_MODEL_ID, fetch, getCountry, getFragmentId, getRegionalLocale, getRequestInfos } from '../utils/common.js';
+import {
+    COLLECTION_MODEL_ID,
+    fetch,
+    geoMatchScore,
+    getCountry,
+    getFragmentId,
+    getRegionalLocale,
+    getRequestInfos,
+    matchesGeo,
+} from '../utils/common.js';
 import { log, logDebug } from '../utils/log.js';
 
 const SETTINGS_ID_PATH = 'settings/index';
@@ -128,14 +137,14 @@ export function collectSettingEntries(settingFragment) {
         } = ref;
         if (!fields) continue;
         const { name, tags } = fields;
-        const locales = fields.locales || [];
-        const countries = fields.countries || [];
+        const locales = fields.locales ?? [];
+        const geos = fields.geos ?? [];
         if (!name) continue;
         if (!grouped[name]) {
             grouped[name] = { default: null, override: [] };
         }
-        const normalizedFields = { ...fields, locales, countries };
-        if (locales?.length > 0 || countries.length > 0 || tags?.length > 0) {
+        const normalizedFields = { ...fields, locales, geos };
+        if (locales.length > 0 || geos.length > 0 || tags?.length > 0) {
             grouped[name].override.push(normalizedFields);
         } else {
             grouped[name].default = normalizedFields;
@@ -152,13 +161,13 @@ export async function getSettings(context) {
     if (cachedSettings && !cachedSettings.isExpired) return cachedSettings.settings;
     const { id } = await getSettingsId(context);
     if (!id) {
-        return cachedSettings?.settings ?? null;
+        return null;
     }
     const response = await fetch(odinReferences(id, context.preview, REFERENCES.ALL), context, 'settings');
 
     if (response.status !== 200) {
-        logDebug(() => 'Failed to fetch settings fragment, serving stale cache', context);
-        return cachedSettings?.settings ?? null;
+        logDebug(() => 'Failed to fetch settings fragment', context);
+        return null;
     }
 
     const settings = collectSettingEntries(response.body);
@@ -189,36 +198,31 @@ export function resolveSettingEntry(fragment, locale, setting, country) {
         return null;
     }
     const fragmentTags = fragment.fields?.tags ?? [];
-    const filtered = setting.override.filter((overrideSetting) => {
-        const localeOk =
-            !overrideSetting.locales || overrideSetting.locales.length === 0 || overrideSetting.locales.includes(locale);
-        const normalizedCountry = country?.toUpperCase() ?? '';
-        const countryOk =
-            !overrideSetting.countries ||
-            overrideSetting.countries.length === 0 ||
-            overrideSetting.countries.some((c) => c.toUpperCase() === normalizedCountry);
-        const tagsOk =
-            !overrideSetting.tags ||
-            overrideSetting.tags.length === 0 ||
-            overrideSetting.tags.some((tag) => fragmentTags.includes(tag));
-        const templateOk =
-            !overrideSetting.templates ||
-            overrideSetting.templates.length === 0 ||
-            overrideSetting.templates.includes(template);
-        return localeOk && countryOk && tagsOk && templateOk;
-    });
+    const filtered = setting.override
+        .map((overrideSetting) => ({
+            overrideSetting,
+            geo: overrideGeoMatch(overrideSetting, { locale, country }),
+        }))
+        .filter(({ overrideSetting, geo }) => {
+            const tagsOk =
+                !overrideSetting.tags ||
+                overrideSetting.tags.length === 0 ||
+                overrideSetting.tags.some((tag) => fragmentTags.includes(tag));
+            const templateOk =
+                !overrideSetting.templates ||
+                overrideSetting.templates.length === 0 ||
+                overrideSetting.templates.includes(template);
+            return geo !== null && tagsOk && templateOk;
+        });
     if (filtered.length === 0) return defaultEntry;
-    let bestMatch = defaultEntry;
+    let bestMatch;
     if (filtered.length === 1) {
-        bestMatch = filtered[0];
+        bestMatch = filtered[0].overrideSetting;
     } else {
         let maxScore = -1;
-        for (const overrideSetting of filtered) {
+        for (const { overrideSetting, geo } of filtered) {
             const tagMatches = overrideSetting.tags?.filter((tag) => fragmentTags.includes(tag)).length ?? 0;
-            const score =
-                (overrideSetting.locales?.length > 0 ? 2 : 0) +
-                (overrideSetting.countries?.length > 0 ? 10 : 0) +
-                tagMatches * 1;
+            const score = geoMatchScore(geo) * 10 + tagMatches;
             if (score > maxScore) {
                 maxScore = score;
                 bestMatch = overrideSetting;
@@ -226,6 +230,16 @@ export function resolveSettingEntry(fragment, locale, setting, country) {
         }
     }
     return { ...defaultEntry, ...bestMatch };
+}
+
+function overrideGeoMatch(overrideSetting, { locale, country }) {
+    if (overrideSetting.geos?.length > 0) {
+        return matchesGeo(overrideSetting.geos, { regionLocale: locale, country });
+    }
+    if (overrideSetting.locales?.length > 0) {
+        return overrideSetting.locales.includes(locale) ? { region: true, country: false } : null;
+    }
+    return undefined;
 }
 
 export function parsePlaceholderRemap(textValue) {

@@ -30,6 +30,7 @@
             import '../../src/settings/mas-settings.js';
             import Store from '../../src/store.js';
             import { PAGE_NAMES, QUICK_ACTION } from '../../src/constants.js';
+            import { __tagCacheStores } from '../../src/aem/tag-cache.js';
             import {
                 createDefaultSettingsReferences,
                 createQueryBuilderFetchMock,
@@ -111,6 +112,7 @@
                 references = defaultReferences,
                 expectedRows = 3,
                 aem = null,
+                aemFromStoreOnly = false,
                 fragmentId = null,
                 creating = false,
             } = {}) => {
@@ -140,7 +142,15 @@
                 settingsPage.dialog = null;
                 settingsPage.showDiscardDialog = false;
                 const { aem: generatedAem, calls } = createSettingsIndexAemMock({ references });
-                settingsPage.aem = aem || generatedAem;
+                const selectedAem = aem || generatedAem;
+                if (aemFromStoreOnly) {
+                    Store.settings.setAem(selectedAem);
+                    settingsPage.geoOptions = [];
+                    settingsPage.loadedSurface = '';
+                    settingsPage.aem = null;
+                } else {
+                    settingsPage.aem = selectedAem;
+                }
                 await waitForUpdates(settingsPage, 2);
 
                 const table = settingsPage.shadowRoot.querySelector('#settings-table');
@@ -160,6 +170,7 @@
                         Store.users.set([]);
                         Store.placeholders.addons.data.set([{ value: 'disabled', itemText: 'disabled' }]);
                         Store.placeholders.addons.loading.set(false);
+                        __tagCacheStores.data.delete('/content/cq:tags/mas');
                     });
 
                     after(() => {
@@ -463,24 +474,69 @@
                             Store.settings.addOverride = originalAddOverride;
                         });
 
-                        it('countries-changed event from mas-country-picker updates form countries array', async () => {
+                        it('promotion geo picker change updates form geos array', async () => {
                             const { settingsPage, table } = await setupPage({ references: referencesWithOverride });
                             const overrideDialog = await openOverrideDialog(settingsPage, table);
                             expect(overrideDialog).to.exist;
 
-                            const countryPicker = overrideDialog.querySelector('mas-country-picker');
-                            expect(countryPicker).to.exist;
+                            const geoPicker = overrideDialog.querySelector('mas-promo-variation-geos');
+                            expect(geoPicker).to.exist;
 
-                            countryPicker.dispatchEvent(
-                                new CustomEvent('countries-changed', {
+                            geoPicker.dispatchEvent(
+                                new CustomEvent('change', {
                                     bubbles: true,
                                     composed: true,
-                                    detail: { countries: ['KR', 'JP', 'US'] },
+                                    detail: {
+                                        value: ['mas:pzn/country/KR', 'mas:pzn/country/JP', 'mas:locale/US/en_US'],
+                                    },
                                 }),
                             );
                             await waitForUpdates(settingsPage, 1);
 
-                            expect(settingsPage.form.countries).to.deep.equal(['KR', 'JP', 'US']);
+                            expect(settingsPage.form.geos).to.deep.equal([
+                                'mas:pzn/country/KR',
+                                'mas:pzn/country/JP',
+                                'mas:locale/US/en_US',
+                            ]);
+                        });
+
+                        it('loads prefixed country and region tokens for the promotion geo picker', async () => {
+                            __tagCacheStores.data.delete('/content/cq:tags/mas');
+                            const { aem } = createSettingsIndexAemMock({ references: referencesWithOverride });
+                            aem.tags = {
+                                list: async () => ({
+                                    hits: [
+                                        { path: '/content/cq:tags/mas/locale/US/en_US' },
+                                        { path: '/content/cq:tags/mas/pzn/country/KR' },
+                                        { path: '/content/cq:tags/mas/keyword/legal' },
+                                    ],
+                                }),
+                            };
+                            const { settingsPage, table } = await setupPage({ references: referencesWithOverride, aem });
+                            await waitForUpdates(settingsPage, 2);
+                            const overrideDialog = await openOverrideDialog(settingsPage, table);
+                            const geoPicker = overrideDialog.querySelector('mas-promo-variation-geos');
+
+                            expect(geoPicker.geos).to.deep.equal(['mas:locale/US/en_US', 'mas:pzn/country/KR']);
+                        });
+
+                        it('loads geo options from the settings store AEM client', async () => {
+                            __tagCacheStores.data.delete('/content/cq:tags/mas');
+                            const { aem } = createSettingsIndexAemMock({ references: referencesWithOverride });
+                            aem.tags = {
+                                list: async () => ({
+                                    hits: [{ path: '/content/cq:tags/mas/pzn/country/KR' }],
+                                }),
+                            };
+                            const { settingsPage } = await setupPage({
+                                references: referencesWithOverride,
+                                aem,
+                                aemFromStoreOnly: true,
+                            });
+                            await waitForUpdates(settingsPage, 2);
+
+                            expect(settingsPage.aem).to.equal(null);
+                            expect(settingsPage.geoOptions).to.include('mas:pzn/country/KR');
                         });
 
                         it('publishes override from dialog publish action', async () => {

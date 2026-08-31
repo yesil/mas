@@ -90,7 +90,7 @@ test.describe('Settings - hideTrialCTAs', () => {
         });
     });
 
-    // @MAS-Settings-hideTrialCTAs-country-KR — countries:["KR"] override strips trial CTA; locale stays en_US
+    // @MAS-Settings-hideTrialCTAs-country-KR — KR geo override strips trial CTA; locale stays en_US
     test(`${features[3].name},${features[3].tags}`, async ({ page, baseURL }) => {
         const { data } = features[3];
         let testPage = `${baseURL}${features[3].path}${features[3].browserParams}`;
@@ -109,12 +109,12 @@ test.describe('Settings - hideTrialCTAs', () => {
             await expect(card).toBeVisible();
         });
 
-        await test.step('step-3: Verify trial CTA is stripped by countries:["KR"] override', async () => {
+        await test.step('step-3: Verify trial CTA is stripped by the KR geo override', async () => {
             await expect(settingsPage.freeTrialCta).toHaveCount(0);
         });
     });
 
-    // @MAS-Settings-hideTrialCTAs-country-US — countries:["KR"] override does not apply; trial CTA visible
+    // @MAS-Settings-hideTrialCTAs-country-US — KR geo override does not apply; trial CTA visible
     test(`${features[4].name},${features[4].tags}`, async ({ page, baseURL }) => {
         const { data } = features[4];
         let testPage = `${baseURL}${features[4].path}${features[4].browserParams}`;

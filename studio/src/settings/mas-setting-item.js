@@ -142,7 +142,9 @@ export class MasSettingItem extends LitElement {
                     >${this.row.label}</sp-table-cell
                 >
                 <sp-table-cell
-                    >${[...(this.row.locales || []), ...(this.row.countries || [])].join(', ') || 'All'}</sp-table-cell
+                    >${(this.row.geos?.length ? this.row.geos.map((geo) => geo.split('/').pop()) : this.row.locales)?.join(
+                        ', ',
+                    ) || 'All'}</sp-table-cell
                 >
                 <sp-table-cell class="template-cell">${this.row.templateSummary}</sp-table-cell>
                 ${this.valueCellTemplate}

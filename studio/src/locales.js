@@ -5,7 +5,6 @@ export {
     getLanguageName,
     getCountryName,
     getCountryFlag,
-    getCountryCodes,
     getDefaultLocale,
     getDefaultLocaleCode,
     getDefaultLocales,

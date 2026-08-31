@@ -53,13 +53,18 @@ describe('settings', () => {
             expect(result.secureLabel.override[0].locales).to.include('fr_FR');
         });
 
-        it('groups countries-only override into override array', () => {
+        it('groups geos-only override into override array', () => {
             const fragment = {
                 references: {
                     ref1: { value: { fields: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false } } },
                     ref2: {
                         value: {
-                            fields: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, countries: ['KR'] },
+                            fields: {
+                                name: 'hideTrialCTAs',
+                                valuetype: 'boolean',
+                                booleanValue: true,
+                                geos: ['mas:pzn/country/KR'],
+                            },
                         },
                     },
                 },
@@ -67,7 +72,7 @@ describe('settings', () => {
             const result = collectSettingEntries(fragment);
             expect(result.hideTrialCTAs.default).to.exist;
             expect(result.hideTrialCTAs.override).to.have.length(1);
-            expect(result.hideTrialCTAs.override[0].countries).to.include('KR');
+            expect(result.hideTrialCTAs.override[0].geos).to.include('mas:pzn/country/KR');
         });
 
         it('returns empty object when references is null', () => {
@@ -86,7 +91,7 @@ describe('settings', () => {
             expect(collectSettingEntries(fragment)).to.deep.equal({});
         });
 
-        it('reads countries directly from countries field (new model)', () => {
+        it('reads geos directly from geos field', () => {
             const fragment = {
                 references: {
                     ref1: { value: { fields: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false } } },
@@ -96,7 +101,7 @@ describe('settings', () => {
                                 name: 'hideTrialCTAs',
                                 valuetype: 'boolean',
                                 booleanValue: true,
-                                countries: ['KR', 'JP'],
+                                geos: ['mas:pzn/country/KR', 'mas:pzn/country/JP'],
                             },
                         },
                     },
@@ -104,20 +109,26 @@ describe('settings', () => {
             };
             const result = collectSettingEntries(fragment);
             expect(result.hideTrialCTAs.override).to.have.length(1);
-            expect(result.hideTrialCTAs.override[0].countries).to.deep.equal(['KR', 'JP']);
+            expect(result.hideTrialCTAs.override[0].geos).to.deep.equal(['mas:pzn/country/KR', 'mas:pzn/country/JP']);
             expect(result.hideTrialCTAs.override[0].locales).to.deep.equal([]);
         });
     });
 
     describe('resolveSettingEntry', () => {
         const makeSetting = (overrides = []) => ({
-            default: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false, locales: [], countries: [] },
+            default: { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: false, locales: [], geos: [] },
             override: overrides,
         });
 
         it('matches country override when country codes are uppercase', () => {
             const setting = makeSetting([
-                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'] },
+                {
+                    name: 'hideTrialCTAs',
+                    valuetype: 'boolean',
+                    booleanValue: true,
+                    locales: [],
+                    geos: ['mas:pzn/country/KR'],
+                },
             ]);
             const entry = resolveSettingEntry({}, 'en_US', setting, 'KR');
             expect(entry.booleanValue).to.equal(true);
@@ -125,7 +136,13 @@ describe('settings', () => {
 
         it('matches country override case-insensitively when request sends lowercase', () => {
             const setting = makeSetting([
-                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'] },
+                {
+                    name: 'hideTrialCTAs',
+                    valuetype: 'boolean',
+                    booleanValue: true,
+                    locales: [],
+                    geos: ['mas:pzn/country/KR'],
+                },
             ]);
             const entry = resolveSettingEntry({}, 'en_US', setting, 'kr');
             expect(entry.booleanValue).to.equal(true);
@@ -133,15 +150,21 @@ describe('settings', () => {
 
         it('returns default when country does not match', () => {
             const setting = makeSetting([
-                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'] },
+                {
+                    name: 'hideTrialCTAs',
+                    valuetype: 'boolean',
+                    booleanValue: true,
+                    locales: [],
+                    geos: ['mas:pzn/country/KR'],
+                },
             ]);
             const entry = resolveSettingEntry({}, 'en_US', setting, 'JP');
             expect(entry.booleanValue).to.equal(false);
         });
 
-        it('matches override with no country filter when country is undefined', () => {
+        it('matches override with no geo filter when country is undefined', () => {
             const setting = makeSetting([
-                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: [] },
+                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], geos: [] },
             ]);
             const entry = resolveSettingEntry({}, 'en_US', setting, undefined);
             expect(entry.booleanValue).to.equal(true);
@@ -150,13 +173,20 @@ describe('settings', () => {
         it('country-specific override wins over tag-only override when both match', () => {
             const fragment = { fields: { tags: ['catalog'] } };
             const setting = makeSetting([
-                { name: 'hideTrialCTAs', valuetype: 'boolean', booleanValue: true, locales: [], countries: ['KR'], tags: [] },
+                {
+                    name: 'hideTrialCTAs',
+                    valuetype: 'boolean',
+                    booleanValue: true,
+                    locales: [],
+                    geos: ['mas:pzn/country/KR'],
+                    tags: [],
+                },
                 {
                     name: 'hideTrialCTAs',
                     valuetype: 'boolean',
                     booleanValue: false,
                     locales: [],
-                    countries: [],
+                    geos: [],
                     tags: ['catalog'],
                 },
             ]);
@@ -172,7 +202,7 @@ describe('settings', () => {
                     valuetype: 'boolean',
                     booleanValue: true,
                     locales: ['fr_FR'],
-                    countries: [],
+                    geos: [],
                     tags: [],
                 },
                 {
@@ -180,12 +210,26 @@ describe('settings', () => {
                     valuetype: 'boolean',
                     booleanValue: false,
                     locales: [],
-                    countries: [],
+                    geos: [],
                     tags: ['catalog'],
                 },
             ]);
             const entry = resolveSettingEntry(fragment, 'fr_FR', setting, undefined);
             expect(entry.booleanValue).to.equal(true);
+        });
+
+        it('prefers geos over legacy locales when both are present', () => {
+            const setting = makeSetting([
+                {
+                    name: 'hideTrialCTAs',
+                    valuetype: 'boolean',
+                    booleanValue: true,
+                    locales: ['en_US'],
+                    geos: ['mas:pzn/country/JP'],
+                },
+            ]);
+            const entry = resolveSettingEntry({}, 'en_US', setting, 'KR');
+            expect(entry.booleanValue).to.equal(false);
         });
     });
 
@@ -232,69 +276,6 @@ describe('settings', () => {
             expect(result).to.be.null;
         });
 
-        it('serves stale cache when settings index fetch fails after cache expires', async () => {
-            const clock = sinon.useFakeTimers({ now: Date.now(), toFake: ['Date'] });
-            const referencesBody = {
-                references: {
-                    ref1: {
-                        value: {
-                            fields: {
-                                name: 'secureLabel',
-                                valuetype: 'optional-text',
-                                booleanValue: true,
-                                textValue: '{{secure-label}}',
-                                locales: [],
-                                countries: [],
-                            },
-                        },
-                    },
-                },
-            };
-            mockSettingsFetch(DEFAULT_SURFACE, 'sid', referencesBody);
-            const ctx = createContext();
-            const fresh = await getSettings(ctx);
-            expect(fresh).to.exist;
-
-            clock.tick(6 * 60 * 1000);
-            fetchStub.withArgs(settingsIndexUrl()).returns(createResponse(503, null, 'Service Unavailable'));
-
-            const stale = await getSettings(createContext());
-            expect(stale).to.deep.equal(fresh);
-            clock.restore();
-        });
-
-        it('serves stale cache when settings references fetch fails after cache expires', async () => {
-            const clock = sinon.useFakeTimers({ now: Date.now(), toFake: ['Date'] });
-            const referencesBody = {
-                references: {
-                    ref1: {
-                        value: {
-                            fields: {
-                                name: 'secureLabel',
-                                valuetype: 'optional-text',
-                                booleanValue: true,
-                                textValue: '{{secure-label}}',
-                                locales: [],
-                                countries: [],
-                            },
-                        },
-                    },
-                },
-            };
-            mockSettingsFetch(DEFAULT_SURFACE, 'sid2', referencesBody);
-            const ctx = createContext();
-            const fresh = await getSettings(ctx);
-            expect(fresh).to.exist;
-
-            clock.tick(6 * 60 * 1000);
-            fetchStub.withArgs(settingsIndexUrl()).returns(createResponse(200, { id: 'sid2' }));
-            fetchStub.withArgs(settingsContentUrl('sid2')).returns(createResponse(500, null, 'Internal Server Error'));
-
-            const stale = await getSettings(createContext());
-            expect(stale).to.deep.equal(fresh);
-            clock.restore();
-        });
-
         it('returns grouped settings on success', async () => {
             const referencesBody = {
                 references: {
@@ -320,7 +301,7 @@ describe('settings', () => {
                         booleanValue: true,
                         textValue: '{{secure-label}}',
                         locales: [],
-                        countries: [],
+                        geos: [],
                     },
                     override: [],
                 },
@@ -587,7 +568,7 @@ describe('settings', () => {
                                     name: 'hideTrialCTAs',
                                     valuetype: 'boolean',
                                     booleanValue: true,
-                                    countries: ['KR'],
+                                    geos: ['mas:pzn/country/KR'],
                                 },
                             ],
                         },
@@ -642,7 +623,7 @@ describe('settings', () => {
                                 tags: [],
                                 valuetype: 'optional-text',
                                 textValue:
-                                    '<merch-quantity-select title=\"Select quantity\" min=\"2\" default-value=\"3\" max=\"10\" step=\"1\"></merch-quantity-select>',
+                                    '<merch-quantity-select title="Select quantity" min="2" default-value="3" max="10" step="1"></merch-quantity-select>',
                                 booleanValue: true,
                             },
                             override: [],
@@ -652,7 +633,7 @@ describe('settings', () => {
             };
             const result = await settings.process(context);
             expect(result.body.settings.quantitySelect).to.equal(
-                '<merch-quantity-select title=\"Select quantity\" min=\"2\" default-value=\"3\" max=\"10\" step=\"1\"></merch-quantity-select>',
+                '<merch-quantity-select title="Select quantity" min="2" default-value="3" max="10" step="1"></merch-quantity-select>',
             );
         });
 
@@ -967,7 +948,7 @@ describe('settings', () => {
                                     name: 'hideTrialCTAs',
                                     valuetype: 'boolean',
                                     booleanValue: true,
-                                    countries: ['KR'],
+                                    geos: ['mas:pzn/country/KR'],
                                 },
                             ],
                         },
@@ -996,7 +977,7 @@ describe('settings', () => {
                                     name: 'hideTrialCTAs',
                                     valuetype: 'boolean',
                                     booleanValue: true,
-                                    countries: ['KR'],
+                                    geos: ['mas:pzn/country/KR'],
                                 },
                             ],
                         },
@@ -1007,7 +988,7 @@ describe('settings', () => {
             expect(result.body.settings.hideTrialCTAs).to.be.false;
         });
 
-        it('prefers country override over locale override when both match and fragment has no tags', async () => {
+        it('prefers region-locale geo override over country override when both match', async () => {
             const context = {
                 locale: 'en_US',
                 country: 'KR',
@@ -1025,13 +1006,13 @@ describe('settings', () => {
                                     name: 'hideTrialCTAs',
                                     valuetype: 'boolean',
                                     booleanValue: false,
-                                    locales: ['en_US'],
+                                    geos: ['mas:locale/US/en_US'],
                                 },
                                 {
                                     name: 'hideTrialCTAs',
                                     valuetype: 'boolean',
                                     booleanValue: true,
-                                    countries: ['KR'],
+                                    geos: ['mas:pzn/country/KR'],
                                 },
                             ],
                         },
@@ -1039,7 +1020,7 @@ describe('settings', () => {
                 },
             };
             const result = await settings.process(context);
-            expect(result.body.settings.hideTrialCTAs).to.be.true;
+            expect(result.body.settings.hideTrialCTAs).to.be.false;
         });
 
         it('applies setting when templates is empty array (no template filter)', async () => {

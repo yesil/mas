@@ -4,7 +4,6 @@ import {
     getLocaleByCode,
     getCountryName,
     getCountryFlag,
-    getCountryCodes,
     getDefaultLocale,
     getDefaultLocaleCode,
     getDefaultLocales,
@@ -104,17 +103,6 @@ describe('locales', function () {
 
         it('should return country code when country is not found', function () {
             expect(getCountryName('XX')).to.equal('XX');
-        });
-    });
-
-    describe('getCountryCodes', function () {
-        it('returns a sorted array of known country codes', function () {
-            const codes = getCountryCodes();
-            expect(Array.isArray(codes)).to.equal(true);
-            expect(codes.length).to.be.greaterThan(0);
-            expect(codes).to.include('US');
-            expect(codes).to.include('KR');
-            expect(codes).to.deep.equal([...codes].sort());
         });
     });
 

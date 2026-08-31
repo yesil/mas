@@ -291,7 +291,7 @@ describe('Settings Store Namespace', () => {
                         id: 'setting-hide-trial-kr',
                         name: 'hideTrialCTAs',
                         value: true,
-                        fields: [{ name: 'countries', values: ['KR'] }],
+                        fields: [{ name: 'geos', type: 'tag', values: ['mas:pzn/country/KR'] }],
                     }),
                 ],
             ),
@@ -947,10 +947,11 @@ describe('Settings Store Namespace', () => {
             name: 'showPlanType',
             label: 'Show plan type',
             fieldName: 'entries',
-            locales: ['fr_FR'],
+            locales: [],
             templates: ['plans'],
             value: currentOverrideValue,
             path: '/content/dam/mas/sandbox/settings/setting-show-plan-type-fr',
+            fields: [{ name: 'geos', type: 'tag', values: ['mas:pzn/country/KR'] }],
         });
 
         const getByIdCalls = [];
@@ -986,7 +987,8 @@ describe('Settings Store Namespace', () => {
                                 fields: [
                                     { name: 'name', type: 'text', multiple: false, values: ['showPlanType'] },
                                     { name: 'templates', type: 'text', multiple: true, values: ['plans'] },
-                                    { name: 'locales', type: 'text', multiple: true, values: ['fr_FR'] },
+                                    { name: 'locales', type: 'text', multiple: true, values: [] },
+                                    { name: 'geos', type: 'tag', multiple: true, values: ['mas:pzn/country/KR'] },
                                     { name: 'tags', type: 'tag', multiple: true, values: [] },
                                     { name: 'valuetype', type: 'text', multiple: false, values: ['boolean'] },
                                     { name: 'textValue', type: 'text', multiple: false, values: [] },
@@ -1012,7 +1014,7 @@ describe('Settings Store Namespace', () => {
         expect(updated).to.equal(true);
         expect(getByIdCalls).to.deep.equal([overrideId]);
         expect(store.rows.get()[0].value.overrides[0].value).to.equal(false);
-        expect(store.toast.get().message).to.contain("'Show plan type (fr_FR)' is now [Off]");
+        expect(store.toast.get().message).to.contain("'Show plan type (KR)' is now [Off]");
         expect(store.toast.get().variant).to.equal('');
     });
 
@@ -1549,7 +1551,7 @@ describe('Settings Store Namespace', () => {
         store.editSetting();
     });
 
-    it('normalizeSettingFragment reads countries directly from countries field', () => {
+    it('normalizeSettingFragment reads geos directly from geos field', () => {
         const fragment = createSettingReference({
             id: 'setting-hide-trial-ctas-kr',
             name: 'hideTrialCTAs',
@@ -1558,14 +1560,14 @@ describe('Settings Store Namespace', () => {
             valueType: 'boolean',
             value: true,
             path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas-kr',
-            fields: [{ name: 'countries', values: ['KR', 'JP'] }],
+            fields: [{ name: 'geos', type: 'tag', values: ['mas:pzn/country/KR', 'mas:pzn/country/JP'] }],
         });
         const record = normalizeSettingFragment(new Fragment(fragment));
         expect(record.locales).to.deep.equal([]);
-        expect(record.countries).to.deep.equal(['KR', 'JP']);
+        expect(record.geos).to.deep.equal(['mas:pzn/country/KR', 'mas:pzn/country/JP']);
     });
 
-    it('addOverride with countries writes to countries field (not country: prefix in locales)', async () => {
+    it('addOverride writes full geo tags to the geos field', async () => {
         const topLevel = createSettingReference({
             id: 'setting-hide-trial-ctas',
             name: 'hideTrialCTAs',
@@ -1582,7 +1584,7 @@ describe('Settings Store Namespace', () => {
 
         const rowId = store.rows.get()[0].value.id;
         const createdId = await store.addOverride(rowId, {
-            countries: ['KR'],
+            geos: ['mas:pzn/country/KR'],
             locales: [],
             valueType: 'boolean',
             booleanValue: true,
@@ -1593,11 +1595,12 @@ describe('Settings Store Namespace', () => {
         expect(created.name).to.include('kr');
         const localesField = created.fields.find((f) => f.name === 'locales');
         expect(localesField.values).to.deep.equal([]);
-        const countriesField = created.fields.find((f) => f.name === 'countries');
-        expect(countriesField.values).to.include('KR');
+        const geosField = created.fields.find((f) => f.name === 'geos');
+        expect(geosField.type).to.equal('tag');
+        expect(geosField.values).to.include('mas:pzn/country/KR');
     });
 
-    it('updateOverride with countries writes to countries field (not country: prefix in locales)', async () => {
+    it('updateOverride writes full geo tags to the geos field', async () => {
         const topLevel = createSettingReference({
             id: 'setting-hide-trial-ctas',
             name: 'hideTrialCTAs',
@@ -1616,7 +1619,7 @@ describe('Settings Store Namespace', () => {
             value: true,
             fieldName: 'entries',
             path: '/content/dam/mas/sandbox/settings/setting-hide-trial-ctas-kr',
-            fields: [{ name: 'countries', values: ['KR'] }],
+            fields: [{ name: 'geos', type: 'tag', values: ['mas:pzn/country/KR'] }],
         });
         const harness = createMutationHarness({ topLevel, overrides: [existingOverride] });
         const store = new SettingsStore();
@@ -1626,7 +1629,7 @@ describe('Settings Store Namespace', () => {
         const rowId = store.rows.get()[0].value.id;
         const overrideId = store.rows.get()[0].value.overrides[0].id;
         const updated = await store.updateOverride(rowId, overrideId, {
-            countries: ['JP'],
+            geos: ['mas:pzn/country/JP'],
             locales: [],
             valueType: 'boolean',
             booleanValue: true,
@@ -1636,8 +1639,9 @@ describe('Settings Store Namespace', () => {
         const savedOverride = harness.calls.save.find((f) => f.id === overrideId);
         const localesField = savedOverride.fields.find((f) => f.name === 'locales');
         expect(localesField.values).to.deep.equal([]);
-        const countriesField = savedOverride.fields.find((f) => f.name === 'countries');
-        expect(countriesField.values).to.include('JP');
-        expect(countriesField.values).to.not.include('KR');
+        const geosField = savedOverride.fields.find((f) => f.name === 'geos');
+        expect(geosField.type).to.equal('tag');
+        expect(geosField.values).to.include('mas:pzn/country/JP');
+        expect(geosField.values).to.not.include('mas:pzn/country/KR');
     });
 });
