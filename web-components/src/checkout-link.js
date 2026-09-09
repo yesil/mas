@@ -18,6 +18,7 @@ export class CheckoutLink extends CheckoutMixin(HTMLAnchorElement) {
     }
 
     clickHandler(e) {
+        if (this.handleAupCheckout(e)) return;
         if (this.checkoutActionHandler) {
             this.checkoutActionHandler?.(e);
             return;

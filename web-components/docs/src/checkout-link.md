@@ -23,6 +23,32 @@ See [MAS](mas.html#terminology) to learn more.
 >
 ```
 
+## AUP Select {#aup-select}
+
+To route checkout links and buttons through the host's initialized `window.aupsdk`, add:
+
+```html
+<meta name="aup-select" content="on" />
+```
+
+Checkout reads the live boolean `service.settings.aupSelect` on each click. The settings layer resolves `aup-select` metadata through `getParameter`, falling back to the commerce service's `aup-select` attribute when metadata is absent:
+
+```html
+<mas-commerce-service aup-select="on"></mas-commerce-service>
+```
+
+Only exact `on` enables routing; the default is disabled. The `aup-select` query parameter takes precedence over metadata, which takes precedence over the service attribute, including an explicit `off` or empty value. Query and metadata changes take effect on subsequent clicks without reinitializing the service. Removing the query parameter restores metadata or the service attribute; removing metadata restores the service attribute. Storage overrides are ignored.
+
+Single-offer `BASE` and `TRIAL` CTAs launch the `buy` and `try` intents through `launchWorkflowInModal`, using the SDK's default rendering mode. M@S does not initialize or reconfigure the SDK. The configured checkout client ID is forwarded to orchestration without a client-side allowlist.
+
+The resolved offer supplies product arrangement, optional product code, and segments. Checkout options supply country, language, and segment overrides. Optional `svar`, `customerIntent`, and `sid` go in the recommendation context; `ctxrturl`, `rtc`, `lo`, and `af` go in workflow params. The return URL defaults to the current page. Internal Select variants are not forwarded.
+
+Downloads, upgrades, perpetual offers, promotions, multiple offers/add-ons, non-unit quantities, and modified link clicks retain the existing action. If the SDK is unavailable or launch fails, M@S invokes the saved checkout action once. Workflow completion or cancellation does not trigger fallback. Repeated checkout clicks are suppressed until the SDK reports workflow exit.
+
+The original link URL and click event remain available to the host's analytics. This also applies to headless CTAs after their `mas-field` wrapper is removed.
+
+On cancellation, M@S uses the SDK's `System/AppClosed` cart report to synchronize the originating card's addon and quantity. Only products matching that card's main offer and authored addon are applied. Product identity comes from resolved offer data, so hash-based host actions and checkout URLs without `pa` can synchronize. If addon offer data is unavailable, the card retains its current state. Cart synchronization errors do not trigger checkout fallback. Host and SDK default message handlers remain in the delegation chain. Addon presentation in Select (`showaddon`: `off`, `checkbox`, or `toggle`) remains controlled by the experience campaign; it does not preselect the card's addon.
+
 ## Attributes {#attributes}
 
 | Attribute                     | Description                                                                                                                                                                                                                                  | Default Value | Required | Provider                |

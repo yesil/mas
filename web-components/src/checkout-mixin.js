@@ -4,9 +4,14 @@ import {
     MasElement,
 } from './mas-element.js';
 import { applyPageLocaleToCheckoutUrl } from './buildCheckoutUrl.js';
+import { launchAupCheckout } from './aup-checkout.js';
 import { selectOffers, getService } from './utilities.js';
 import { isPromotionActive } from './price/utilities.js';
-import { MODAL_TYPE_3_IN_1 } from '../src/constants.js';
+import {
+    EVENT_MERCH_ADDON_AND_QUANTITY_UPDATE,
+    MODAL_TYPE_3_IN_1,
+    STATE_RESOLVED,
+} from '../src/constants.js';
 import { PROMO_CONTEXT_CANCEL_VALUE } from '@dexter/tacocat-core';
 
 export const CLASS_NAME_DOWNLOAD = 'download';
@@ -15,9 +20,9 @@ const CHECKOUT_PARAM_VALUE_MAPPING = {
     e: 'EDU',
     t: 'TEAM',
 };
+let aupCheckoutPending = false;
 
 export function createCheckoutElement(Class, options = {}, innerHTML = '') {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const service = getService();
     if (!service) return null;
     const {
@@ -254,6 +259,124 @@ export function CheckoutMixin(Base) {
 
         setCheckoutUrl() {
             // to be implemented in the subclass
+        }
+
+        handleAupCheckout(e) {
+            if (
+                e.defaultPrevented ||
+                e.button !== 0 ||
+                e.metaKey ||
+                e.ctrlKey ||
+                e.shiftKey ||
+                e.altKey ||
+                this.classList.contains(CLASS_NAME_DOWNLOAD) ||
+                this.classList.contains(CLASS_NAME_UPGRADE) ||
+                this.hasAttribute('download') ||
+                (this.target && this.target !== '_self')
+            ) {
+                return false;
+            }
+            if (aupCheckoutPending) {
+                e.preventDefault();
+                return true;
+            }
+            const sdk = window.aupsdk;
+            if (
+                this.masElement.state !== STATE_RESOLVED ||
+                !getService()?.settings.aupSelect ||
+                typeof sdk?.getOrchestratorContext !== 'function'
+            ) {
+                return false;
+            }
+            e.preventDefault();
+            aupCheckoutPending = true;
+            const { checkoutActionHandler, href, value } = this;
+            const card = this.closest('merch-card');
+            const id = this.getAttribute('data-modal-id');
+            const options = {
+                ...this.options,
+                cs: this.customerSegment,
+                ms: this.marketSegment,
+            };
+            const fallback = () => {
+                if (checkoutActionHandler) return checkoutActionHandler(e);
+                if (href) window.location.href = href;
+            };
+            let cartItems;
+            this.aupCheckoutPromise = launchAupCheckout(
+                sdk,
+                value,
+                options,
+                card && id
+                    ? (items) => {
+                          cartItems = items;
+                      }
+                    : undefined,
+            )
+                .catch((e) => {
+                    this.masElement.log?.warn('AUP checkout launch failed');
+                    return false;
+                })
+                .then((handled) => {
+                    if (!handled) return fallback();
+                    if (!cartItems) return;
+                    try {
+                        const pa = value[0].productArrangementCode;
+                        if (
+                            this.masElement.state !== STATE_RESOLVED ||
+                            this.value[0]?.productArrangementCode !== pa
+                        )
+                            return;
+                        const addonPrices = [
+                            ...card.querySelectorAll(
+                                'merch-addon [is="inline-price"]',
+                            ),
+                        ];
+                        if (
+                            card.addonCheckbox &&
+                            (!addonPrices.length ||
+                                addonPrices.some(
+                                    (price) =>
+                                        price.masElement.state !==
+                                            STATE_RESOLVED ||
+                                        !price.value?.length,
+                                ))
+                        )
+                            return;
+                        const addonOffers = addonPrices.flatMap(
+                            (price) => price.value,
+                        );
+                        const items = cartItems.filter(
+                            (item) =>
+                                item.productArrangementCode === pa ||
+                                addonOffers.some(
+                                    (offer) =>
+                                        offer.productArrangementCode ===
+                                        item.productArrangementCode,
+                                ),
+                        );
+                        card.dispatchEvent(
+                            new CustomEvent(
+                                EVENT_MERCH_ADDON_AND_QUANTITY_UPDATE,
+                                {
+                                    detail: {
+                                        id,
+                                        items,
+                                        productArrangementCode: pa,
+                                    },
+                                },
+                            ),
+                        );
+                    } catch (e) {
+                        this.masElement.log?.warn(
+                            'AUP checkout cart synchronization failed',
+                        );
+                    }
+                })
+                .finally(() => {
+                    aupCheckoutPending = false;
+                });
+            return true;
         }
 
         clickHandler(e) {

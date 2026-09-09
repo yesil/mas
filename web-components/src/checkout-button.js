@@ -21,6 +21,7 @@ export class CheckoutButton extends CheckoutMixin(HTMLButtonElement) {
     }
 
     clickHandler(e) {
+        if (this.handleAupCheckout(e)) return;
         if (this.checkoutActionHandler) {
             this.checkoutActionHandler?.(e);
             return;
