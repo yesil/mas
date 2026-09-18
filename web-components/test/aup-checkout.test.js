@@ -31,6 +31,7 @@ describe('aup-select checkout routing', () => {
     let previousSdk;
     let launch;
     let legacy;
+    let lifecycle;
     let service;
     let cleanup;
 
@@ -48,13 +49,17 @@ describe('aup-select checkout routing', () => {
         };
         window.aupsdk = sdk;
         legacy = sinon.spy((event) => event.preventDefault());
+        lifecycle = sinon.spy();
         container = document.createElement('div');
         document.body.append(container);
         meta = document.createElement('meta');
         meta.name = 'aup-select';
         meta.content = 'on';
         document.head.append(meta);
-        service = initMasCommerceService({}, () => ({ handler: legacy }));
+        service = initMasCommerceService({}, () => ({
+            handler: legacy,
+            aupHandler: lifecycle,
+        }));
     });
 
     afterEach(async () => {
@@ -509,6 +514,34 @@ describe('aup-select checkout routing', () => {
                 expect(analytics.calledOnceWithExactly(event)).to.be.true;
             });
 
+            it('notifies the host when the handled AUP modal opens and closes', async () => {
+                const exit = deferred();
+                launch.returns(exit.promise);
+                const element = await create(Class);
+                element.dataset.modalId = 'checkout-modal';
+                const event = click(element);
+                expect(lifecycle.calledOnce).to.be.true;
+                expect(lifecycle.firstCall.args).to.deep.equal([
+                    {
+                        type: 'open',
+                        element,
+                        modalId: 'checkout-modal',
+                        event,
+                    },
+                ]);
+                exit.resolve({ status: 'cancel' });
+                await element.aupCheckoutPromise;
+                expect(lifecycle.callCount).to.equal(2);
+                expect(lifecycle.secondCall.args).to.deep.equal([
+                    {
+                        type: 'close',
+                        element,
+                        modalId: 'checkout-modal',
+                        event,
+                    },
+                ]);
+            });
+
             it('uses try for a resolved trial offer and supports keyboard-generated clicks', async () => {
                 const element = await create(Class, { wcsOsi: 'stock-m2m' });
                 click(element, { detail: 0 });
@@ -522,11 +555,22 @@ describe('aup-select checkout routing', () => {
                 delete window.aupsdk;
                 click(element);
                 expect(legacy.calledOnce).to.be.true;
+                expect(lifecycle.called).to.be.false;
                 window.aupsdk = sdk;
                 click(element);
                 await element.aupCheckoutPromise;
                 expect(launch.calledOnce).to.be.true;
                 expect(legacy.calledOnce).to.be.true;
+            });
+
+            it('does not notify close before the legacy no-workflow fallback', async () => {
+                launch.resolves({ status: 'no-workflow-found' });
+                const element = await create(Class);
+                const event = click(element);
+                await element.aupCheckoutPromise;
+                expect(legacy.calledOnceWithExactly(event)).to.be.true;
+                expect(lifecycle.calledOnce).to.be.true;
+                expect(lifecycle.firstCall.args[0].type).to.equal('open');
             });
 
             for (const failure of ['context', 'launch']) {
@@ -640,8 +684,10 @@ describe('aup-select checkout routing', () => {
                     click(element);
                     expect(launch.calledOnce).to.be.true;
                     expect(sdk.getOrchestratorContext.calledOnce).to.be.true;
+                    expect(lifecycle.calledOnce).to.be.true;
                     exit.resolve({ status: 'cancel' });
                     await element.aupCheckoutPromise;
+                    expect(lifecycle.callCount).to.equal(2);
                 } finally {
                     clock.restore();
                 }
