@@ -49,7 +49,7 @@ describe('aup-select checkout routing', () => {
         };
         window.aupsdk = sdk;
         legacy = sinon.spy((event) => event.preventDefault());
-        lifecycle = sinon.spy();
+        lifecycle = sinon.stub();
         container = document.createElement('div');
         document.body.append(container);
         meta = document.createElement('meta');
@@ -519,14 +519,12 @@ describe('aup-select checkout routing', () => {
                 launch.returns(exit.promise);
                 const element = await create(Class);
                 element.dataset.modalId = 'checkout-modal';
-                const event = click(element);
+                click(element);
                 expect(lifecycle.calledOnce).to.be.true;
                 expect(lifecycle.firstCall.args).to.deep.equal([
                     {
                         type: 'open',
                         element,
-                        modalId: 'checkout-modal',
-                        event,
                     },
                 ]);
                 exit.resolve({ status: 'cancel' });
@@ -536,8 +534,6 @@ describe('aup-select checkout routing', () => {
                     {
                         type: 'close',
                         element,
-                        modalId: 'checkout-modal',
-                        event,
                     },
                 ]);
             });
@@ -563,25 +559,35 @@ describe('aup-select checkout routing', () => {
                 expect(legacy.calledOnce).to.be.true;
             });
 
-            it('does not notify close before the legacy no-workflow fallback', async () => {
+            it('closes the AUP lifecycle before the legacy no-workflow fallback', async () => {
                 launch.resolves({ status: 'no-workflow-found' });
                 const element = await create(Class);
+                const calls = [];
+                lifecycle.callsFake(({ type }) => calls.push(type));
+                legacy = sinon.spy((event) => {
+                    calls.push('fallback');
+                    event.preventDefault();
+                });
+                element.checkoutActionHandler = legacy;
                 const event = click(element);
                 await element.aupCheckoutPromise;
                 expect(legacy.calledOnceWithExactly(event)).to.be.true;
-                expect(lifecycle.calledOnce).to.be.true;
-                expect(lifecycle.firstCall.args[0].type).to.equal('open');
+                expect(calls).to.deep.equal(['open', 'close', 'fallback']);
             });
 
-            for (const failure of ['context', 'launch']) {
-                it(`runs the saved action once after ${failure} rejection`, async () => {
+            for (const failure of ['context', 'launch', 'launch-sync']) {
+                it(`runs the saved action once after ${failure} failure`, async () => {
                     const element = await create(Class);
                     const failed =
                         failure === 'context'
                             ? sdk.getOrchestratorContext
                             : launch;
                     const error = new Error('SDK unavailable');
-                    failed.rejects(error);
+                    if (failure === 'launch-sync') {
+                        failed.throws(error);
+                    } else {
+                        failed.rejects(error);
+                    }
                     const log = sinon.spy(element.masElement.log, 'error');
                     const event = click(element);
                     const replacement = sinon.spy();
@@ -589,6 +595,12 @@ describe('aup-select checkout routing', () => {
                     await element.aupCheckoutPromise;
                     expect(legacy.calledOnceWithExactly(event)).to.be.true;
                     expect(replacement.called).to.be.false;
+                    expect(lifecycle.callCount).to.equal(2);
+                    expect(lifecycle.firstCall.args[0].type).to.equal('open');
+                    expect(lifecycle.secondCall.args[0].type).to.equal('close');
+                    expect(lifecycle.secondCall.callId).to.be.lessThan(
+                        legacy.firstCall.callId,
+                    );
                     expect(
                         log.calledWithExactly(
                             'AUP checkout launch failed',
@@ -622,6 +634,31 @@ describe('aup-select checkout routing', () => {
                     expect(handler.calledOnce).to.be.true;
                 });
             }
+
+            it('logs lifecycle callback errors and preserves fallback', async () => {
+                const element = await create(Class);
+                const error = new Error('Host lifecycle failed');
+                element.aupHandler = sinon.stub().throws(error);
+                const log = sinon.spy(element.masElement.log, 'error');
+                launch.resolves({ status: 'no-workflow-found' });
+                const event = click(element);
+                await element.aupCheckoutPromise;
+                expect(launch.calledOnce).to.be.true;
+                expect(legacy.calledOnceWithExactly(event)).to.be.true;
+                expect(element.aupHandler.callCount).to.equal(2);
+                expect(
+                    log.calledWithExactly(
+                        'AUP checkout open handler failed',
+                        error,
+                    ),
+                ).to.be.true;
+                expect(
+                    log.calledWithExactly(
+                        'AUP checkout close handler failed',
+                        error,
+                    ),
+                ).to.be.true;
+            });
 
             it('preserves a resolved empty-offer action without locking subsequent checkout', async () => {
                 const element = await create(Class);

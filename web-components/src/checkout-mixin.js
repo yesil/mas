@@ -22,6 +22,31 @@ const CHECKOUT_PARAM_VALUE_MAPPING = {
 };
 let aupCheckoutPending = false;
 
+/**
+ * @typedef {'open' | 'close'} AupHandlerType
+ */
+
+/**
+ * @typedef {Object} AupHandlerContext
+ * @property {AupHandlerType} type
+ * @property {HTMLAnchorElement | HTMLButtonElement} element
+ */
+
+/**
+ * @callback AupHandler
+ * @param {AupHandlerContext} context
+ * @returns {void}
+ */
+
+/**
+ * @typedef {Object} CheckoutAction
+ * @property {string} [url]
+ * @property {string} [text]
+ * @property {string} [className]
+ * @property {(event: MouseEvent) => unknown} [handler]
+ * @property {AupHandler} [aupHandler]
+ */
+
 export function createCheckoutElement(Class, options = {}, innerHTML = '') {
     const service = getService();
     if (!service) return null;
@@ -66,6 +91,9 @@ export function CheckoutMixin(Base) {
     return class CheckoutBase extends Base {
         /* c8 ignore next 1 */
         checkoutActionHandler;
+
+        /** @type {AupHandler | undefined} */
+        aupHandler;
 
         masElement = new MasElement(this);
 
@@ -201,7 +229,7 @@ export function CheckoutMixin(Base) {
          * @param {Commerce.Wcs.Offer[]} offers
          * @param {Commerce.Checkout.Options} options
          * @param {Commerce.Checkout.AnyOptions} overrides
-         * @param {Commerce.Checkout.CheckoutAction} checkoutAction
+         * @param {CheckoutAction} checkoutAction
          * @param {number} version
          */
         renderOffers(
@@ -346,8 +374,6 @@ export function CheckoutMixin(Base) {
                     aupHandler({
                         type,
                         element: this,
-                        modalId: id,
-                        event: e,
                     });
                 } catch (error) {
                     this.masElement.log?.error(
@@ -377,6 +403,7 @@ export function CheckoutMixin(Base) {
                     return false;
                 })
                 .then(async (handled) => {
+                    notifyAupHandler('close');
                     if (!handled) {
                         try {
                             return await fallback();
@@ -388,7 +415,6 @@ export function CheckoutMixin(Base) {
                             return;
                         }
                     }
-                    notifyAupHandler('close');
                     if (!cartItems) return;
                     try {
                         const pa = value[0].productArrangementCode;
